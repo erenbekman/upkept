@@ -1,5 +1,15 @@
 const TABLES = ['app_meta', 'habits', 'reason_tags', 'entries'] as const
 
+// Column names get interpolated into INSERT SQL, and import data can come from
+// the network (sync). Whitelist identifiers per table so a crafted key can't
+// inject SQL; unknown keys are dropped. Values are always parameterized.
+const COLUMNS: Record<string, Set<string>> = {
+  app_meta: new Set(['key', 'value']),
+  habits: new Set(['id', 'user_id', 'name', 'target_desc', 'color', 'sort_order', 'active', 'created_at']),
+  reason_tags: new Set(['id', 'user_id', 'name', 'sort_order']),
+  entries: new Set(['id', 'user_id', 'habit_id', 'date', 'status', 'reason_tag_id', 'note', 'created_at']),
+}
+
 export interface Backup {
   schema_version: number
   exported_at: string
@@ -29,7 +39,8 @@ export function useBackup() {
 
       for (const t of TABLES) {
         for (const row of data.tables[t] ?? []) {
-          const cols = Object.keys(row)
+          const cols = Object.keys(row).filter(c => COLUMNS[t].has(c))
+          if (!cols.length) continue
           const placeholders = cols.map(() => '?').join(', ')
           await db.run(
             `INSERT INTO ${t} (${cols.join(', ')}) VALUES (${placeholders})`,

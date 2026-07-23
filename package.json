@@ -1,0 +1,31 @@
+{
+  "name": "lifestyle-bootstrap",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "sqlite:wasm": "cp node_modules/sql.js/dist/sql-wasm.wasm public/assets/sql-wasm.wasm",
+    "cap:sync": "npm run generate && cap sync",
+    "postinstall": "npm run sqlite:wasm && nuxt prepare"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "^6.0.2",
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.1",
+    "jeep-sqlite": "^2.7.5",
+    "nuxt": "^3.13.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.2.1",
+    "@tauri-apps/cli": "^2.11.4",
+    "@vite-pwa/nuxt": "^0.10.5",
+    "sql.js": "1.12.0",
+    "typescript": "^5.6.0"
+  }
+}

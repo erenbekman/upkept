@@ -15,6 +15,10 @@ export function useDb() {
   async function run(sql: string, params: any[] = []) {
     const res = await conn.run(sql, params)
     await save()
+    if (import.meta.client && !(window as any).__upkeptImporting) {
+      localStorage.setItem('upkept_mutated_at', String(Date.now()))
+      window.dispatchEvent(new Event('upkept:mutated'))
+    }
     return res
   }
 

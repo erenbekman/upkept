@@ -4,8 +4,38 @@ import type { ReasonTag } from '~/composables/useEntries'
 const db = useDb()
 const reasonsRepo = useReasons()
 const backup = useBackup()
+const syncApi = useSync()
 const { theme, apply: applyTheme } = useTheme()
 const { show: toast } = useToast()
+
+const codeInput = ref('')
+
+async function startSync() {
+  syncApi.setCode(syncApi.generateCode())
+  await syncApi.sync()
+  toast('Senkronizasyon başladı ✓')
+}
+async function linkSync() {
+  const c = codeInput.value.trim().toLowerCase()
+  if (!c) return
+  syncApi.setCode(c)
+  codeInput.value = ''
+  await syncApi.sync()
+  toast('Bağlandı ✓')
+}
+function unlinkSync() {
+  if (!confirm('Bu cihazın senkron bağlantısı kesilsin mi? Veriler cihazda kalır.')) return
+  syncApi.setCode(null)
+  toast('Bağlantı kesildi')
+}
+async function copyCode() {
+  if (!syncApi.code.value) return
+  await navigator.clipboard.writeText(syncApi.code.value)
+  toast('Kod kopyalandı')
+}
+async function syncNow() {
+  toast((await syncApi.sync()) ? 'Senkronize edildi ✓' : 'Senkron hatası')
+}
 
 const startDate = ref('')
 const reasons = ref<ReasonTag[]>([])
@@ -105,6 +135,40 @@ async function onImportFile(e: Event) {
     </div>
 
     <div>
+      <div class="eyebrow">Senkronizasyon</div>
+      <div class="field" style="display:flex; flex-direction:column; gap:12px;">
+        <template v-if="!syncApi.code.value">
+          <div style="font-size:13px; color:var(--muted); line-height:1.5;">Cihazlarını login olmadan bağla. Bir cihazda başlat, çıkan kodu diğerlerine gir. En son değişen taraf kazanır.</div>
+          <button class="btn btn-primary" @click="startSync">Bu cihazda başlat</button>
+          <div style="text-align:center; font-size:12px; color:var(--muted2);">veya</div>
+          <div class="row" style="gap:8px;">
+            <input v-model="codeInput" class="note-area" style="margin-top:0; flex:1;" placeholder="kod gir (örn. ab3cd-9fk2m)" />
+            <button class="btn" @click="linkSync">Bağla</button>
+          </div>
+        </template>
+        <template v-else>
+          <div class="row spread">
+            <div>
+              <div style="font-size:13px; color:var(--muted);">Senkron kodu</div>
+              <div style="font-family:monospace; font-size:18px; font-weight:700; color:var(--ink); letter-spacing:1px;">{{ syncApi.code.value }}</div>
+            </div>
+            <button class="btn" @click="copyCode">Kopyala</button>
+          </div>
+          <div style="font-size:12.5px; color:var(--muted);">
+            <span v-if="syncApi.status.value === 'syncing'">Senkronize ediliyor…</span>
+            <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">Bağlantı hatası — tekrar dene</span>
+            <span v-else-if="syncApi.status.value === 'ok'">Bulutla senkronize ✓</span>
+            <span v-else>Hazır</span>
+          </div>
+          <div class="row" style="gap:12px;">
+            <button class="btn" style="flex:1;" @click="syncNow">Şimdi senkronize et</button>
+            <button class="btn" style="flex:1;" @click="unlinkSync">Bağlantıyı kes</button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <div>
       <div class="eyebrow">Görünüm</div>
       <div class="row spread field">
         <span style="font-size:15.5px; font-weight:600; color:var(--ink2);">Tema</span>
@@ -115,6 +179,6 @@ async function onImportFile(e: Event) {
       </div>
     </div>
 
-    <div class="micro" style="margin-top:2px;">Verilerin cihazında kalır.</div>
+    <div class="micro" style="margin-top:2px;">{{ syncApi.code.value ? 'Verilerin cihazlarında ve bulutta senkron.' : 'Verilerin cihazında kalır.' }}</div>
   </div>
 </template>

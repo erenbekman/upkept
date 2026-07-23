@@ -1,5 +1,22 @@
 <script setup lang="ts">
 const { msg } = useToast()
+const { code, sync } = useSync()
+
+let debounce: ReturnType<typeof setTimeout>
+const onMutated = () => { clearTimeout(debounce); debounce = setTimeout(() => sync(), 1500) }
+const onVisible = () => { if (!document.hidden) sync() }
+
+onMounted(() => {
+  if (code.value) sync()
+  window.addEventListener('upkept:mutated', onMutated)
+  window.addEventListener('focus', sync)
+  document.addEventListener('visibilitychange', onVisible)
+})
+onUnmounted(() => {
+  window.removeEventListener('upkept:mutated', onMutated)
+  window.removeEventListener('focus', sync)
+  document.removeEventListener('visibilitychange', onVisible)
+})
 
 const tabs = [
   { to: '/app', icon: '☼', label: 'Bugün' },

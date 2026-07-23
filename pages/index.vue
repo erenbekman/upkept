@@ -12,10 +12,11 @@ if (import.meta.client) {
   if (installed) await navigateTo('/app', { replace: true })
 }
 
+const DMG_URL = 'https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg'
 const platforms = [
-  { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.' },
-  { title: 'iOS', body: 'Cebinde. Tek dokunuşla işaretle; aylık grid ve nazik hatırlatmalar hep yanında.' },
-  { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle.' },
+  { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.', cta: { label: 'Tarayıcıda aç', to: '/app' } },
+  { title: 'iOS', body: 'Cebinde. Tek dokunuşla işaretle; aylık grid ve nazik hatırlatmalar hep yanında.', cta: { label: 'App Store — yakında' } },
+  { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', cta: { label: 'macOS için indir', href: DMG_URL } },
 ]
 const steps = [
   { n: '1', title: 'Alışkanlığını ekle', body: 'Az ama sürdürülebilir. Bir–üç alışkanlıkla başla, gerisini zaman getirir.' },
@@ -108,8 +109,12 @@ const statuses = [
           <div v-for="p in platforms" :key="p.title" class="plat">
             <div class="plat-title">{{ p.title }}</div>
             <div class="plat-body">{{ p.body }}</div>
+            <NuxtLink v-if="p.cta.to" :to="p.cta.to" class="plat-cta">{{ p.cta.label }} →</NuxtLink>
+            <a v-else-if="p.cta.href" :href="p.cta.href" class="plat-cta">{{ p.cta.label }} ↓</a>
+            <span v-else class="plat-soon">{{ p.cta.label }}</span>
           </div>
         </div>
+        <div class="plat-note">macOS uygulaması imzasız — ilk açılışta sağ tık → <b>Aç</b>. Windows &amp; Android yakında.</div>
       </section>
 
       <section id="how" class="sec">
@@ -225,6 +230,10 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 46px; letter-s
 .plat { padding: 30px 30px 30px 0; border-top: 1.5px solid #262420; }
 .plat-title { font-family: 'Spectral', serif; font-size: 25px; font-weight: 500; color: #201e1a; margin: 6px 0 12px; }
 .plat-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
+.plat-cta { display: inline-block; margin-top: 14px; font-size: 14.5px; font-weight: 700; color: #6d6fae; }
+.plat-cta:hover { opacity: 0.7; }
+.plat-soon { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: #b0a894; }
+.plat-note { margin-top: 26px; font-size: 13px; color: #9a917f; line-height: 1.6; }
 
 .steps { gap: 44px; }
 .step { text-align: center; }

@@ -14,3 +14,5 @@ dist/
 # tooling scratch / test screenshots
 .playwright-mcp/
 v2-*.png
+landing-*.png
+app-check.png

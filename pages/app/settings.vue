@@ -142,7 +142,7 @@ async function onImportFile(e: Event) {
           <button class="btn btn-primary" @click="startSync">Bu cihazda başlat</button>
           <div style="text-align:center; font-size:12px; color:var(--muted2);">veya</div>
           <div class="row" style="gap:8px;">
-            <input v-model="codeInput" class="note-area" style="margin-top:0; flex:1;" placeholder="kod gir (örn. ab3cd-9fk2m)" />
+            <input v-model="codeInput" class="note-area" style="margin-top:0; flex:1;" placeholder="kodu yapıştır" />
             <button class="btn" @click="linkSync">Bağla</button>
           </div>
         </template>

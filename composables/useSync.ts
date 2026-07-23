@@ -10,12 +10,23 @@ export function useSync() {
   const status = useState<'idle' | 'syncing' | 'ok' | 'error'>('sync_status', () => 'idle')
   const lastAt = useState<number | null>('sync_last', () => null)
 
+  // The code is the ONLY access control to a user's synced data, so it must be
+  // hard to guess: 25 symbols over a 31-char alphabet ≈ 124 bits. Rejection
+  // sampling (drop bytes >= 248) removes the modulo bias of a plain b % 31.
   function generateCode(): string {
-    const abc = '23456789abcdefghjkmnpqrstuvwxyz'
-    const b = new Uint8Array(10)
-    crypto.getRandomValues(b)
-    const s = Array.from(b, x => abc[x % abc.length]).join('')
-    return `${s.slice(0, 5)}-${s.slice(5)}`
+    const abc = '23456789abcdefghjkmnpqrstuvwxyz' // no ambiguous 0/o/1/l/i
+    const max = 256 - (256 % abc.length) // 248
+    const out: string[] = []
+    const buf = new Uint8Array(32)
+    while (out.length < 25) {
+      crypto.getRandomValues(buf)
+      for (const b of buf) {
+        if (b >= max) continue
+        out.push(abc[b % abc.length])
+        if (out.length === 25) break
+      }
+    }
+    return out.join('').replace(/(.{5})(?=.)/g, '$1-') // xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
   }
 
   function setCode(c: string | null) {

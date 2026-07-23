@@ -2,11 +2,11 @@
 const { msg } = useToast()
 
 const tabs = [
-  { to: '/', icon: '☼', label: 'Bugün' },
-  { to: '/grid', icon: '▦', label: 'Grid' },
-  { to: '/stats', icon: '◔', label: 'İstatistik' },
-  { to: '/habits', icon: '❋', label: 'Alışkanlıklar' },
-  { to: '/settings', icon: '⚙︎', label: 'Ayarlar' },
+  { to: '/app', icon: '☼', label: 'Bugün' },
+  { to: '/app/grid', icon: '▦', label: 'Grid' },
+  { to: '/app/stats', icon: '◔', label: 'İstatistik' },
+  { to: '/app/habits', icon: '❋', label: 'Alışkanlıklar' },
+  { to: '/app/settings', icon: '⚙︎', label: 'Ayarlar' },
 ]
 </script>
 

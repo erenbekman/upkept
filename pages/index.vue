@@ -153,7 +153,7 @@ const statuses = [
           <span>upkept</span>
         </div>
         <div class="foot-links">
-          <NuxtLink to="/gizlilik">Gizlilik</NuxtLink>
+          <NuxtLink to="/privacy">Privacy</NuxtLink>
           <a href="mailto:erenbekman@gmail.com">İletişim</a>
           <span>© 2026</span>
         </div>

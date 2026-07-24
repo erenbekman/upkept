@@ -13,11 +13,6 @@ if (import.meta.client) {
 }
 
 const DMG_URL = 'https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg'
-const platforms = [
-  { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.', cta: { label: 'Tarayıcıda aç', to: '/app' } },
-  { title: 'iOS', body: 'Cebinde. Tek dokunuşla işaretle; aylık grid ve nazik hatırlatmalar hep yanında.', cta: { label: 'App Store — yakında' } },
-  { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', cta: { label: 'macOS için indir', href: DMG_URL } },
-]
 
 // ---- "Fark" section (illustrative, static) ----
 const missBtns = [
@@ -84,6 +79,24 @@ const gLegend = [
   { ...gmeta('partial'), label: 'Kısmen', border: '1px solid transparent' },
   { ...gmeta('miss'), label: 'Yapamadım', border: '1px solid transparent' },
   { glyph: '·', bg: 'transparent', color: '#c3b79b', label: 'Kayıt yok', border: '1px dashed #e6ddc8' },
+]
+
+// ---- Steps / Privacy / Platforms ----
+const steps = [
+  { n: '1', title: 'Alışkanlığını ekle', body: 'Az ama sürdürülebilir. Bir–üç alışkanlıkla başla, gerisini zaman getirir.' },
+  { n: '2', title: 'Günü işaretle', body: 'Yaptım, kısmen ya da yapamadım. İstersen sebebini bırak — hepsi opsiyonel.' },
+  { n: '3', title: 'Süreklilik gör', body: 'Grid ve istatistiklerde ilerlemeni izle. Kusursuzluk değil, devamlılık.' },
+]
+const privacy = [
+  { title: 'Hesap yok', body: 'Ne e-posta ne şifre. Aç ve başla.' },
+  { title: 'Bulut opsiyonel', body: 'İstersen anonim kodla senkronla, istemezsen cihazda kalır.' },
+  { title: 'İnternetsiz', body: 'Uçakta, dağda, her yerde çalışır.' },
+  { title: 'Dışa aktar', body: 'Verini dilediğin an yedekle, taşı.' },
+]
+const platforms = [
+  { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.', soon: false, cta: { label: 'Tarayıcıda aç', to: '/app' } },
+  { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', soon: false, cta: { label: 'macOS için indir', href: DMG_URL } },
+  { title: 'iOS', body: 'Cebinde, tek dokunuşla. Üzerinde çalışıyoruz — çok yakında.', soon: true, cta: null },
 ]
 </script>
 
@@ -227,65 +240,96 @@ const gLegend = [
 
       <!-- NASIL ÇALIŞIR -->
       <section id="how" class="sec">
-        <div class="sec-head center">
+        <div class="sec-head wide">
           <div class="lp-eyebrow">Zahmetsiz</div>
-          <h2>Günde on saniye</h2>
+          <h2>Günde <span class="em">on saniye.</span></h2>
         </div>
-        <div class="cols-3 steps">
-          <div class="step">
-            <div class="step-n">1</div>
-            <div class="step-title">Alışkanlığını ekle</div>
-            <div class="step-body">Az ama sürdürülebilir. Bir–üç alışkanlıkla başla, gerisini zaman getirir.</div>
+        <div class="cols3">
+          <div v-for="s in steps" :key="s.n" class="hstep">
+            <div class="hstep-n">{{ s.n }}</div>
+            <div class="hstep-title">{{ s.title }}</div>
+            <div class="hstep-body">{{ s.body }}</div>
           </div>
-          <div class="step">
-            <div class="step-n">2</div>
-            <div class="step-title">Günü işaretle</div>
-            <div class="step-body">Yaptım, kısmen ya da yapamadım. İstersen sebep ekle — hepsi opsiyonel.</div>
+        </div>
+      </section>
+
+      <!-- VERİLERİN SENDE KALIR -->
+      <section id="gizlilik" class="sec">
+        <div class="privacy-card">
+          <div class="sec-head wide" style="margin-bottom:34px;">
+            <div class="lp-eyebrow">Gizlilik</div>
+            <h2 class="h2-sm">Verilerin <span class="em">sende kalır.</span></h2>
+            <p class="lead">Ne zorunlu hesap, ne reklam, ne izleme. upkept cihazında çalışır — internetin olmasa bile.</p>
           </div>
-          <div class="step">
-            <div class="step-n">3</div>
-            <div class="step-title">Süreklilik gör</div>
-            <div class="step-body">Grid ve istatistiklerde ilerlemeni izle. Kusursuzluk değil, devamlılık.</div>
+          <div class="privacy-grid">
+            <div v-for="p in privacy" :key="p.title" class="pv">
+              <div class="pv-title">{{ p.title }}</div>
+              <div class="pv-body">{{ p.body }}</div>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- PLATFORMLAR -->
       <section id="platforms" class="sec">
-        <div class="sec-head">
-          <div class="lp-eyebrow">Her yerde seninle</div>
-          <h2>Bir challenge, üç ekran</h2>
+        <div class="sec-head wide">
+          <div class="lp-eyebrow">Her yerde</div>
+          <h2>Nerede istersen, <span class="em">orada.</span></h2>
         </div>
-        <div class="cols-3">
-          <div v-for="p in platforms" :key="p.title" class="plat">
-            <div class="plat-title">{{ p.title }}</div>
+        <div class="cols3">
+          <div v-for="p in platforms" :key="p.title" class="plat" :class="{ soon: p.soon }">
+            <div class="plat-head">
+              <div class="plat-title">{{ p.title }}</div>
+              <span v-if="p.soon" class="plat-badge">Yakında</span>
+            </div>
             <div class="plat-body">{{ p.body }}</div>
-            <NuxtLink v-if="p.cta.to" :to="p.cta.to" class="plat-cta">{{ p.cta.label }} →</NuxtLink>
-            <a v-else-if="p.cta.href" :href="p.cta.href" class="plat-cta">{{ p.cta.label }} ↓</a>
-            <span v-else class="plat-soon">{{ p.cta.label }}</span>
+            <NuxtLink v-if="p.cta?.to" :to="p.cta.to" class="plat-cta">{{ p.cta.label }} →</NuxtLink>
+            <a v-else-if="p.cta?.href" :href="p.cta.href" class="plat-cta">{{ p.cta.label }} ↓</a>
           </div>
         </div>
         <div class="plat-note">macOS uygulaması imzasız — ilk açılışta sağ tık → <b>Aç</b>. Windows &amp; Android yakında.</div>
       </section>
 
       <!-- KAPANIŞ -->
-      <section class="philosophy">
-        <div class="quote">Her seri bir gün önce sıfırdı. Kaçırmak da yolculuğun bir parçası — <span class="em">önemli olan geri dönmen.</span></div>
+      <section class="closing">
+        <h2 class="close-h">Kusursuz olmana gerek yok. <span class="em">Sadece devam et.</span></h2>
+        <p class="close-p">Hesap gerekmez. Bugünden başla.</p>
         <NuxtLink to="/app" class="btn-dark">Bugün başla</NuxtLink>
       </section>
 
+      <!-- FOOTER -->
       <footer class="foot">
-        <div class="lp-brand foot-brand">
-          <svg width="20" height="20" viewBox="0 0 60 60" fill="none">
-            <path d="M47 22 A19 19 0 1 0 49 34" stroke="#a89f8c" stroke-width="6.5" stroke-linecap="round" />
-            <circle cx="47" cy="14" r="4.6" fill="#a89f8c" />
-          </svg>
-          <span>upkept</span>
+        <div class="foot-top">
+          <div>
+            <div class="lp-brand" style="margin-bottom:14px;">
+              <svg width="24" height="24" viewBox="0 0 60 60" fill="none">
+                <path d="M47 22 A19 19 0 1 0 49 34" stroke="#6d6fae" stroke-width="6.5" stroke-linecap="round" />
+                <circle cx="47" cy="14" r="4.6" fill="#6d6fae" />
+              </svg>
+              <span>upkept</span>
+            </div>
+            <p class="foot-desc">Sakin, yargısız bir aylık alışkanlık günlüğü. Verilerin sende kalır.</p>
+          </div>
+          <div>
+            <div class="foot-col-title">Uygulama</div>
+            <div class="foot-col">
+              <NuxtLink to="/app">Web</NuxtLink>
+              <a href="#platforms">Masaüstü</a>
+              <a href="#platforms">iOS · yakında</a>
+            </div>
+          </div>
+          <div>
+            <div class="foot-col-title">upkept</div>
+            <div class="foot-col">
+              <NuxtLink to="/privacy">Privacy</NuxtLink>
+              <a href="#how">Nasıl çalışır</a>
+              <a href="mailto:erenbekman@gmail.com">İletişim</a>
+            </div>
+          </div>
         </div>
-        <div class="foot-links">
-          <NuxtLink to="/privacy">Privacy</NuxtLink>
-          <a href="mailto:erenbekman@gmail.com">İletişim</a>
-          <span>© 2026</span>
+        <div class="foot-bottom">
+          <span>© 2026 upkept</span>
+          <span class="foot-quote">Kaçırmak da yolculuğun bir parçası.</span>
         </div>
       </footer>
     </div>
@@ -309,7 +353,7 @@ const gLegend = [
 
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; }
 .lp-brand { display: flex; align-items: center; gap: 10px; }
-.lp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 23px; letter-spacing: -0.8px; }
+.lp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 23px; letter-spacing: -0.8px; color: #262420; }
 .nav-links { display: flex; align-items: center; gap: 34px; font-size: 15px; font-weight: 600; color: #6b6459; }
 .nav-links a { color: #6b6459; }
 .nav-links a:hover { opacity: 0.7; }
@@ -338,12 +382,12 @@ h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-hei
 .ph-pill.partial { background: #c79433; color: #fbf8f0; }
 .ph-pill.none { background: transparent; color: #c3b79b; border: 1.5px dashed #ddd9d0; }
 
-.sec { padding: 40px 0 96px; }
+.sec { padding: 40px 0 92px; }
 .sec-head { margin-bottom: 40px; max-width: 560px; }
 .sec-head.wide { max-width: 620px; }
-.sec-head.center { text-align: center; margin-left: auto; margin-right: auto; max-width: 560px; }
 .lp-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #b0917d; text-transform: uppercase; margin-bottom: 12px; }
 h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-spacing: -1.6px; margin: 0; color: #201e1a; line-height: 1.04; }
+.h2-sm { font-size: 44px; letter-spacing: -1.5px; }
 .lead { font-size: 18px; line-height: 1.6; color: #6b6459; margin: 16px 0 0; }
 .lead b, .sec-head b { color: #262420; font-weight: 600; }
 
@@ -392,32 +436,49 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 .row-name { width: 128px; flex: 0 0 128px; font-size: 14px; font-weight: 600; color: #3a352d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
 .lp-cell { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
 
-/* Nasıl çalışır + Platformlar */
-.cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
-.steps { gap: 44px; }
-.step { text-align: center; }
-.step-n { font-family: 'Spectral', serif; font-size: 34px; color: #6d6fae; margin-bottom: 16px; }
-.step-title { font-family: 'Spectral', serif; font-size: 22px; font-weight: 500; color: #201e1a; margin-bottom: 10px; }
-.step-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; max-width: 260px; margin: 0 auto; }
-.plat { padding: 30px 30px 30px 0; border-top: 1.5px solid #262420; }
-.plat-title { font-family: 'Spectral', serif; font-size: 25px; font-weight: 500; color: #201e1a; margin: 6px 0 12px; }
+/* 3-column layout (how + platforms) */
+.cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.hstep { border-top: 1.5px solid #262420; padding-top: 22px; }
+.hstep-n { font-family: 'Spectral', serif; font-size: 30px; color: #6d6fae; margin-bottom: 12px; }
+.hstep-title { font-family: 'Spectral', serif; font-size: 22px; font-weight: 500; color: #201e1a; margin-bottom: 8px; }
+.hstep-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
+
+/* Privacy */
+.privacy-card { background: #f2ede2; border: 1px solid #e6dcc7; border-radius: 26px; padding: 44px 44px 40px; }
+.privacy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.pv-title { font-family: 'Spectral', serif; font-size: 18.5px; font-weight: 500; color: #201e1a; margin-bottom: 6px; }
+.pv-body { font-size: 14.5px; line-height: 1.55; color: #6b6459; }
+
+/* Platforms */
+.plat { border-top: 1.5px solid #262420; padding-top: 22px; }
+.plat.soon { opacity: 0.55; border-top-color: #d8cdb4; }
+.plat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.plat-title { font-family: 'Spectral', serif; font-size: 24px; font-weight: 500; color: #201e1a; }
+.plat-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #a89f8c; border: 1px solid #d8cdb4; padding: 3px 9px; border-radius: 999px; }
 .plat-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
 .plat-cta { display: inline-block; margin-top: 14px; font-size: 14.5px; font-weight: 700; color: #6d6fae; }
 .plat-cta:hover { opacity: 0.7; }
-.plat-soon { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: #b0a894; }
 .plat-note { margin-top: 26px; font-size: 13px; color: #9a917f; line-height: 1.6; }
 
-.philosophy { padding: 40px 0 96px; text-align: center; }
-.quote { max-width: 760px; margin: 0 auto; font-family: 'Spectral', serif; font-weight: 400; font-size: 36px; line-height: 1.4; color: #201e1a; letter-spacing: -0.6px; }
-.philosophy .btn-dark { margin-top: 40px; padding: 17px 38px; }
+/* Closing */
+.closing { padding: 30px 0 80px; text-align: center; }
+.close-h { font-size: 52px; letter-spacing: -1.8px; max-width: 640px; margin: 0 auto 12px; line-height: 1.08; }
+.close-p { font-size: 17px; color: #6b6459; margin: 0 0 30px; }
+.closing .btn-dark { padding: 17px 40px; }
 
-.foot { border-top: 1.5px solid #e2d9c8; padding: 30px 0 54px; display: flex; align-items: center; justify-content: space-between; color: #9a917f; font-size: 14px; }
-.foot-brand span { font-family: 'Spectral', serif; font-size: 16px; color: #6b6459; font-weight: 400; }
-.foot-links { display: flex; gap: 26px; align-items: center; }
-.foot-links a { color: #9a917f; }
+/* Footer */
+.foot { border-top: 1.5px solid #e2d9c8; padding: 40px 0 56px; }
+.foot-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+.foot-desc { font-size: 15px; line-height: 1.55; color: #8a8172; max-width: 300px; margin: 0; }
+.foot-col-title { font-size: 12.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #b0a894; margin-bottom: 14px; }
+.foot-col { display: flex; flex-direction: column; gap: 10px; font-size: 15px; font-weight: 600; }
+.foot-col a { color: #6b6459; }
+.foot-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eadfc9; padding-top: 20px; font-size: 13.5px; color: #a89f8c; gap: 16px; flex-wrap: wrap; }
+.foot-quote { font-family: 'Spectral', serif; font-style: italic; }
 
 @media (max-width: 860px) {
   .fark-two { grid-template-columns: 1fr; }
+  .privacy-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 780px) {
   .wrap { padding: 0 20px; }
@@ -427,10 +488,12 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
   .hero-copy p { font-size: 17px; }
   .phone-wrap { order: 2; }
   h2 { font-size: 34px; }
-  .cols-3 { grid-template-columns: 1fr; gap: 0; }
-  .steps { gap: 36px; }
-  .plat { padding: 24px 0; }
-  .quote { font-size: 26px; }
+  .h2-sm { font-size: 32px; }
+  .close-h { font-size: 34px; letter-spacing: -1px; }
+  .cols3 { grid-template-columns: 1fr; gap: 32px; }
+  .privacy-grid { grid-template-columns: 1fr; gap: 22px; }
+  .privacy-card { padding: 32px 24px 30px; }
+  .foot-top { grid-template-columns: 1fr; gap: 28px; }
   .sec { padding: 30px 0 64px; }
 }
 </style>

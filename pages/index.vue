@@ -18,16 +18,72 @@ const platforms = [
   { title: 'iOS', body: 'Cebinde. Tek dokunuşla işaretle; aylık grid ve nazik hatırlatmalar hep yanında.', cta: { label: 'App Store — yakında' } },
   { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', cta: { label: 'macOS için indir', href: DMG_URL } },
 ]
-const steps = [
-  { n: '1', title: 'Alışkanlığını ekle', body: 'Az ama sürdürülebilir. Bir–üç alışkanlıkla başla, gerisini zaman getirir.' },
-  { n: '2', title: 'Günü işaretle', body: 'Yaptım, kısmen ya da yapamadım. İstersen sebep ekle — hepsi opsiyonel.' },
-  { n: '3', title: 'Süreklilik gör', body: 'Grid ve istatistiklerde ilerlemeni izle. Kusursuzluk değil, devamlılık.' },
+
+// ---- "Fark" section (illustrative, static) ----
+const missBtns = [
+  { glyph: '✓', label: 'Yaptım', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#5f8a58', labelColor: '#8a8172' },
+  { glyph: '~', label: 'Kısmen', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#c79433', labelColor: '#8a8172' },
+  { glyph: '✕', label: 'Yapamadım', border: '#c07d63', bg: '#f2e1d9', dotBg: '#bd7659', labelColor: '#9a5236' },
 ]
-const statuses = [
-  { glyph: '✓', label: 'Yaptım', cls: 'done' },
-  { glyph: '~', label: 'Kısmen', cls: 'partial' },
-  { glyph: '✕', label: 'Yapamadım', cls: 'miss' },
-  { glyph: '·', label: 'Kayıt yok', cls: 'none' },
+const missChips = [
+  { label: 'Yorgundum', on: true }, { label: 'Seyahatteydim', on: false },
+  { label: 'Hastaydım', on: false }, { label: 'Unuttum', on: false },
+]
+const reasonBars = [
+  { label: 'Yorgundum', count: 8, color: '#bd7659' },
+  { label: 'Vaktim olmadı', count: 5, color: '#c79433' },
+  { label: 'Seyahatteydim', count: 4, color: '#6d6fae' },
+  { label: 'Unuttum', count: 3, color: '#9aa088' },
+].map(r => ({ ...r, w: Math.round((r.count / 8) * 100) + '%' }))
+
+// ---- Monthly grid showcase (illustrative, static) ----
+function gmeta(s: string | null) {
+  switch (s) {
+    case 'done': return { glyph: '✓', bg: '#e6efe1', color: '#3f6b3a' }
+    case 'partial': return { glyph: '~', bg: '#f5ead1', color: '#8a6414' }
+    case 'miss': return { glyph: '✕', bg: '#f2e1d9', color: '#9a5236' }
+    default: return { glyph: '·', bg: 'transparent', color: '#c3b79b' }
+  }
+}
+const todayIdx = 21
+const gDays = Array.from({ length: 31 }, (_, i) => ({
+  n: i + 1,
+  color: i === todayIdx ? '#6d6fae' : (i > todayIdx ? '#cbc1ac' : '#a89f8c'),
+}))
+const pats: Record<string, string> = {
+  'Egzersiz': 'dddpdmdddpddnddddpddmd',
+  'Su içmek': 'dddddddpdddddddpdddddd',
+  'Kitap okumak': 'dpdmddpdnddpdmddpddnpd',
+  'Meditasyon': 'pdmdnddpdmddndpddmddnd',
+  'Erken uyumak': 'ddnddpddndmddpddnddpdd',
+}
+const cm: Record<string, string | null> = { d: 'done', p: 'partial', m: 'miss', n: null }
+const gridRows = Object.entries(pats).map(([name, p]) => {
+  const cells = []
+  for (let i = 0; i < 31; i++) {
+    if (i > todayIdx) {
+      cells.push({ glyph: '', bg: 'transparent', color: 'transparent', border: '1px dashed #ece3ce', opacity: 0.55, ring: 'none' })
+      continue
+    }
+    const st = cm[p[i]] ?? null
+    const m = gmeta(st)
+    const none = !st
+    cells.push({
+      glyph: none ? '·' : m.glyph,
+      bg: none ? 'transparent' : m.bg,
+      color: none ? '#c3b79b' : m.color,
+      border: none ? '1px dashed #ece3ce' : '1px solid transparent',
+      opacity: 1,
+      ring: i === todayIdx ? '0 0 0 2px #6d6fae' : 'none',
+    })
+  }
+  return { name, cells }
+})
+const gLegend = [
+  { ...gmeta('done'), label: 'Yaptım', border: '1px solid transparent' },
+  { ...gmeta('partial'), label: 'Kısmen', border: '1px solid transparent' },
+  { ...gmeta('miss'), label: 'Yapamadım', border: '1px solid transparent' },
+  { glyph: '·', bg: 'transparent', color: '#c3b79b', label: 'Kayıt yok', border: '1px dashed #e6ddc8' },
 ]
 </script>
 
@@ -36,10 +92,6 @@ const statuses = [
     <svg class="arc arc-tr" viewBox="0 0 600 600">
       <path d="M470 220 A190 190 0 1 0 490 340" fill="none" stroke="#6d6fae" stroke-width="2" stroke-linecap="round" stroke-dasharray="620" />
       <circle cx="470" cy="140" r="14" fill="#6d6fae" opacity="0.5" />
-    </svg>
-    <svg class="arc arc-bl" viewBox="0 0 400 400">
-      <path d="M300 150 A120 120 0 1 0 312 210" fill="none" stroke="#c9a487" stroke-width="1.5" stroke-linecap="round" />
-      <circle cx="300" cy="95" r="9" fill="#c9a487" />
     </svg>
 
     <div class="wrap">
@@ -52,20 +104,21 @@ const statuses = [
           <span>upkept</span>
         </div>
         <div class="nav-links">
-          <a href="#platforms">Platformlar</a>
+          <a href="#fark">Fark</a>
+          <a href="#grid">Aylık grid</a>
           <a href="#how">Nasıl çalışır</a>
-          <a href="#felsefe">Felsefe</a>
           <NuxtLink to="/app" class="nav-cta">Başla</NuxtLink>
         </div>
       </nav>
 
+      <!-- HERO -->
       <section class="lp-hero">
         <div class="hero-copy">
           <h1>Kusursuz değil,<br><span class="em">sürekli</span> ol.</h1>
           <p>Alışkanlıklarını sakin ve yargısız takip et. Bir günü kaçırmak bir alarm değil — sadece sessizce kaydedilir.</p>
           <div class="hero-cta">
-            <NuxtLink to="/app" class="btn-dark">Ücretsiz başla</NuxtLink>
-            <a href="#how" class="btn-link">Nasıl çalışır</a>
+            <NuxtLink to="/app" class="btn-dark">Bugün başla</NuxtLink>
+            <span class="hero-note">Hesap yok · internetsiz çalışır</span>
           </div>
         </div>
 
@@ -80,26 +133,124 @@ const statuses = [
             </div>
             <div class="ph-day">Gün 12</div>
             <div class="ph-date">23 Temmuz, Perşembe</div>
-            <div class="ph-row">
-              <span class="ph-name">Egzersiz</span>
-              <span class="ph-pill done">✓</span>
+            <div class="ph-row"><span class="ph-name">Egzersiz</span><span class="ph-pill done">✓</span></div>
+            <div class="ph-row"><span class="ph-name">Su içmek</span><span class="ph-pill done">✓</span></div>
+            <div class="ph-row"><span class="ph-name">Kitap okumak</span><span class="ph-pill partial">~</span></div>
+            <div class="ph-row"><span class="ph-name">Meditasyon</span><span class="ph-pill none">+</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FARK -->
+      <section id="fark" class="sec">
+        <div class="sec-head wide">
+          <div class="lp-eyebrow">upkept farkı</div>
+          <h2>Neden kaçırdığını da <span class="em">kaydet.</span></h2>
+          <p class="lead">Bir günü kaçırdığında suçlanmazsın. Sebebini bir dokunuşla bırakırsın — ve zamanla bu küçük notlar örüntüye dönüşür. Kaçırmak bir hata değil, <b>veridir.</b></p>
+        </div>
+
+        <div class="fark-two">
+          <div class="lp-card miss-card">
+            <div class="miss-title">Meditasyon</div>
+            <div class="miss-sub">Bugünü nasıl geçirdin?</div>
+            <div class="sbtns">
+              <div v-for="b in missBtns" :key="b.label" class="sbtn" :style="{ borderColor: b.border, background: b.bg }">
+                <div class="sdot" :style="{ background: b.dotBg }">{{ b.glyph }}</div>
+                <div class="slabel" :style="{ color: b.labelColor }">{{ b.label }}</div>
+              </div>
             </div>
-            <div class="ph-row">
-              <span class="ph-name">Su içmek</span>
-              <span class="ph-pill done">✓</span>
+            <div class="reason-label">Bir sebep <span>(opsiyonel)</span></div>
+            <div class="fark-chips">
+              <div
+                v-for="c in missChips" :key="c.label" class="fark-chip"
+                :style="c.on
+                  ? { borderColor: '#6d6fae', background: '#6d6fae', color: '#fbf8f0' }
+                  : { borderColor: '#e2d8c1', background: '#fbf8f0', color: '#6b6459' }"
+              >{{ c.label }}</div>
             </div>
-            <div class="ph-row">
-              <span class="ph-name">Kitap okumak</span>
-              <span class="ph-pill partial">~</span>
+            <div class="note-prev">Yatağa geç girdim, yarın erken denerim…</div>
+          </div>
+
+          <div class="lp-card summary-card">
+            <div class="sum-eyebrow">Zamanla</div>
+            <div class="sum-title">En sık kaçırma sebebin</div>
+            <div class="bars">
+              <div v-for="r in reasonBars" :key="r.label" class="bar-row">
+                <div class="bar-top">
+                  <span class="bar-label">{{ r.label }}</span>
+                  <span class="bar-count">{{ r.count }} kez</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill" :style="{ width: r.w, background: r.color }" /></div>
+              </div>
             </div>
-            <div class="ph-row">
-              <span class="ph-name">Meditasyon</span>
-              <span class="ph-pill none">+</span>
+            <div class="sum-foot">Yargı yok — sadece kendini tanıman için sakin bir örüntü.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AYLIK GRID -->
+      <section id="grid" class="sec">
+        <div class="sec-head wide">
+          <div class="lp-eyebrow">İmza ekran</div>
+          <h2>Bütün ay, <span class="em">tek bakışta.</span></h2>
+          <p class="lead">Satır senin alışkanlığın, sütun ayın günü. Her hücrede yumuşak bir renk ve işaret — bugün vurgulu, gelecek günler sessiz. İlerlemeni zorlamadan görürsün.</p>
+        </div>
+
+        <div class="lp-card grid-card">
+          <div class="grid-head">
+            <div class="grid-title">Temmuz 2026</div>
+            <div class="lp-legend">
+              <div v-for="l in gLegend" :key="l.label" class="lp-legend-item">
+                <div class="lp-legend-box" :style="{ background: l.bg, color: l.color, border: l.border }">{{ l.glyph }}</div>
+                <span>{{ l.label }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="grid-scroll">
+            <div class="grid-inner">
+              <div class="day-row">
+                <div v-for="d in gDays" :key="d.n" class="day-num" :style="{ color: d.color }">{{ d.n }}</div>
+              </div>
+              <div class="grid-body">
+                <div v-for="row in gridRows" :key="row.name" class="grid-line">
+                  <div class="row-name">{{ row.name }}</div>
+                  <div
+                    v-for="(c, i) in row.cells" :key="i" class="lp-cell"
+                    :style="{ background: c.bg, color: c.color, border: c.border, opacity: c.opacity, boxShadow: c.ring }"
+                  >{{ c.glyph }}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- NASIL ÇALIŞIR -->
+      <section id="how" class="sec">
+        <div class="sec-head center">
+          <div class="lp-eyebrow">Zahmetsiz</div>
+          <h2>Günde on saniye</h2>
+        </div>
+        <div class="cols-3 steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-title">Alışkanlığını ekle</div>
+            <div class="step-body">Az ama sürdürülebilir. Bir–üç alışkanlıkla başla, gerisini zaman getirir.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-title">Günü işaretle</div>
+            <div class="step-body">Yaptım, kısmen ya da yapamadım. İstersen sebep ekle — hepsi opsiyonel.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div class="step-title">Süreklilik gör</div>
+            <div class="step-body">Grid ve istatistiklerde ilerlemeni izle. Kusursuzluk değil, devamlılık.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PLATFORMLAR -->
       <section id="platforms" class="sec">
         <div class="sec-head">
           <div class="lp-eyebrow">Her yerde seninle</div>
@@ -117,29 +268,8 @@ const statuses = [
         <div class="plat-note">macOS uygulaması imzasız — ilk açılışta sağ tık → <b>Aç</b>. Windows &amp; Android yakında.</div>
       </section>
 
-      <section id="how" class="sec">
-        <div class="sec-head center">
-          <div class="lp-eyebrow">Zahmetsiz</div>
-          <h2>Günde on saniye</h2>
-        </div>
-        <div class="cols-3 steps">
-          <div v-for="s in steps" :key="s.n" class="step">
-            <div class="step-n">{{ s.n }}</div>
-            <div class="step-title">{{ s.title }}</div>
-            <div class="step-body">{{ s.body }}</div>
-          </div>
-        </div>
-
-        <div class="strip">
-          <div class="strip-lead">Dört sakin durum —</div>
-          <div v-for="st in statuses" :key="st.label" class="strip-item">
-            <div class="strip-glyph" :class="st.cls">{{ st.glyph }}</div>
-            <span>{{ st.label }}</span>
-          </div>
-        </div>
-      </section>
-
-      <section id="felsefe" class="philosophy">
+      <!-- KAPANIŞ -->
+      <section class="philosophy">
         <div class="quote">Her seri bir gün önce sıfırdı. Kaçırmak da yolculuğun bir parçası — <span class="em">önemli olan geri dönmen.</span></div>
         <NuxtLink to="/app" class="btn-dark">Bugün başla</NuxtLink>
       </section>
@@ -169,64 +299,106 @@ const statuses = [
   font-family: 'Karla', system-ui, sans-serif;
 }
 .arc { position: absolute; pointer-events: none; }
-.arc-tr { top: -160px; right: -180px; width: 620px; height: 620px; opacity: 0.5; }
+.arc-tr { top: -160px; right: -180px; width: 600px; height: 600px; opacity: 0.45; }
 .arc-tr path { animation: drawArc 2.2s ease forwards; }
-.arc-bl { bottom: -120px; left: -140px; width: 420px; height: 420px; opacity: 0.35; }
 @keyframes drawArc { from { stroke-dashoffset: 620; } to { stroke-dashoffset: 0; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 
 .wrap { position: relative; max-width: 1140px; margin: 0 auto; padding: 0 44px; }
 
-.nav { display: flex; align-items: center; justify-content: space-between; padding: 30px 0; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; }
 .lp-brand { display: flex; align-items: center; gap: 10px; }
 .lp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 23px; letter-spacing: -0.8px; }
-.nav-links { display: flex; align-items: center; gap: 36px; font-size: 15px; font-weight: 600; color: #6b6459; }
+.nav-links { display: flex; align-items: center; gap: 34px; font-size: 15px; font-weight: 600; color: #6b6459; }
 .nav-links a { color: #6b6459; }
 .nav-links a:hover { opacity: 0.7; }
 .nav-cta { border: 1.5px solid #262420; color: #262420 !important; padding: 10px 20px; border-radius: 999px; font-weight: 700; }
 
-.lp-hero { display: grid; grid-template-columns: 1fr 340px; gap: 56px; align-items: center; padding: 70px 0 110px; }
+.lp-hero { display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: center; padding: 56px 0 88px; }
 .hero-copy { animation: fadeUp 0.7s ease; }
-h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-height: 1.02; letter-spacing: -2.5px; margin: 0 0 26px; color: #201e1a; }
+h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-height: 1.02; letter-spacing: -2.5px; margin: 0 0 24px; color: #201e1a; }
 .em { font-style: italic; color: #6d6fae; }
-.hero-copy p { font-size: 19px; line-height: 1.6; color: #6b6459; max-width: 440px; margin: 0 0 38px; }
-.hero-cta { display: flex; align-items: center; gap: 22px; }
+.hero-copy p { font-size: 19px; line-height: 1.6; color: #6b6459; max-width: 430px; margin: 0 0 34px; }
+.hero-cta { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .btn-dark { background: #262420; color: #f7f4ed !important; font-size: 16px; font-weight: 700; padding: 16px 32px; border-radius: 999px; display: inline-block; }
 .btn-dark:hover { opacity: 0.85; }
-.btn-link { font-size: 15.5px; font-weight: 700; color: #262420; border-bottom: 1.5px solid #c9c0ad; padding-bottom: 3px; }
+.hero-note { font-size: 14.5px; font-weight: 600; color: #8a8172; }
 
 .phone-wrap { justify-self: center; animation: floaty 6s ease-in-out infinite; }
-.phone {
-  width: 300px; border-radius: 40px; background: #ffffff;
-  border: 1px solid #eae8e2; padding: 26px 22px 30px;
-  box-shadow: 0 40px 80px -40px rgba(74,63,44,0.5);
-}
+.phone { width: 300px; border-radius: 40px; background: #fff; border: 1px solid #eae8e2; padding: 26px 22px 30px; box-shadow: 0 40px 80px -40px rgba(74,63,44,0.5); }
 .ph-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
 .ph-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 17px; color: #201e1a; }
 .ph-day { font-family: 'Spectral', serif; font-size: 34px; color: #201e1a; line-height: 1; }
 .ph-date { font-size: 13px; color: #8c8880; margin: 8px 0 22px; }
-.ph-row {
-  display: flex; align-items: center; justify-content: space-between;
-  background: #f6f5f2; border: 1px solid #eae8e2; border-radius: 16px;
-  padding: 13px 14px; margin-bottom: 10px;
-}
+.ph-row { display: flex; align-items: center; justify-content: space-between; background: #f6f5f2; border: 1px solid #eae8e2; border-radius: 16px; padding: 13px 14px; margin-bottom: 10px; }
 .ph-name { font-size: 15px; font-weight: 600; color: #2a2825; }
-.ph-pill {
-  width: 30px; height: 30px; border-radius: 50%; display: flex;
-  align-items: center; justify-content: center; font-size: 15px; font-weight: 700;
-}
+.ph-pill { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
 .ph-pill.done { background: #5f8a58; color: #fbf8f0; }
 .ph-pill.partial { background: #c79433; color: #fbf8f0; }
 .ph-pill.none { background: transparent; color: #c3b79b; border: 1.5px dashed #ddd9d0; }
 
-.sec { padding: 20px 0 110px; }
-.sec-head { margin-bottom: 56px; max-width: 560px; }
-.sec-head.center { text-align: center; margin-left: auto; margin-right: auto; }
-.lp-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #b0917d; text-transform: uppercase; margin-bottom: 14px; }
-h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 46px; letter-spacing: -1.4px; margin: 0; color: #201e1a; line-height: 1.05; }
+.sec { padding: 40px 0 96px; }
+.sec-head { margin-bottom: 40px; max-width: 560px; }
+.sec-head.wide { max-width: 620px; }
+.sec-head.center { text-align: center; margin-left: auto; margin-right: auto; max-width: 560px; }
+.lp-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #b0917d; text-transform: uppercase; margin-bottom: 12px; }
+h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-spacing: -1.6px; margin: 0; color: #201e1a; line-height: 1.04; }
+.lead { font-size: 18px; line-height: 1.6; color: #6b6459; margin: 16px 0 0; }
+.lead b, .sec-head b { color: #262420; font-weight: 600; }
 
+.lp-card { background: #fbf8f0; border: 1px solid #eadfc9; border-radius: 26px; box-shadow: 0 20px 50px -34px rgba(74,63,44,0.5); }
+
+/* Fark */
+.fark-two { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 28px; align-items: stretch; }
+.miss-card { padding: 30px 30px 32px; }
+.miss-title { font-family: 'Spectral', serif; font-size: 22px; color: #33302b; margin-bottom: 4px; }
+.miss-sub { font-size: 14px; color: #9a917f; margin-bottom: 20px; }
+.sbtns { display: flex; gap: 10px; margin-bottom: 24px; }
+.sbtn { flex: 1; border: 2px solid; border-radius: 18px; padding: 16px 6px 13px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.sdot { width: 42px; height: 42px; border-radius: 50%; color: #fbf8f0; display: flex; align-items: center; justify-content: center; font-size: 21px; font-weight: 700; }
+.slabel { font-size: 12.5px; font-weight: 700; }
+.reason-label { font-size: 13.5px; color: #6b6459; font-weight: 600; margin-bottom: 12px; }
+.reason-label span { color: #b0a894; font-weight: 500; }
+.fark-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 18px; }
+.fark-chip { border: 1.5px solid; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 999px; }
+.note-prev { border: 1.5px solid #e2d8c1; background: #fdfbf5; border-radius: 14px; padding: 12px 15px; font-size: 14.5px; color: #b0a894; font-style: italic; }
+
+.summary-card { background: #f2ede2; border-color: #e6dcc7; box-shadow: none; padding: 30px 30px 28px; display: flex; flex-direction: column; }
+.sum-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.5px; color: #9a917f; text-transform: uppercase; margin-bottom: 6px; }
+.sum-title { font-family: 'Spectral', serif; font-size: 25px; color: #33302b; line-height: 1.15; margin-bottom: 22px; }
+.bars { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.bar-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.bar-label { font-size: 15px; font-weight: 600; color: #3a352d; }
+.bar-count { font-size: 14px; font-weight: 700; color: #9a917f; }
+.bar-track { height: 9px; border-radius: 6px; background: #e3d9c6; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; }
+.sum-foot { margin-top: 24px; font-family: 'Spectral', serif; font-style: italic; font-size: 16px; color: #6b6459; line-height: 1.45; }
+
+/* Grid showcase */
+.grid-card { padding: 26px 26px 22px; overflow: hidden; }
+.grid-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
+.grid-title { font-family: 'Spectral', serif; font-size: 22px; color: #33302b; }
+.lp-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+.lp-legend-item { display: flex; align-items: center; gap: 6px; }
+.lp-legend-box { width: 18px; height: 18px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.lp-legend-item span { font-size: 12.5px; color: #9a917f; font-weight: 600; }
+.grid-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+.grid-inner { min-width: max-content; }
+.day-row { display: flex; gap: 4px; margin-bottom: 6px; padding-left: 132px; }
+.day-num { width: 24px; flex: 0 0 24px; text-align: center; font-size: 10.5px; font-weight: 700; }
+.grid-body { display: flex; flex-direction: column; gap: 5px; }
+.grid-line { display: flex; align-items: center; gap: 4px; }
+.row-name { width: 128px; flex: 0 0 128px; font-size: 14px; font-weight: 600; color: #3a352d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+.lp-cell { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+/* Nasıl çalışır + Platformlar */
 .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.steps { gap: 44px; }
+.step { text-align: center; }
+.step-n { font-family: 'Spectral', serif; font-size: 34px; color: #6d6fae; margin-bottom: 16px; }
+.step-title { font-family: 'Spectral', serif; font-size: 22px; font-weight: 500; color: #201e1a; margin-bottom: 10px; }
+.step-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; max-width: 260px; margin: 0 auto; }
 .plat { padding: 30px 30px 30px 0; border-top: 1.5px solid #262420; }
 .plat-title { font-family: 'Spectral', serif; font-size: 25px; font-weight: 500; color: #201e1a; margin: 6px 0 12px; }
 .plat-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
@@ -235,50 +407,30 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 46px; letter-s
 .plat-soon { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: #b0a894; }
 .plat-note { margin-top: 26px; font-size: 13px; color: #9a917f; line-height: 1.6; }
 
-.steps { gap: 44px; }
-.step { text-align: center; }
-.step-n { font-family: 'Spectral', serif; font-size: 34px; color: #6d6fae; margin-bottom: 16px; }
-.step-title { font-family: 'Spectral', serif; font-size: 22px; font-weight: 500; color: #201e1a; margin-bottom: 10px; }
-.step-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; max-width: 260px; margin: 0 auto; }
-
-.strip {
-  margin-top: 72px; display: flex; align-items: center; justify-content: center;
-  gap: 40px; flex-wrap: wrap; padding: 30px 0;
-  border-top: 1.5px solid #e2d9c8; border-bottom: 1.5px solid #e2d9c8;
-}
-.strip-lead { font-family: 'Spectral', serif; font-style: italic; font-size: 18px; color: #6b6459; }
-.strip-item { display: flex; align-items: center; gap: 10px; }
-.strip-item span { font-size: 14px; font-weight: 600; color: #6b6459; }
-.strip-glyph {
-  width: 38px; height: 38px; border-radius: 12px; display: flex;
-  align-items: center; justify-content: center; font-size: 18px; font-weight: 700;
-}
-.strip-glyph.done { background: #e6efe1; color: #3f6b3a; }
-.strip-glyph.partial { background: #f5ead1; color: #8a6414; }
-.strip-glyph.miss { background: #f2e1d9; color: #9a5236; }
-.strip-glyph.none { background: transparent; color: #b0a894; border: 1px dashed #d8cdb4; }
-
-.philosophy { padding: 60px 0 110px; text-align: center; }
+.philosophy { padding: 40px 0 96px; text-align: center; }
 .quote { max-width: 760px; margin: 0 auto; font-family: 'Spectral', serif; font-weight: 400; font-size: 36px; line-height: 1.4; color: #201e1a; letter-spacing: -0.6px; }
-.philosophy .btn-dark { margin-top: 48px; padding: 17px 38px; }
+.philosophy .btn-dark { margin-top: 40px; padding: 17px 38px; }
 
 .foot { border-top: 1.5px solid #e2d9c8; padding: 30px 0 54px; display: flex; align-items: center; justify-content: space-between; color: #9a917f; font-size: 14px; }
 .foot-brand span { font-family: 'Spectral', serif; font-size: 16px; color: #6b6459; font-weight: 400; }
 .foot-links { display: flex; gap: 26px; align-items: center; }
 .foot-links a { color: #9a917f; }
 
+@media (max-width: 860px) {
+  .fark-two { grid-template-columns: 1fr; }
+}
 @media (max-width: 780px) {
   .wrap { padding: 0 20px; }
   .nav-links a:not(.nav-cta) { display: none; }
-  .lp-hero { grid-template-columns: 1fr; gap: 40px; padding: 30px 0 70px; }
+  .lp-hero { grid-template-columns: 1fr; gap: 40px; padding: 24px 0 60px; }
   h1 { font-size: 46px; letter-spacing: -1.5px; }
   .hero-copy p { font-size: 17px; }
   .phone-wrap { order: 2; }
+  h2 { font-size: 34px; }
   .cols-3 { grid-template-columns: 1fr; gap: 0; }
   .steps { gap: 36px; }
   .plat { padding: 24px 0; }
-  h2 { font-size: 34px; }
   .quote { font-size: 26px; }
-  .strip { gap: 20px 28px; }
+  .sec { padding: 30px 0 64px; }
 }
 </style>

@@ -1,5 +1,11 @@
 export default defineNuxtConfig({
-  ssr: false,
+  // Hybrid: marketing pages are prerendered for SEO/link previews; the tracker
+  // (/app/**) stays a client-only SPA because it needs SQLite/localStorage.
+  routeRules: {
+    '/': { prerender: true },
+    '/privacy': { prerender: true },
+    '/app/**': { ssr: false },
+  },
   devtools: { enabled: false },
   modules: ['@vite-pwa/nuxt'],
   css: ['~/assets/main.css'],
@@ -9,6 +15,12 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'tr' },
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        { name: 'description', content: 'Sakin ve yargısız aylık alışkanlık takibi. Kaçırmak bir alarm değil — önemli olan geri dönmen. Hesap yok, offline çalışır.' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'upkept' },
+        { property: 'og:image', content: 'https://upkept.pages.dev/og.png' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'theme-color', content: '#6d6fae' },
       ],
       link: [
         { rel: 'icon', href: '/favicon.ico', sizes: 'any' },

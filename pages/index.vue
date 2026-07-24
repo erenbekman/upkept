@@ -1,6 +1,19 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
 
+useSeoMeta({
+  title: 'upkept — Kusursuz değil, sürekli ol.',
+  description: 'Sakin ve yargısız aylık alışkanlık takibi. Kaçırdığın günü sebebiyle kaydet; metrikler süreklilik yüzdesi etrafında kurulu. Hesap yok, offline çalışır, verilerin sende kalır.',
+  ogTitle: 'upkept — Kusursuz değil, sürekli ol.',
+  ogDescription: 'Sakin, yargısız aylık alışkanlık takibi. Web · macOS · iOS (yakında). Hesap yok, verilerin sende kalır.',
+  ogImage: 'https://upkept.pages.dev/og.png',
+  ogUrl: 'https://up-kept.app/',
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'upkept — Kusursuz değil, sürekli ol.',
+  twitterDescription: 'Sakin, yargısız aylık alışkanlık takibi. Hesap yok, verilerin sende kalır.',
+  twitterImage: 'https://upkept.pages.dev/og.png',
+})
+
 // Installed contexts (native app, Tauri desktop, or installed PWA) skip the
 // marketing landing and open straight into the tracker.
 if (import.meta.client) {

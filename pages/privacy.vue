@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
-useHead({ title: 'Privacy — Upkept' })
+useSeoMeta({
+  title: 'Privacy — upkept',
+  description: 'upkept keeps your data on your device. No accounts, no ads, no tracking; optional anonymous sync.',
+  ogTitle: 'Privacy — upkept',
+  ogDescription: 'Local-first habit tracker. No accounts, no ads, no tracking.',
+  ogUrl: 'https://up-kept.app/privacy',
+})
 </script>
 
 <template>

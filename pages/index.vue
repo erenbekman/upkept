@@ -98,6 +98,22 @@ const platforms = [
   { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', soon: false, cta: { label: 'macOS için indir', href: DMG_URL } },
   { title: 'iOS', body: 'Cebinde, tek dokunuşla. Üzerinde çalışıyoruz — çok yakında.', soon: true, cta: null },
 ]
+
+// ---- Hero phone mockup (mirrors the app's Bugün screen) ----
+const phoneRows = [
+  { name: 'Egzersiz', sub: 'Henüz işaretlemedin', subColor: '#b0a894', glyph: '+', dotBg: 'transparent', dotText: '#c3b79b', dotBorder: '1.5px dashed #cdc2a8' },
+  { name: 'Su içmek', sub: 'Bugün yaptın', subColor: '#5f8a58', glyph: '✓', dotBg: '#5f8a58', dotText: '#fbf8f0', dotBorder: 'none' },
+  { name: 'Kitap okumak', sub: 'Yorgundum', subColor: '#b3862c', glyph: '~', dotBg: '#c79433', dotText: '#fbf8f0', dotBorder: 'none' },
+  { name: 'Meditasyon', sub: 'Yarın yeni bir gün', subColor: '#b57254', glyph: '✕', dotBg: '#bd7659', dotText: '#fbf8f0', dotBorder: 'none' },
+  { name: 'Erken uyumak', sub: 'Henüz işaretlemedin', subColor: '#b0a894', glyph: '+', dotBg: 'transparent', dotText: '#c3b79b', dotBorder: '1.5px dashed #cdc2a8' },
+]
+const phoneTabs = [
+  { label: 'Bugün', icon: '☼', color: '#6d6fae', weight: 700 },
+  { label: 'Grid', icon: '▦', color: '#b0a894', weight: 500 },
+  { label: 'İstatistik', icon: '◔', color: '#b0a894', weight: 500 },
+  { label: 'Alışkanlık', icon: '❋', color: '#b0a894', weight: 500 },
+  { label: 'Ayarlar', icon: '⚙︎', color: '#b0a894', weight: 500 },
+]
 </script>
 
 <template>
@@ -137,19 +153,36 @@ const platforms = [
 
         <div class="phone-wrap">
           <div class="phone">
-            <div class="ph-brand">
-              <svg width="20" height="20" viewBox="0 0 60 60" fill="none">
-                <path d="M47 22 A19 19 0 1 0 49 34" stroke="#6d6fae" stroke-width="6.5" stroke-linecap="round" />
-                <circle cx="47" cy="14" r="4.6" fill="#6d6fae" />
-              </svg>
-              <span>upkept</span>
+            <div class="ph-status">
+              <span>9:41</span>
+              <span class="ph-ind">▲ ▬ ⬤</span>
             </div>
-            <div class="ph-day">Gün 12</div>
-            <div class="ph-date">23 Temmuz, Perşembe</div>
-            <div class="ph-row"><span class="ph-name">Egzersiz</span><span class="ph-pill done">✓</span></div>
-            <div class="ph-row"><span class="ph-name">Su içmek</span><span class="ph-pill done">✓</span></div>
-            <div class="ph-row"><span class="ph-name">Kitap okumak</span><span class="ph-pill partial">~</span></div>
-            <div class="ph-row"><span class="ph-name">Meditasyon</span><span class="ph-pill none">+</span></div>
+            <div class="ph-head">
+              <div class="ph-brand">
+                <svg width="20" height="20" viewBox="0 0 60 60" fill="none">
+                  <path d="M47 22 A19 19 0 1 0 49 34" stroke="#6d6fae" stroke-width="6.5" stroke-linecap="round" />
+                  <circle cx="47" cy="14" r="4.6" fill="#6d6fae" />
+                </svg>
+                <span>upkept</span>
+              </div>
+              <div class="ph-day">Gün 22</div>
+              <div class="ph-date">22 Temmuz 2026 Çarşamba</div>
+            </div>
+            <div class="ph-rows">
+              <div v-for="r in phoneRows" :key="r.name" class="ph-row">
+                <div class="ph-rowmain">
+                  <div class="ph-name">{{ r.name }}</div>
+                  <div class="ph-sub" :style="{ color: r.subColor }">{{ r.sub }}</div>
+                </div>
+                <div class="ph-dot" :style="{ background: r.dotBg, color: r.dotText, border: r.dotBorder }">{{ r.glyph }}</div>
+              </div>
+            </div>
+            <div class="ph-tabs">
+              <div v-for="t in phoneTabs" :key="t.label" class="ph-tab">
+                <div class="ph-tab-ic" :style="{ color: t.color }">{{ t.icon }}</div>
+                <div class="ph-tab-lb" :style="{ color: t.color, fontWeight: t.weight }">{{ t.label }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -370,17 +403,28 @@ h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-hei
 .hero-note { font-size: 14.5px; font-weight: 600; color: #8a8172; }
 
 .phone-wrap { justify-self: center; animation: floaty 6s ease-in-out infinite; }
-.phone { width: 300px; border-radius: 40px; background: #fff; border: 1px solid #eae8e2; padding: 26px 22px 30px; box-shadow: 0 40px 80px -40px rgba(74,63,44,0.5); }
-.ph-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
-.ph-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 17px; color: #201e1a; }
-.ph-day { font-family: 'Spectral', serif; font-size: 34px; color: #201e1a; line-height: 1; }
-.ph-date { font-size: 13px; color: #8c8880; margin: 8px 0 22px; }
-.ph-row { display: flex; align-items: center; justify-content: space-between; background: #f6f5f2; border: 1px solid #eae8e2; border-radius: 16px; padding: 13px 14px; margin-bottom: 10px; }
-.ph-name { font-size: 15px; font-weight: 600; color: #2a2825; }
-.ph-pill { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
-.ph-pill.done { background: #5f8a58; color: #fbf8f0; }
-.ph-pill.partial { background: #c79433; color: #fbf8f0; }
-.ph-pill.none { background: transparent; color: #c3b79b; border: 1.5px dashed #ddd9d0; }
+.phone {
+  position: relative; width: 300px; height: 610px; border-radius: 42px;
+  background: #f4efe3; overflow: hidden; font-family: 'Karla', system-ui, sans-serif;
+  box-shadow: 0 40px 80px -30px rgba(74,63,44,0.55), 0 0 0 9px #171412, 0 0 0 11px #2c2822;
+}
+.ph-status { display: flex; align-items: flex-end; justify-content: space-between; padding: 14px 24px 6px; font-size: 12px; font-weight: 700; color: #3a352d; }
+.ph-ind { letter-spacing: 2px; opacity: 0.85; font-size: 10px; }
+.ph-head { padding: 8px 18px 0; }
+.ph-brand { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
+.ph-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 17px; letter-spacing: -0.6px; color: #33302b; }
+.ph-day { font-family: 'Spectral', serif; font-size: 32px; font-weight: 500; line-height: 1; color: #33302b; letter-spacing: -0.8px; }
+.ph-date { margin-top: 7px; font-size: 12.5px; color: #9a917f; font-weight: 500; }
+.ph-rows { display: flex; flex-direction: column; gap: 9px; padding: 16px 14px 0; }
+.ph-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 17px; background: #fbf8f0; border: 1px solid #ece3ce; box-shadow: 0 5px 14px -12px rgba(74,63,44,0.4); }
+.ph-rowmain { flex: 1; min-width: 0; }
+.ph-name { font-size: 14px; font-weight: 600; color: #3a352d; }
+.ph-sub { font-size: 11px; margin-top: 2px; font-weight: 500; }
+.ph-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex: 0 0 28px; }
+.ph-tabs { position: absolute; bottom: 0; left: 0; right: 0; height: 62px; padding: 10px 6px 18px; display: flex; background: rgba(244,239,227,0.9); backdrop-filter: blur(10px); border-top: 1px solid #e6ddc8; }
+.ph-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.ph-tab-ic { font-size: 15px; line-height: 1; }
+.ph-tab-lb { font-size: 8.5px; }
 
 .sec { padding: 40px 0 92px; }
 .sec-head { margin-bottom: 40px; max-width: 560px; }

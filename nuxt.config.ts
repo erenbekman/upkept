@@ -18,7 +18,7 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Sakin ve yargısız aylık alışkanlık takibi. Kaçırmak bir alarm değil — önemli olan geri dönmen. Hesap yok, offline çalışır.' },
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'upkept' },
-        { property: 'og:image', content: 'https://upkept.pages.dev/og.png' },
+        { property: 'og:image', content: 'https://up-kept.app/og.png' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'theme-color', content: '#6d6fae' },
       ],

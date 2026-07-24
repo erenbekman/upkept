@@ -7,6 +7,7 @@ useSeoMeta({
   ogDescription: 'Local-first habit tracker. No accounts, no ads, no tracking.',
   ogUrl: 'https://up-kept.app/privacy',
 })
+useHead({ link: [{ rel: 'canonical', href: 'https://up-kept.app/privacy' }] })
 </script>
 
 <template>

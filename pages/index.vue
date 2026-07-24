@@ -6,13 +6,14 @@ useSeoMeta({
   description: 'Sakin ve yargısız aylık alışkanlık takibi. Kaçırdığın günü sebebiyle kaydet; metrikler süreklilik yüzdesi etrafında kurulu. Hesap yok, offline çalışır, verilerin sende kalır.',
   ogTitle: 'upkept — Kusursuz değil, sürekli ol.',
   ogDescription: 'Sakin, yargısız aylık alışkanlık takibi. Web · macOS · iOS (yakında). Hesap yok, verilerin sende kalır.',
-  ogImage: 'https://upkept.pages.dev/og.png',
+  ogImage: 'https://up-kept.app/og.png',
   ogUrl: 'https://up-kept.app/',
   twitterCard: 'summary_large_image',
   twitterTitle: 'upkept — Kusursuz değil, sürekli ol.',
   twitterDescription: 'Sakin, yargısız aylık alışkanlık takibi. Hesap yok, verilerin sende kalır.',
-  twitterImage: 'https://upkept.pages.dev/og.png',
+  twitterImage: 'https://up-kept.app/og.png',
 })
+useHead({ link: [{ rel: 'canonical', href: 'https://up-kept.app/' }] })
 
 // Installed contexts (native app, Tauri desktop, or installed PWA) skip the
 // marketing landing and open straight into the tracker.
@@ -44,7 +45,22 @@ const reasonBars = [
   { label: 'Unuttum', count: 3, color: '#9aa088' },
 ].map(r => ({ ...r, w: Math.round((r.count / 8) * 100) + '%' }))
 
-// ---- Monthly grid showcase (illustrative, static) ----
+// ---- Live demo date so the mockups never go stale ----
+// Stable seed for prerender/hydration; onMounted shifts it to the real date on
+// the client, so the phone + grid always show the current month/day.
+const MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
+const today = ref(new Date(2026, 6, 24))
+onMounted(() => { today.value = new Date() })
+
+const dom = computed(() => today.value.getDate())
+const dim = computed(() => new Date(today.value.getFullYear(), today.value.getMonth() + 1, 0).getDate())
+const todayIdx = computed(() => dom.value - 1)
+const phoneDay = computed(() => `Gün ${dom.value}`)
+const phoneDate = computed(() => `${dom.value} ${MONTHS_TR[today.value.getMonth()]} ${today.value.getFullYear()} ${DAYS_TR[today.value.getDay()]}`)
+const monthTitle = computed(() => `${MONTHS_TR[today.value.getMonth()]} ${today.value.getFullYear()}`)
+
+// ---- Monthly grid showcase (illustrative) ----
 function gmeta(s: string | null) {
   switch (s) {
     case 'done': return { glyph: '✓', bg: '#e6efe1', color: '#3f6b3a' }
@@ -53,11 +69,6 @@ function gmeta(s: string | null) {
     default: return { glyph: '·', bg: 'transparent', color: '#c3b79b' }
   }
 }
-const todayIdx = 21
-const gDays = Array.from({ length: 31 }, (_, i) => ({
-  n: i + 1,
-  color: i === todayIdx ? '#6d6fae' : (i > todayIdx ? '#cbc1ac' : '#a89f8c'),
-}))
 const pats: Record<string, string> = {
   'Egzersiz': 'dddpdmdddpddnddddpddmd',
   'Su içmek': 'dddddddpdddddddpdddddd',
@@ -66,14 +77,19 @@ const pats: Record<string, string> = {
   'Erken uyumak': 'ddnddpddndmddpddnddpdd',
 }
 const cm: Record<string, string | null> = { d: 'done', p: 'partial', m: 'miss', n: null }
-const gridRows = Object.entries(pats).map(([name, p]) => {
+const gDays = computed(() => Array.from({ length: dim.value }, (_, i) => ({
+  n: i + 1,
+  color: i === todayIdx.value ? '#6d6fae' : (i > todayIdx.value ? '#cbc1ac' : '#a89f8c'),
+})))
+const gridRows = computed(() => Object.entries(pats).map(([name, p]) => {
+  const full = (p + p).slice(0, 31) // repeat the hand-tuned pattern to cover any month length
   const cells = []
-  for (let i = 0; i < 31; i++) {
-    if (i > todayIdx) {
+  for (let i = 0; i < dim.value; i++) {
+    if (i > todayIdx.value) {
       cells.push({ glyph: '', bg: 'transparent', color: 'transparent', border: '1px dashed #ece3ce', opacity: 0.55, ring: 'none' })
       continue
     }
-    const st = cm[p[i]] ?? null
+    const st = cm[full[i]] ?? null
     const m = gmeta(st)
     const none = !st
     cells.push({
@@ -82,11 +98,11 @@ const gridRows = Object.entries(pats).map(([name, p]) => {
       color: none ? '#c3b79b' : m.color,
       border: none ? '1px dashed #ece3ce' : '1px solid transparent',
       opacity: 1,
-      ring: i === todayIdx ? '0 0 0 2px #6d6fae' : 'none',
+      ring: i === todayIdx.value ? '0 0 0 2px #6d6fae' : 'none',
     })
   }
   return { name, cells }
-})
+}))
 const gLegend = [
   { ...gmeta('done'), label: 'Yaptım', border: '1px solid transparent' },
   { ...gmeta('partial'), label: 'Kısmen', border: '1px solid transparent' },
@@ -131,7 +147,7 @@ const phoneTabs = [
 
 <template>
   <div class="lp">
-    <svg class="arc arc-tr" viewBox="0 0 600 600">
+    <svg class="arc arc-tr" viewBox="0 0 600 600" aria-hidden="true">
       <path d="M470 220 A190 190 0 1 0 490 340" fill="none" stroke="#6d6fae" stroke-width="2" stroke-linecap="round" stroke-dasharray="620" />
       <circle cx="470" cy="140" r="14" fill="#6d6fae" opacity="0.5" />
     </svg>
@@ -178,8 +194,8 @@ const phoneTabs = [
                 </svg>
                 <span>upkept</span>
               </div>
-              <div class="ph-day">Gün 22</div>
-              <div class="ph-date">22 Temmuz 2026 Çarşamba</div>
+              <div class="ph-day">{{ phoneDay }}</div>
+              <div class="ph-date">{{ phoneDate }}</div>
             </div>
             <div class="ph-rows">
               <div v-for="r in phoneRows" :key="r.name" class="ph-row">
@@ -257,7 +273,7 @@ const phoneTabs = [
 
         <div class="lp-card grid-card">
           <div class="grid-head">
-            <div class="grid-title">Temmuz 2026</div>
+            <div class="grid-title">{{ monthTitle }}</div>
             <div class="lp-legend">
               <div v-for="l in gLegend" :key="l.label" class="lp-legend-item">
                 <div class="lp-legend-box" :style="{ background: l.bg, color: l.color, border: l.border }">{{ l.glyph }}</div>
@@ -265,7 +281,7 @@ const phoneTabs = [
               </div>
             </div>
           </div>
-          <div class="grid-scroll">
+          <div class="grid-scroll" aria-hidden="true">
             <div class="grid-inner">
               <div class="day-row">
                 <div v-for="d in gDays" :key="d.n" class="day-num" :style="{ color: d.color }">{{ d.n }}</div>
@@ -367,7 +383,7 @@ const phoneTabs = [
           <div>
             <div class="foot-col-title">upkept</div>
             <div class="foot-col">
-              <NuxtLink to="/privacy">Privacy</NuxtLink>
+              <NuxtLink to="/privacy">Gizlilik</NuxtLink>
               <a href="#how">Nasıl çalışır</a>
               <a href="mailto:erenbekman@gmail.com">İletişim</a>
             </div>

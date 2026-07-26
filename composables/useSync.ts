@@ -1,5 +1,14 @@
-// ponytail: hardcoded API base; change here if you move to a custom domain.
-const API_BASE = 'https://upkept.pages.dev/api'
+// Web: same-origin so /api hits the Pages Functions on whatever domain served
+// the app (up-kept.app, *.pages.dev). Native (Capacitor/Tauri) loads from a
+// localhost/file origin, so it needs the absolute production URL.
+function apiBase(): string {
+  if (import.meta.client) {
+    const h = location.hostname
+    if (h === 'up-kept.app' || h.endsWith('.pages.dev')) return `${location.origin}/api`
+  }
+  return 'https://up-kept.app/api'
+}
+const API_BASE = apiBase()
 const CODE_KEY = 'upkept_sync_code'
 const MUT_KEY = 'upkept_mutated_at'
 

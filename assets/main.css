@@ -25,6 +25,7 @@ html, body, #__nuxt { margin: 0; min-height: 100%; }
 body {
   background: var(--bg); color: var(--ink); font-family: var(--sans);
   font-size: 16px; line-height: 1.4;
+  overscroll-behavior-y: contain; /* iOS rubber-band must not eat the pull-to-refresh drag */
 }
 a { color: var(--accent); text-decoration: none; }
 input, textarea, button, select { font-family: inherit; }
@@ -185,11 +186,44 @@ table.grid td.cell { width: 36px; padding: 4px 0; text-align: center; }
   display: flex; background: var(--bar); backdrop-filter: blur(14px);
   border-top: 1.5px solid var(--line);
 }
-.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding-top: 4px; color: var(--muted2); }
-.tab-icon { font-size: 19px; line-height: 1; }
-.tab-label { font-size: 10.5px; font-weight: 500; }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--muted2); }
+.tab-icon { font-size: 23px; line-height: 1; }
+/* Mobile bar is icon-only; the label stays in the DOM for screen readers. */
+.tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .tab.router-link-exact-active { color: var(--accent); }
-.tab.router-link-exact-active .tab-label { font-weight: 700; }
+
+/* ---------- Senkron durumu + pull-to-refresh ---------- */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.sync-chip {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 999px;
+  min-height: 34px; max-width: 62%;
+}
+.sync-chip:active { background: var(--card2); }
+.sync-chip .sync-ic { font-size: 13px; line-height: 1; display: inline-block; }
+.sync-chip.syncing .sync-ic { animation: spin 0.9s linear infinite; }
+.sync-chip.bad { color: var(--miss-text); border-color: #c07d63; }
+.sync-chip.off { color: var(--accent); border-style: dashed; }
+
+.back-today {
+  background: transparent; border: 1px solid var(--border); border-radius: 999px;
+  color: var(--accent); font-size: 13px; font-weight: 700; padding: 8px 16px;
+  min-height: 36px; cursor: pointer;
+}
+.back-today:active { background: var(--card2); }
+
+.ptr {
+  position: fixed; top: env(safe-area-inset-top); left: 50%; z-index: 30;
+  display: flex; align-items: center; gap: 8px; pointer-events: none;
+  padding: 8px 16px; border-radius: 999px; background: var(--card);
+  border: 1px solid var(--border); color: var(--muted);
+  font-size: 12.5px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 10px 24px -12px rgba(24,22,20,0.35);
+}
+.ptr-ic { display: inline-block; font-size: 14px; line-height: 1; }
+.ptr-ic.spin { animation: spin 0.9s linear infinite; }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -244,8 +278,9 @@ table.grid td.cell { width: 36px; padding: 4px 0; text-align: center; }
   }
   .tab { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 14px; border-radius: 12px; width: 100%; }
   .tab-icon { font-size: 19px; }
-  .tab-label { font-size: 15px; font-weight: 600; }
+  .tab-label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; font-size: 15px; font-weight: 600; }
   .tab.router-link-exact-active { background: var(--card); }
+  .tab.router-link-exact-active .tab-label { font-weight: 700; }
 
   .app-shell { max-width: none; margin: 0; padding-left: 232px; padding-bottom: 48px; }
   .screen, .habit-list, .grid-scroll, .legend { max-width: 760px; margin-left: auto; margin-right: auto; }

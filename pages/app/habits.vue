@@ -8,6 +8,7 @@ const editing = ref<Partial<Habit> | null>(null)
 
 async function load() { habits.value = await repo.listActive() }
 onMounted(load)
+watch(useSync().dataVersion, load)
 
 function openNew() { editing.value = { name: '', target_desc: '', color: '#7d9a6f' } }
 function openEdit(h: Habit) { editing.value = { ...h } }

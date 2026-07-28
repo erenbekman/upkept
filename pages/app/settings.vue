@@ -34,7 +34,7 @@ async function copyCode() {
   toast('Kod kopyalandı')
 }
 async function syncNow() {
-  toast((await syncApi.sync()) ? 'Senkronize edildi ✓' : 'Senkron hatası')
+  toast((await syncApi.sync()) ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et')
 }
 
 const startDate = ref('')
@@ -46,6 +46,7 @@ async function load() {
   reasons.value = await reasonsRepo.list()
 }
 onMounted(load)
+watch(syncApi.dataVersion, load)
 
 async function saveStart() {
   await db.setMeta('challenge_start_date', startDate.value)
@@ -155,13 +156,15 @@ async function onImportFile(e: Event) {
             <button class="btn" @click="copyCode">Kopyala</button>
           </div>
           <div style="font-size:12.5px; color:var(--muted);">
-            <span v-if="syncApi.status.value === 'syncing'">Senkronize ediliyor…</span>
-            <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">Bağlantı hatası — tekrar dene</span>
-            <span v-else-if="syncApi.status.value === 'ok'">Bulutla senkronize ✓</span>
-            <span v-else>Hazır</span>
+            <span v-if="syncApi.status.value === 'syncing'">Güncelleniyor…</span>
+            <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">Güncellenemedi — internetini kontrol edip tekrar dene</span>
+            <span v-else>Son güncelleme: {{ fmtAgo(syncApi.lastAt.value) }}</span>
+          </div>
+          <div style="font-size:12.5px; color:var(--muted); line-height:1.5;">
+            Başka bir cihazda işaretleme yaptıysan <b>Şimdi güncelle</b>'ye bas — ya da ekranı aşağı çek. Uygulamayı her açtığında da kendiliğinden güncellenir.
           </div>
           <div class="row" style="gap:12px;">
-            <button class="btn" style="flex:1;" @click="syncNow">Şimdi senkronize et</button>
+            <button class="btn btn-primary" style="flex:1;" @click="syncNow">Şimdi güncelle</button>
             <button class="btn" style="flex:1;" @click="unlinkSync">Bağlantıyı kes</button>
           </div>
         </template>

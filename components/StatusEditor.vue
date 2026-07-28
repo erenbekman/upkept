@@ -73,7 +73,9 @@ async function clear() {
       <div class="sheet-title">{{ habitName }}</div>
       <span class="saved-flag" :style="{ opacity: saved ? 1 : 0 }">✓ Kaydedildi</span>
     </div>
-    <div class="sub" style="margin-bottom:20px;">Bugünü nasıl geçirdin?</div>
+    <div class="sub" style="margin-bottom:20px;">
+      {{ date === todayStr() ? 'Bugünü nasıl geçirdin?' : `${fmtLong(date)} nasıl geçti?` }}
+    </div>
 
     <div class="status-btns">
       <button

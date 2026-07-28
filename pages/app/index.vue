@@ -6,24 +6,36 @@ const habitsRepo = useHabits()
 const entriesRepo = useEntries()
 const db = useDb()
 const { show: toast } = useToast()
+const syncApi = useSync()
 
 const today = todayStr()
+const date = ref(today)
 const habits = ref<Habit[]>([])
 const byHabit = ref<Record<number, Entry>>({})
 const reasonName = ref<Record<number, string>>({})
-const dayNo = ref<number | null>(null)
+const startDate = ref<string | null>(null)
 const editing = ref<Habit | null>(null)
+
+const isToday = computed(() => date.value === today)
+const dayNo = computed(() => (startDate.value ? challengeDay(startDate.value, date.value) : null))
 
 async function load() {
   habits.value = await habitsRepo.listActive()
-  const list = await entriesRepo.getForDate(today)
+  const list = await entriesRepo.getForDate(date.value)
   byHabit.value = Object.fromEntries(list.map(e => [e.habit_id, e]))
   const reasons = await entriesRepo.listReasons()
   reasonName.value = Object.fromEntries(reasons.map((r: ReasonTag) => [r.id, r.name]))
-  const start = await db.getMeta('challenge_start_date')
-  dayNo.value = start ? challengeDay(start, today) : null
+  startDate.value = await db.getMeta('challenge_start_date')
 }
 onMounted(load)
+watch(date, load)
+watch(syncApi.dataVersion, load)
+
+function step(dir: -1 | 1) {
+  const next = shiftDate(date.value, dir)
+  if (next > today) return
+  date.value = next
+}
 
 function meta(id: number) {
   return statusMeta(byHabit.value[id]?.status ?? null)
@@ -40,20 +52,53 @@ async function onSaved() {
   editing.value = null
   if (h && byHabit.value[h.id]) toast('Kaydedildi ✓')
 }
+
+const syncLabel = computed(() => {
+  if (!syncApi.code.value) return 'Cihazları bağla'
+  if (syncApi.status.value === 'syncing') return 'Güncelleniyor…'
+  if (syncApi.status.value === 'error') return 'Güncellenemedi · dokun'
+  return `Güncellendi · ${fmtAgo(syncApi.lastAt.value)}`
+})
+
+async function syncNow() {
+  if (!syncApi.code.value) return navigateTo('/app/settings')
+  toast((await syncApi.sync()) ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et')
+}
 </script>
 
 <template>
   <div class="screen">
-    <div class="brand">
-      <svg width="26" height="26" viewBox="0 0 60 60" fill="none">
-        <path d="M47 22 A19 19 0 1 0 49 34" stroke="var(--accent)" stroke-width="6.5" stroke-linecap="round" />
-        <circle cx="47" cy="14" r="4.6" fill="var(--accent)" />
-      </svg>
-      <span>upkept</span>
+    <div class="row spread" style="margin-bottom:16px;">
+      <div class="brand" style="margin-bottom:0;">
+        <svg width="26" height="26" viewBox="0 0 60 60" fill="none">
+          <path d="M47 22 A19 19 0 1 0 49 34" stroke="var(--accent)" stroke-width="6.5" stroke-linecap="round" />
+          <circle cx="47" cy="14" r="4.6" fill="var(--accent)" />
+        </svg>
+        <span>upkept</span>
+      </div>
+      <button
+        class="sync-chip"
+        :class="{ syncing: syncApi.status.value === 'syncing', bad: syncApi.status.value === 'error', off: !syncApi.code.value }"
+        @click="syncNow"
+      >
+        <span class="sync-ic">⟳</span>
+        <span>{{ syncLabel }}</span>
+      </button>
     </div>
-    <div class="big-day">{{ dayNo != null ? `Gün ${dayNo}` : 'Bugün' }}</div>
-    <div class="sub" style="font-size:15px;">{{ fmtLong(today) }}</div>
-    <div class="serif-note">Bugün nasıl geçti? Acele yok.</div>
+
+    <div class="row spread">
+      <button class="icon-btn" aria-label="Önceki gün" @click="step(-1)">‹</button>
+      <div style="text-align:center;">
+        <div class="big-day">{{ dayNo != null ? `Gün ${dayNo}` : (isToday ? 'Bugün' : fmtShort(date)) }}</div>
+        <div class="sub" style="font-size:15px;">{{ fmtLong(date) }}</div>
+      </div>
+      <button class="icon-btn" aria-label="Sonraki gün" :disabled="isToday" :style="{ opacity: isToday ? 0.25 : 1 }" @click="step(1)">›</button>
+    </div>
+
+    <div v-if="!isToday" class="row" style="justify-content:center; margin-top:10px;">
+      <button class="back-today" @click="date = today">Bugüne dön</button>
+    </div>
+    <div v-else class="serif-note">Bugün nasıl geçti? Acele yok.</div>
   </div>
 
   <div v-if="!habits.length" class="empty-card">
@@ -86,7 +131,7 @@ async function onSaved() {
     v-if="editing"
     :habit-id="editing.id"
     :habit-name="editing.name"
-    :date="today"
+    :date="date"
     :current="byHabit[editing.id] ?? null"
     @saved="onSaved"
     @close="editing = null"

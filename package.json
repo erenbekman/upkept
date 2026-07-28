@@ -7,6 +7,7 @@
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "test": "node --test test/*.test.mjs",
     "sqlite:wasm": "cp node_modules/sql.js/dist/sql-wasm.wasm public/assets/sql-wasm.wasm",
     "cap:sync": "npm run generate && cap sync",
     "postinstall": "npm run sqlite:wasm && nuxt prepare"

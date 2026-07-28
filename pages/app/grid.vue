@@ -26,7 +26,7 @@ async function load() {
   cells.value = Object.fromEntries(list.map(e => [`${e.habit_id}-${e.date}`, e]))
 }
 onMounted(load)
-watch([year, month], load)
+watch([year, month, useSync().dataVersion], load)
 
 function shift(dir: -1 | 1) {
   let m = month.value + dir, y = year.value

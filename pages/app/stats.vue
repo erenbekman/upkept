@@ -57,7 +57,7 @@ async function load() {
   topReasonCount.value = bestN
 
   // current streak (done or partial), walking back from today
-  const winFirst = todayStr(new Date(new Date(today + 'T00:00:00').getTime() - 89 * 86400000))
+  const winFirst = shiftDate(today, -89)
   const recent = await entriesRepo.getRange(winFirst, today) as Entry[]
   const kept = new Map<number, Set<string>>()
   for (const e of recent) {
@@ -69,8 +69,8 @@ async function load() {
   const raw = habits.map(h => {
     const set = kept.get(h.id) ?? new Set()
     let n = 0
-    let cursor = new Date(today + 'T00:00:00')
-    while (set.has(todayStr(cursor))) { n++; cursor = new Date(cursor.getTime() - 86400000) }
+    let cursor = today
+    while (set.has(cursor)) { n++; cursor = shiftDate(cursor, -1) }
     return { name: h.name, days: n }
   })
   const max = Math.max(1, ...raw.map(s => s.days))
@@ -78,7 +78,7 @@ async function load() {
 }
 
 onMounted(load)
-watch([year, month], load)
+watch([year, month, useSync().dataVersion], load)
 </script>
 
 <template>

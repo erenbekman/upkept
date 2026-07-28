@@ -10,7 +10,7 @@ Sakin ve yargısız bir aylık alışkanlık takipçisi. Bir günü kaçırmak b
 
 <br/>
 
-**[🌐 Web'de aç](https://upkept.pages.dev/app)**  ·  **[⬇︎ macOS için indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg)**  ·  📱 iOS *yakında*
+**[🌐 Web'de aç](https://upkept.pages.dev/app)**  ·  **[⬇︎ macOS için indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg)**  ·  **[📱 App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887)**
 
 ![platform](https://img.shields.io/badge/web·macOS·iOS-6d6fae?style=flat-square)
 ![hesap](https://img.shields.io/badge/hesap-gerekmez-5f8a58?style=flat-square)
@@ -53,7 +53,7 @@ Bir günü kaçırdığında sebebini bir dokunuşla bırakırsın (*yorgundum, 
 |---|---|
 | **Web / PWA** | [upkept.pages.dev](https://upkept.pages.dev/app) — tarayıcıda aç, "Ana ekrana ekle" ile kur |
 | **macOS** | [Upkept.dmg indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg) → Applications'a sürükle · imzasız olduğu için ilk açılışta sağ tık → **Aç** |
-| **iOS** | Çok yakında (App Store) |
+| **iOS** | [App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887) — iPhone & iPad |
 | **Windows / Android** | Yakında |
 
 macOS uygulaması açılışta kendini otomatik günceller — yeni sürüm için tekrar indirmene gerek yok.

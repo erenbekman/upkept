@@ -5,7 +5,7 @@ useSeoMeta({
   title: 'upkept — Kusursuz değil, sürekli ol.',
   description: 'Sakin ve yargısız aylık alışkanlık takibi. Kaçırdığın günü sebebiyle kaydet; metrikler süreklilik yüzdesi etrafında kurulu. Hesap yok, offline çalışır, verilerin sende kalır.',
   ogTitle: 'upkept — Kusursuz değil, sürekli ol.',
-  ogDescription: 'Sakin, yargısız aylık alışkanlık takibi. Web · macOS · iOS (yakında). Hesap yok, verilerin sende kalır.',
+  ogDescription: 'Sakin, yargısız aylık alışkanlık takibi. Web · macOS · iOS. Hesap yok, verilerin sende kalır.',
   ogImage: 'https://up-kept.app/og.png',
   ogUrl: 'https://up-kept.app/',
   twitterCard: 'summary_large_image',
@@ -27,6 +27,7 @@ if (import.meta.client) {
 }
 
 const DMG_URL = 'https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg'
+const IOS_URL = 'https://apps.apple.com/us/app/upkept/id6794236887'
 
 // ---- "Fark" section (illustrative, static) ----
 const missBtns = [
@@ -125,7 +126,7 @@ const privacy = [
 const platforms = [
   { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.', soon: false, cta: { label: 'Tarayıcıda aç', to: '/app' } },
   { title: 'Masaüstü', body: 'Geniş ekranda ayın tamamını gör, alışkanlıklarını rahatça düzenle. macOS (.dmg).', soon: false, cta: { label: 'macOS için indir', href: DMG_URL } },
-  { title: 'iOS', body: 'Cebinde, tek dokunuşla. Üzerinde çalışıyoruz — çok yakında.', soon: true, cta: null },
+  { title: 'iOS', body: 'Cebinde, tek dokunuşla. iPhone ve iPad için App Store’da yayında.', soon: false, cta: { label: 'App Store’dan indir', href: IOS_URL } },
 ]
 
 // ---- Hero phone mockup (mirrors the app's Bugün screen) ----
@@ -137,11 +138,11 @@ const phoneRows = [
   { name: 'Erken uyumak', sub: 'Henüz işaretlemedin', subColor: '#b0a894', glyph: '+', dotBg: 'transparent', dotText: '#c3b79b', dotBorder: '1.5px dashed #cdc2a8' },
 ]
 const phoneTabs = [
-  { label: 'Bugün', icon: '☼', color: '#6d6fae', weight: 700 },
-  { label: 'Grid', icon: '▦', color: '#b0a894', weight: 500 },
-  { label: 'İstatistik', icon: '◔', color: '#b0a894', weight: 500 },
-  { label: 'Alışkanlık', icon: '❋', color: '#b0a894', weight: 500 },
-  { label: 'Ayarlar', icon: '⚙︎', color: '#b0a894', weight: 500 },
+  { label: 'Bugün', icon: '☼', color: '#6d6fae' },
+  { label: 'Grid', icon: '▦', color: '#b0a894' },
+  { label: 'İstatistik', icon: '◔', color: '#b0a894' },
+  { label: 'Alışkanlık', icon: '❋', color: '#b0a894' },
+  { label: 'Ayarlar', icon: '⚙︎', color: '#b0a894' },
 ]
 </script>
 
@@ -176,6 +177,7 @@ const phoneTabs = [
           <p>Alışkanlıklarını sakin ve yargısız takip et. Bir günü kaçırmak bir alarm değil — sadece sessizce kaydedilir.</p>
           <div class="hero-cta">
             <NuxtLink to="/app" class="btn-dark">Bugün başla</NuxtLink>
+            <a :href="IOS_URL" class="btn-store" target="_blank" rel="noopener"> App Store’dan indir</a>
             <span class="hero-note">Hesap yok · internetsiz çalışır</span>
           </div>
         </div>
@@ -209,7 +211,6 @@ const phoneTabs = [
             <div class="ph-tabs">
               <div v-for="t in phoneTabs" :key="t.label" class="ph-tab">
                 <div class="ph-tab-ic" :style="{ color: t.color }">{{ t.icon }}</div>
-                <div class="ph-tab-lb" :style="{ color: t.color, fontWeight: t.weight }">{{ t.label }}</div>
               </div>
             </div>
           </div>
@@ -346,7 +347,7 @@ const phoneTabs = [
             </div>
             <div class="plat-body">{{ p.body }}</div>
             <NuxtLink v-if="p.cta?.to" :to="p.cta.to" class="plat-cta">{{ p.cta.label }} →</NuxtLink>
-            <a v-else-if="p.cta?.href" :href="p.cta.href" class="plat-cta">{{ p.cta.label }} ↓</a>
+            <a v-else-if="p.cta?.href" :href="p.cta.href" class="plat-cta" target="_blank" rel="noopener">{{ p.cta.label }} ↓</a>
           </div>
         </div>
         <div class="plat-note">macOS uygulaması imzasız — ilk açılışta sağ tık → <b>Aç</b>. Windows &amp; Android yakında.</div>
@@ -377,7 +378,7 @@ const phoneTabs = [
             <div class="foot-col">
               <NuxtLink to="/app">Web</NuxtLink>
               <a href="#platforms">Masaüstü</a>
-              <a href="#platforms">iOS · yakında</a>
+              <a :href="IOS_URL" target="_blank" rel="noopener">iOS · App Store</a>
             </div>
           </div>
           <div>
@@ -426,7 +427,9 @@ const phoneTabs = [
 h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-height: 1.02; letter-spacing: -2.5px; margin: 0 0 24px; color: #201e1a; }
 .em { font-style: italic; color: #6d6fae; }
 .hero-copy p { font-size: 19px; line-height: 1.6; color: #6b6459; max-width: 430px; margin: 0 0 34px; }
-.hero-cta { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.btn-store { border: 1.5px solid #d8cfba; color: #4a463f !important; background: #fbf8f0; font-size: 15px; font-weight: 700; padding: 14px 24px; border-radius: 999px; display: inline-block; }
+.btn-store:hover { background: #f4efe2; }
 .btn-dark { background: #262420; color: #f7f4ed !important; font-size: 16px; font-weight: 700; padding: 16px 32px; border-radius: 999px; display: inline-block; }
 .btn-dark:hover { opacity: 0.85; }
 .hero-note { font-size: 14.5px; font-weight: 600; color: #8a8172; }
@@ -451,9 +454,8 @@ h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-hei
 .ph-sub { font-size: 11px; margin-top: 2px; font-weight: 500; }
 .ph-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex: 0 0 28px; }
 .ph-tabs { position: absolute; bottom: 0; left: 0; right: 0; height: 62px; padding: 10px 6px 18px; display: flex; background: rgba(244,239,227,0.9); backdrop-filter: blur(10px); border-top: 1px solid #e6ddc8; }
-.ph-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.ph-tab-ic { font-size: 15px; line-height: 1; }
-.ph-tab-lb { font-size: 8.5px; }
+.ph-tab { flex: 1; display: flex; align-items: center; justify-content: center; }
+.ph-tab-ic { font-size: 18px; line-height: 1; }
 
 .sec { padding: 40px 0 92px; }
 .sec-head { margin-bottom: 40px; max-width: 560px; }

@@ -73,7 +73,7 @@ async function onSaved() { await load(); editing.value = null }
         <thead>
           <tr>
             <th class="hname">Gün</th>
-            <th v-for="d in days" :key="d" class="day">
+            <th v-for="d in days" :key="d" class="day" :class="{ sel: editing?.date === dateOf(d) }">
               <div class="day-num" :class="{ today: dateOf(d) === today, future: dateOf(d) > today }">{{ d }}</div>
               <div class="day-marker" :class="{ today: dateOf(d) === today }" />
             </th>
@@ -86,6 +86,7 @@ async function onSaved() { await load(); editing.value = null }
               v-for="d in days"
               :key="d"
               class="cell"
+              :class="{ sel: editing?.date === dateOf(d), 'sel-cell': editing?.date === dateOf(d) && editing?.habit.id === h.id }"
               @click="dateOf(d) <= today && (editing = { habit: h, date: dateOf(d) })"
             >
               <div

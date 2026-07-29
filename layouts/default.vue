@@ -2,6 +2,13 @@
 const { msg, show: toast } = useToast()
 const { code, sync, status, dataVersion } = useSync()
 
+// Pinch-zoom has no useful state in a fixed-width tracker — it just strands the
+// tab bar off-screen. Scoped to /app so the marketing pages stay zoomable, and
+// mobile Safari ignores maximum-scale anyway; only the native webview obeys it.
+useHead({
+  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover' }],
+})
+
 let debounce: ReturnType<typeof setTimeout>
 const onMutated = () => { clearTimeout(debounce); debounce = setTimeout(() => sync(), 1500) }
 const onVisible = () => { if (!document.hidden) sync() }

@@ -25,13 +25,6 @@ function shift(dir: -1 | 1) {
   year.value = y; month.value = m
 }
 
-function elapsedDays(): number {
-  const isCurrent = year.value === now.getFullYear() && month.value === now.getMonth() + 1
-  const isFuture = new Date(year.value, month.value - 1) > new Date(now.getFullYear(), now.getMonth())
-  if (isFuture) return 0
-  return isCurrent ? now.getDate() : daysInMonth(year.value, month.value)
-}
-
 async function load() {
   const habits = await habitsRepo.listActive()
   habitCount.value = habits.length
@@ -41,40 +34,19 @@ async function load() {
   const start = await db.getMeta('challenge_start_date')
   dayNo.value = start ? challengeDay(start, today) : null
 
-  const slots = habits.length * elapsedDays()
-  const done = monthEntries.filter(e => e.status === 'done').length
-  const partial = monthEntries.filter(e => e.status === 'partial').length
-  completion.value = slots ? Math.round(((done + partial * 0.5) / slots) * 100) : 0
-  consistency.value = slots ? Math.round((monthEntries.length / slots) * 100) : 0
-
-  const tally = new Map<number, number>()
-  for (const e of monthEntries) {
-    if (e.reason_tag_id != null) tally.set(e.reason_tag_id, (tally.get(e.reason_tag_id) ?? 0) + 1)
-  }
-  let bestId: number | null = null, bestN = 0
-  for (const [id, n] of tally) if (n > bestN) { bestId = id; bestN = n }
-  topReason.value = bestId != null ? (reasonMap.get(bestId) ?? '—') : '—'
-  topReasonCount.value = bestN
-
-  // current streak (done or partial), walking back from today
-  const winFirst = shiftDate(today, -89)
-  const recent = await entriesRepo.getRange(winFirst, today) as Entry[]
-  const kept = new Map<number, Set<string>>()
-  for (const e of recent) {
-    if (e.status === 'done' || e.status === 'partial') {
-      if (!kept.has(e.habit_id)) kept.set(e.habit_id, new Set())
-      kept.get(e.habit_id)!.add(e.date)
-    }
-  }
-  const raw = habits.map(h => {
-    const set = kept.get(h.id) ?? new Set()
-    let n = 0
-    let cursor = today
-    while (set.has(cursor)) { n++; cursor = shiftDate(cursor, -1) }
-    return { name: h.name, days: n }
+  const s = monthStats({
+    habits, entries: monthEntries,
+    year: year.value, month: month.value, today, challengeStart: start,
   })
-  const max = Math.max(1, ...raw.map(s => s.days))
-  streaks.value = raw.map(s => ({ ...s, barW: Math.max(8, Math.round((s.days / max) * 74)) + 'px' }))
+  completion.value = s.completion
+  consistency.value = s.consistency
+  topReason.value = s.topReasonId != null ? (reasonMap.get(s.topReasonId) ?? '—') : '—'
+  topReasonCount.value = s.topReasonCount
+
+  const recent = await entriesRepo.getRange(shiftDate(today, -89), today) as Entry[]
+  const raw = currentStreaks(habits, recent, today)
+  const max = Math.max(1, ...raw.map(x => x.days))
+  streaks.value = raw.map(x => ({ ...x, barW: Math.max(8, Math.round((x.days / max) * 74)) + 'px' }))
 }
 
 onMounted(load)

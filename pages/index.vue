@@ -15,16 +15,7 @@ useSeoMeta({
 })
 useHead({ link: [{ rel: 'canonical', href: 'https://up-kept.app/' }] })
 
-// Installed contexts (native app, Tauri desktop, or installed PWA) skip the
-// marketing landing and open straight into the tracker.
-if (import.meta.client) {
-  const w = window as any
-  const installed =
-    w.__TAURI_INTERNALS__ || w.__TAURI__ ||
-    (w.Capacitor?.isNativePlatform?.()) ||
-    w.matchMedia?.('(display-mode: standalone)').matches
-  if (installed) await navigateTo('/app', { replace: true })
-}
+// Installed contexts redirect to /app in middleware/installed-to-app.global.ts.
 
 const DMG_URL = 'https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg'
 const IOS_URL = 'https://apps.apple.com/us/app/upkept/id6794236887'

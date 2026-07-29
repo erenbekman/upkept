@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: false },
   modules: ['@vite-pwa/nuxt'],
-  css: ['~/assets/main.css'],
+  css: ['~/assets/fonts.css', '~/assets/main.css'],
   app: {
     head: {
       title: 'Upkept',
@@ -25,9 +25,10 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@400;500;600;700&display=swap' },
+        // Fonts are self-hosted (assets/fonts.css) — the app must render its own
+        // typography offline. Preload the two faces above the fold.
+        { rel: 'preload', href: '/fonts/karla-400-normal-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' },
+        { rel: 'preload', href: '/fonts/spectral-600-normal-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' },
       ],
     },
   },
@@ -51,6 +52,6 @@ export default defineNuxtConfig({
         { src: 'icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
     },
-    workbox: { globPatterns: ['**/*.{js,css,html,wasm}'] },
+    workbox: { globPatterns: ['**/*.{js,css,html,wasm,woff2}'] },
   },
 })

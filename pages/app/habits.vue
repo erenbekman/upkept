@@ -7,7 +7,9 @@ const habits = ref<Habit[]>([])
 const editing = ref<Partial<Habit> | null>(null)
 
 async function load() { habits.value = await repo.listActive() }
-onMounted(load)
+const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') editing.value = null }
+onMounted(() => { load(); document.addEventListener('keydown', onKey) })
+onUnmounted(() => document.removeEventListener('keydown', onKey))
 watch(useSync().dataVersion, load)
 
 function openNew() { editing.value = { name: '', target_desc: '', color: '#7d9a6f' } }

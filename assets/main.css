@@ -66,13 +66,22 @@ td.cell:focus-visible {
   }
   /* The sheet and toast animate in from off-screen — with animation killed they
      must still land in place rather than stay where the keyframe started. */
-  .sheet { animation: none !important; transform: translate(-50%, 0) !important; }
+  .sheet { transform: translate(-50%, 0) !important; }
   .toast { animation: none !important; transform: translate(-50%, 0) !important; }
 }
 
-/* Must carry the sheet's own translateX(-50%) — animating transform alone drops
-   it, so the sheet slid up half a screen to the right before snapping centre. */
-@keyframes sheetUp { from { transform: translate(-50%, 102%); } to { transform: translate(-50%, 0); } }
+/* Translucency and low contrast are separate user signals from motion — the app
+   leans on backdrop-filter for the tab bar and the sheet scrim. */
+@media (prefers-reduced-transparency: reduce) {
+  .tabbar { background: var(--bg); backdrop-filter: none; }
+  .overlay { background: rgba(24,22,20,0.55); backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .tabbar { background: var(--bg); backdrop-filter: none; border-top-color: var(--ink2); }
+  .card, .field, .habit-row, .manage-row { border-color: var(--ink2); }
+  .cell-box.empty, .st-none .glyph-dot { border-style: solid; border-color: var(--muted); }
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 12px); } 15%,85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
 @keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -86,13 +95,13 @@ td.cell:focus-visible {
 }
 .screen { padding: 18px 20px 8px; animation: screenIn 0.3s ease; }
 .brand { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; }
-.brand span { font-family: var(--serif); font-weight: 500; font-size: 22px; letter-spacing: -0.8px; color: var(--ink); }
-.title { font-family: var(--serif); font-size: 30px; font-weight: 600; color: var(--ink); line-height: 1; margin: 2px 0 0; }
-.big-day { font-family: var(--serif); font-size: 44px; font-weight: 600; line-height: 1; color: var(--ink); letter-spacing: -0.5px; }
+.brand span { font-family: var(--serif); font-weight: 500; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); }
+.title { font-family: var(--serif); font-size: 30px; font-weight: 600; color: var(--ink); line-height: 1.05; letter-spacing: -0.02em; margin: 2px 0 0; }
+.big-day { font-family: var(--serif); font-size: 44px; font-weight: 600; line-height: 1.02; color: var(--ink); letter-spacing: -0.025em; }
 .sub { margin-top: 8px; font-size: 13.5px; color: var(--muted); font-weight: 500; }
 .micro { text-align: center; font-size: 12.5px; font-style: italic; font-family: var(--serif); color: var(--muted2); margin: 16px 24px 4px; }
 .serif-note { margin-top: 16px; font-size: 15px; font-style: italic; font-family: var(--serif); color: var(--serif-soft); }
-.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; color: var(--muted2); text-transform: uppercase; padding: 6px 6px 8px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted2); text-transform: uppercase; padding: 6px 6px 8px; }
 
 .card {
   background: var(--card); border: 1px solid var(--border);
@@ -143,7 +152,7 @@ button.btn-dashed:active { background: var(--card); }
   border: 1px dashed var(--dash); background: var(--card); text-align: center;
 }
 .empty-icon { width: 66px; height: 66px; margin: 0 auto 18px; border-radius: 50%; border: 1.5px dashed var(--dash2); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 30px; color: var(--muted2); }
-.empty-title { font-family: var(--serif); font-size: 21px; color: var(--ink); margin-bottom: 8px; }
+.empty-title { font-family: var(--serif); font-size: 21px; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 8px; }
 .empty-text { font-size: 14.5px; color: var(--muted); line-height: 1.5; max-width: 240px; margin: 0 auto 22px; }
 
 /* ---------- Grid ---------- */
@@ -152,7 +161,7 @@ table.grid { border-collapse: collapse; }
 table.grid th.day { width: 44px; min-width: 44px; padding: 4px 0; background: var(--bg); }
 /* A bare 1..31 strip gives no landmarks while scrolling sideways; the weekday
    letter plus a weekend tint make position readable at a glance. */
-.day-wd { font-size: 9.5px; font-weight: 700; color: var(--muted2); letter-spacing: 0.2px; }
+.day-wd { font-size: 9.5px; font-weight: 700; color: var(--muted2); letter-spacing: 0.03em; }
 table.grid th.day.weekend, table.grid td.cell.weekend { background: var(--card2); }
 .day-num { font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .day-num.today { color: var(--accent-text); }
@@ -166,7 +175,7 @@ table.grid th.hname, table.grid td.hname {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   border-right: 1px solid var(--line);
 }
-table.grid thead th.hname { z-index: 6; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted2); text-transform: uppercase; }
+table.grid thead th.hname { z-index: 6; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(--muted2); text-transform: uppercase; }
 /* min-width, not width: the table layout compresses a plain width down to
    29px and the tap target silently fails the 44px minimum. */
 table.grid td.cell { width: 44px; min-width: 44px; height: 44px; padding: 4px 0; text-align: center; cursor: pointer; }
@@ -207,14 +216,14 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   box-shadow: 0 18px 40px -20px rgba(74,63,44,0.7);
 }
 .hero::after { content: ""; position: absolute; right: -30px; top: -30px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.09); }
-.hero-label { font-size: 13.5px; font-weight: 700; letter-spacing: 0.4px; opacity: 0.9; }
+.hero-label { font-size: 13.5px; font-weight: 700; letter-spacing: 0.03em; opacity: 0.9; }
 .hero-num { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
-.hero-num b { font-family: var(--serif); font-size: 62px; font-weight: 600; line-height: 1; }
+.hero-num b { font-family: var(--serif); font-size: 62px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
 .hero-num span { font-size: 26px; font-weight: 600; }
 .hero-text { margin-top: 8px; font-size: 14px; line-height: 1.45; opacity: 0.92; max-width: 250px; }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
 .stat-card { padding: 18px; border-radius: 22px; background: var(--card); border: 1px solid var(--border); }
-.stat-label { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.3px; }
+.stat-label { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.03em; }
 .stat-num { font-family: var(--serif); font-size: 38px; font-weight: 600; color: var(--ink); margin-top: 2px; }
 .stat-num small { font-size: 18px; }
 .stat-sub { font-size: 12.5px; color: var(--muted2); margin-top: 2px; }
@@ -301,13 +310,21 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 /* ---------- Status editor sheet ---------- */
 .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(24,22,20,0.28); backdrop-filter: blur(2px); animation: fadeIn 0.25s ease; }
 .sheet {
-  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 51;
+  position: fixed; left: 50%; bottom: 0; z-index: 51;
+  /* Default is off-screen: the spring drives it in on mount, so transform has a
+     single owner. A CSS keyframe would keep ownership and override the drag. */
+  transform: translate(-50%, var(--sheet-y, 110%));
   width: 100%; max-width: 480px; background: var(--sheet);
   border-radius: 30px 30px 0 0; box-shadow: 0 -20px 60px -24px rgba(24,22,20,0.35);
-  animation: sheetUp 0.3s cubic-bezier(0.32,0.72,0,1);
   padding: 12px 22px 30px; max-height: 92%; overflow-y: auto;
+  will-change: transform;
 }
-.grabber { width: 42px; height: 5px; border-radius: 3px; background: var(--dash); margin: 0 auto 18px; }
+.sheet-head { touch-action: none; cursor: grab; padding-bottom: 12px; }
+.sheet.dragging { cursor: grabbing; }
+.sheet.dragging .sheet-head { cursor: grabbing; }
+/* Dimming is bound to drag progress; the fade-in keyframe would override it. */
+.overlay-tracked { animation: none; }
+.grabber { width: 42px; height: 5px; border-radius: 3px; background: var(--dash); margin: 0 auto 14px; }
 
 /* Which day am I editing — the sheet answers it, because the grid behind is dimmed. */
 .sheet-date {
@@ -332,7 +349,7 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   position: absolute; inset: 0; width: 100%; height: 100%;
   opacity: 0; border: none; background: none; cursor: pointer;
 }
-.sheet-title { font-family: var(--serif); font-size: 25px; color: var(--ink); }
+.sheet-title { font-family: var(--serif); font-size: 25px; color: var(--ink); letter-spacing: -0.015em; line-height: 1.1; }
 .saved-flag { font-size: 13px; font-weight: 700; color: #5f8a58; transition: opacity 0.2s; }
 .status-btns { display: flex; gap: 10px; }
 .status-btn {
@@ -381,6 +398,7 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   .sheet {
     left: calc(232px + (100% - 232px) / 2); bottom: auto; top: 50%;
     transform: translate(-50%, -50%); border-radius: 26px;
+    will-change: auto;
     max-width: 480px; max-height: 86vh; animation: fadeIn 0.2s ease;
   }
   .toast { left: calc(232px + (100% - 232px) / 2); bottom: 40px; }

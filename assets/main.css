@@ -150,6 +150,10 @@ button.btn-dashed:active { background: var(--card); }
 .grid-scroll { overflow: auto; }
 table.grid { border-collapse: collapse; }
 table.grid th.day { width: 44px; min-width: 44px; padding: 4px 0; background: var(--bg); }
+/* A bare 1..31 strip gives no landmarks while scrolling sideways; the weekday
+   letter plus a weekend tint make position readable at a glance. */
+.day-wd { font-size: 9.5px; font-weight: 700; color: var(--muted2); letter-spacing: 0.2px; }
+table.grid th.day.weekend, table.grid td.cell.weekend { background: var(--card2); }
 .day-num { font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .day-num.today { color: var(--accent-text); }
 .day-num.future { color: var(--muted2); }
@@ -178,7 +182,12 @@ table.grid td.cell { width: 44px; min-width: 44px; height: 44px; padding: 4px 0;
 
 /* Which day you tapped is otherwise unreadable in a horizontally scrolling
    month: tint the whole column and ring the exact cell being edited. */
-table.grid th.day.sel, table.grid td.cell.sel { background: var(--card2); }
+/* Must beat the weekend tint, which is also --card2 — an accent wash instead. */
+table.grid th.day.sel, table.grid td.cell.sel { background: var(--border); }
+@supports (background: color-mix(in srgb, red 10%, transparent)) {
+  table.grid th.day.sel, table.grid td.cell.sel { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+}
+table.grid th.day.sel .day-wd { color: var(--accent-text); }
 table.grid th.day.sel .day-num {
   color: #fbf8f0; background: var(--accent);
   width: 22px; height: 22px; line-height: 22px; border-radius: 50%; margin: 0 auto;
@@ -299,6 +308,30 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   padding: 12px 22px 30px; max-height: 92%; overflow-y: auto;
 }
 .grabber { width: 42px; height: 5px; border-radius: 3px; background: var(--dash); margin: 0 auto 18px; }
+
+/* Which day am I editing — the sheet answers it, because the grid behind is dimmed. */
+.sheet-date {
+  display: flex; align-items: center; gap: 4px; margin-bottom: 22px;
+  background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 4px;
+}
+.date-nav {
+  width: 44px; height: 44px; flex: 0 0 44px; border: none; background: transparent;
+  color: var(--accent-text); font-size: 20px; border-radius: 12px; cursor: pointer;
+}
+.date-nav:disabled { color: var(--muted2); opacity: 0.4; cursor: default; }
+.date-nav:not(:disabled):active { background: var(--card); }
+.date-label {
+  position: relative; flex: 1; min-width: 0; text-align: center;
+  padding: 4px 2px; cursor: pointer; border-radius: 12px;
+}
+.date-label:active { background: var(--card); }
+.date-main { display: block; font-size: 16.5px; font-weight: 700; color: var(--ink); }
+.date-sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+/* Transparent native picker on top of the label: platform UI, zero JS. */
+.date-label input[type="date"] {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; border: none; background: none; cursor: pointer;
+}
 .sheet-title { font-family: var(--serif); font-size: 25px; color: var(--ink); }
 .saved-flag { font-size: 13px; font-weight: 700; color: #5f8a58; transition: opacity 0.2s; }
 .status-btns { display: flex; gap: 10px; }

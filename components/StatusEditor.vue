@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import type { EntryStatus, Entry, ReasonTag } from '~/composables/useEntries'
 
-const props = defineProps<{
+// withDefaults, not optional props: Vue casts an absent Boolean prop to false,
+// which silently disabled the day arrows on any screen that omitted them.
+const props = withDefaults(defineProps<{
   habitId: number
   habitName: string
   date: string
   current: Entry | null
-}>()
-const emit = defineEmits<{ saved: []; close: [] }>()
+  canPrev?: boolean
+  canNext?: boolean
+}>(), { canPrev: true, canNext: true })
+// The parent owns which dates are reachable, so the sheet only asks — it never
+// decides. That keeps the grid (bounded to its month) and the Bugün screen
+// (bounded by today) from needing the same rules.
+const emit = defineEmits<{ saved: []; close: []; goto: [date: string] }>()
 
 const entries = useEntries()
 const reasons = ref<ReasonTag[]>([])
@@ -16,6 +23,15 @@ const status = ref<EntryStatus | null>(props.current?.status ?? null)
 const reasonId = ref<number | null>(props.current?.reason_tag_id ?? null)
 const note = ref<string>(props.current?.note ?? '')
 const saved = ref(false)
+
+// Moving to another day inside the sheet has to reload what that day holds,
+// otherwise the previous day's status stays selected and the next tap overwrites it.
+watch(() => props.date, () => {
+  status.value = props.current?.status ?? null
+  reasonId.value = props.current?.reason_tag_id ?? null
+  note.value = props.current?.note ?? ''
+  saved.value = false
+})
 
 let savedTimer: ReturnType<typeof setTimeout>
 let closeTimer: ReturnType<typeof setTimeout>
@@ -28,8 +44,9 @@ onMounted(async () => {
   reasons.value = await entries.listReasons()
   document.addEventListener('keydown', onKey)
   // Focus has to enter the sheet, or a keyboard user is still tabbing the page
-  // behind the overlay.
-  sheet.value?.querySelector<HTMLElement>('button')?.focus()
+  // behind the overlay. Land on a status button, not the day arrow — that's what
+  // the sheet is for.
+  sheet.value?.querySelector<HTMLElement>('.status-btn')?.focus()
 })
 onUnmounted(() => document.removeEventListener('keydown', onKey))
 
@@ -73,6 +90,11 @@ async function clear() {
   await entries.remove(props.habitId, props.date)
   emit('saved')
 }
+
+function onPick(e: Event) {
+  const v = (e.target as HTMLInputElement).value
+  if (v && v <= todayStr()) emit('goto', v)
+}
 </script>
 
 <template>
@@ -80,12 +102,28 @@ async function clear() {
   <div ref="sheet" class="sheet" role="dialog" aria-modal="true" :aria-label="habitName">
     <div class="grabber" />
 
-    <div class="row spread" style="align-items:baseline; margin-bottom:4px;">
+    <div class="row spread" style="align-items:baseline; margin-bottom:12px;">
       <div class="sheet-title">{{ habitName }}</div>
       <span class="saved-flag" :style="{ opacity: saved ? 1 : 0 }">✓ Kaydedildi</span>
     </div>
-    <div class="sub" style="margin-bottom:20px;">
-      {{ date === todayStr() ? 'Bugünü nasıl geçirdin?' : `${fmtLong(date)} nasıl geçti?` }}
+
+    <!-- The grid highlight sits behind a dimmed overlay, so the day being edited
+         has to be unmistakable here instead. Arrows walk days without closing;
+         tapping the label opens the platform date picker. -->
+    <div class="sheet-date">
+      <button
+        class="date-nav" :disabled="!canPrev"
+        aria-label="Önceki gün" @click="emit('goto', shiftDate(date, -1))"
+      >‹</button>
+      <label class="date-label">
+        <span class="date-main">{{ date === todayStr() ? 'Bugün' : fmtShort(date) }}</span>
+        <span class="date-sub">{{ fmtWeekdayLong(date) }}<template v-if="date !== todayStr()"> · {{ new Date(date + 'T00:00:00').getFullYear() }}</template></span>
+        <input type="date" :value="date" :max="todayStr()" @change="onPick" />
+      </label>
+      <button
+        class="date-nav" :disabled="!canNext"
+        aria-label="Sonraki gün" @click="emit('goto', shiftDate(date, 1))"
+      >›</button>
     </div>
 
     <div class="status-btns">

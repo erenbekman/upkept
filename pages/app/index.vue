@@ -137,7 +137,9 @@ async function syncNow() {
     :habit-name="editing.name"
     :date="date"
     :current="byHabit[editing.id] ?? null"
+    :can-next="!isToday"
     @saved="onSaved"
+    @goto="d => (date = d)"
     @close="editing = null"
   />
 </template>

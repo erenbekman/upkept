@@ -58,6 +58,33 @@ function open(habit: Habit, day: number) {
   editing.value = { habit, date }
 }
 
+// Stepping days inside the sheet must drag the grid along, or the highlighted
+// column ends up off-screen and the visual anchor is lost.
+watch(() => editing.value?.date, async (d) => {
+  if (!d) return
+  await nextTick()
+  document.querySelector('table.grid th.day.sel')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+})
+
+const firstOfMonth = computed(() => dateOf(1))
+const lastEditable = computed(() => {
+  const last = dateOf(daysInMonth(year.value, month.value))
+  return last < today ? last : today
+})
+
+// The picker can jump outside the month on screen — follow it, and reload so the
+// sheet is looking at real data rather than an empty cells map.
+async function goto(date: string) {
+  if (!editing.value || date > today) return
+  const [y, m] = date.split('-').map(Number)
+  if (y !== year.value || m !== month.value) {
+    year.value = y
+    month.value = m
+    await load()
+  }
+  editing.value = { ...editing.value, date }
+}
+
 async function onSaved() { await load(); editing.value = null }
 </script>
 
@@ -79,7 +106,11 @@ async function onSaved() { await load(); editing.value = null }
         <thead>
           <tr>
             <th class="hname">Gün</th>
-            <th v-for="d in days" :key="d" class="day" :class="{ sel: editing?.date === dateOf(d) }">
+            <th
+              v-for="d in days" :key="d" class="day"
+              :class="{ sel: editing?.date === dateOf(d), weekend: isWeekend(dateOf(d)) }"
+            >
+              <div class="day-wd">{{ fmtWeekdayNarrow(dateOf(d)) }}</div>
               <div class="day-num" :class="{ today: dateOf(d) === today, future: dateOf(d) > today }">{{ d }}</div>
               <div class="day-marker" :class="{ today: dateOf(d) === today }" />
             </th>
@@ -92,7 +123,7 @@ async function onSaved() { await load(); editing.value = null }
               v-for="d in days"
               :key="d"
               class="cell"
-              :class="{ sel: editing?.date === dateOf(d), 'sel-cell': editing?.date === dateOf(d) && editing?.habit.id === h.id }"
+              :class="{ sel: editing?.date === dateOf(d), 'sel-cell': editing?.date === dateOf(d) && editing?.habit.id === h.id, weekend: isWeekend(dateOf(d)) }"
               :role="dateOf(d) <= today ? 'button' : undefined"
               :tabindex="dateOf(d) <= today ? 0 : undefined"
               :aria-label="`${h.name} — ${fmtShort(dateOf(d))}`"
@@ -124,7 +155,10 @@ async function onSaved() { await load(); editing.value = null }
     :habit-name="editing.habit.name"
     :date="editing.date"
     :current="cells[`${editing.habit.id}-${editing.date}`] ?? null"
+    :can-prev="editing.date > firstOfMonth"
+    :can-next="editing.date < lastEditable"
     @saved="onSaved"
+    @goto="goto"
     @close="editing = null"
   />
 </template>

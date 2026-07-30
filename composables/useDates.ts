@@ -20,6 +20,21 @@ export function fmtLong(dateStr: string): string {
   })
 }
 
+// Single letter under the grid's day number — scanning a horizontally scrolling
+// month with nothing but 1..31 is what made picking a day disorienting.
+export function fmtWeekdayNarrow(dateStr: string): string {
+  return ['P', 'P', 'S', 'Ç', 'P', 'C', 'C'][new Date(dateStr + 'T00:00:00').getDay()]
+}
+
+export function isWeekend(dateStr: string): boolean {
+  const d = new Date(dateStr + 'T00:00:00').getDay()
+  return d === 0 || d === 6
+}
+
+export function fmtWeekdayLong(dateStr: string): string {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('tr-TR', { weekday: 'long' })
+}
+
 export function fmtShort(dateStr: string): string {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
 }

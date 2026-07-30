@@ -77,12 +77,15 @@ onUnmounted(() => {
 
 const spinning = computed(() => refreshing.value || status.value === 'syncing')
 
+// Inline SVG, not text glyphs: the labels are hidden on mobile, so the icon is
+// the only affordance — and ☼ ▦ ◔ ❋ ⚙︎ render from whatever font falls back,
+// inconsistently across iOS versions (⚙︎ turns into an emoji on some).
 const tabs = [
-  { to: '/app', icon: '☼', label: 'Bugün' },
-  { to: '/app/grid', icon: '▦', label: 'Grid' },
-  { to: '/app/stats', icon: '◔', label: 'İstatistik' },
-  { to: '/app/habits', icon: '❋', label: 'Alışkanlıklar' },
-  { to: '/app/settings', icon: '⚙︎', label: 'Ayarlar' },
+  { to: '/app', label: 'Bugün', path: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>' },
+  { to: '/app/grid', label: 'Grid', path: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>' },
+  { to: '/app/stats', label: 'İstatistik', path: '<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>' },
+  { to: '/app/habits', label: 'Alışkanlıklar', path: '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>' },
+  { to: '/app/settings', label: 'Ayarlar', path: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>' },
 ]
 </script>
 
@@ -101,7 +104,11 @@ const tabs = [
 
     <nav class="tabbar">
       <NuxtLink v-for="t in tabs" :key="t.to" :to="t.to" class="tab" :aria-label="t.label" :title="t.label">
-        <span class="tab-icon">{{ t.icon }}</span>
+        <svg
+          class="tab-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+          stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
+          v-html="t.path"
+        />
         <span class="tab-label">{{ t.label }}</span>
       </NuxtLink>
     </nav>

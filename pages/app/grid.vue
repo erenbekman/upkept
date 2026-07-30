@@ -52,6 +52,12 @@ const legend = [
   { cls: 'st-none', glyph: '·', label: 'Kayıt yok', extra: 'empty' },
 ]
 
+function open(habit: Habit, day: number) {
+  const date = dateOf(day)
+  if (date > today) return
+  editing.value = { habit, date }
+}
+
 async function onSaved() { await load(); editing.value = null }
 </script>
 
@@ -87,7 +93,12 @@ async function onSaved() { await load(); editing.value = null }
               :key="d"
               class="cell"
               :class="{ sel: editing?.date === dateOf(d), 'sel-cell': editing?.date === dateOf(d) && editing?.habit.id === h.id }"
-              @click="dateOf(d) <= today && (editing = { habit: h, date: dateOf(d) })"
+              :role="dateOf(d) <= today ? 'button' : undefined"
+              :tabindex="dateOf(d) <= today ? 0 : undefined"
+              :aria-label="`${h.name} — ${fmtShort(dateOf(d))}`"
+              @click="open(h, d)"
+              @keydown.enter.prevent="open(h, d)"
+              @keydown.space.prevent="open(h, d)"
             >
               <div
                 class="cell-box"

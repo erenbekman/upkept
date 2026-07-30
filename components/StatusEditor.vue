@@ -20,7 +20,18 @@ const saved = ref(false)
 let savedTimer: ReturnType<typeof setTimeout>
 let closeTimer: ReturnType<typeof setTimeout>
 
-onMounted(async () => { reasons.value = await entries.listReasons() })
+const sheet = ref<HTMLElement | null>(null)
+
+const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') emit('close') }
+
+onMounted(async () => {
+  reasons.value = await entries.listReasons()
+  document.addEventListener('keydown', onKey)
+  // Focus has to enter the sheet, or a keyboard user is still tabbing the page
+  // behind the overlay.
+  sheet.value?.querySelector<HTMLElement>('button')?.focus()
+})
+onUnmounted(() => document.removeEventListener('keydown', onKey))
 
 const STATUSES: EntryStatus[] = ['done', 'partial', 'missed']
 const showReasons = computed(() => status.value === 'partial' || status.value === 'missed')
@@ -66,7 +77,7 @@ async function clear() {
 
 <template>
   <div class="overlay" @click="emit('close')" />
-  <div class="sheet">
+  <div ref="sheet" class="sheet" role="dialog" aria-modal="true" :aria-label="habitName">
     <div class="grabber" />
 
     <div class="row spread" style="align-items:baseline; margin-bottom:4px;">

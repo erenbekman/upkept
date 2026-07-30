@@ -114,7 +114,11 @@ async function syncNow() {
       :key="h.id"
       class="habit-row"
       role="button"
+      tabindex="0"
+      :aria-label="`${h.name} — ${subLabel(h.id)}`"
       @click="editing = h"
+      @keydown.enter.prevent="editing = h"
+      @keydown.space.prevent="editing = h"
     >
       <div class="flex1">
         <div class="habit-name">{{ h.name }}</div>

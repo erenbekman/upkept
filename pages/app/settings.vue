@@ -37,6 +37,12 @@ async function syncNow() {
   toast((await syncApi.sync()) ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et')
 }
 
+const updater = useUpdater()
+async function checkUpdate() {
+  const msg = await updater.check(true)
+  if (msg) toast(msg)
+}
+
 const startDate = ref('')
 const reasons = ref<ReasonTag[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -168,6 +174,19 @@ async function onImportFile(e: Event) {
             <button class="btn" style="flex:1;" @click="unlinkSync">Bağlantıyı kes</button>
           </div>
         </template>
+      </div>
+    </div>
+
+    <div v-if="isDesktop()">
+      <div class="eyebrow">Uygulama</div>
+      <div class="row spread field">
+        <div>
+          <div style="font-size:15.5px; font-weight:600; color:var(--ink2);">Güncellemeler</div>
+          <div style="font-size:13px; color:var(--muted); margin-top:2px;">Açılışta kendiliğinden denetlenir</div>
+        </div>
+        <button class="btn" :disabled="updater.busy.value" @click="checkUpdate">
+          {{ updater.busy.value ? 'Denetleniyor…' : 'Şimdi denetle' }}
+        </button>
       </div>
     </div>
 

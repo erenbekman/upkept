@@ -1,0 +1,92 @@
+# Publishes a signed macOS release the in-app updater can consume.
+# Trigger: push a v* tag, or run it by hand from the Actions tab.
+#
+# One-time setup (run locally — the key must never live in the repo):
+#   gh secret set TAURI_SIGNING_PRIVATE_KEY < ~/.tauri/upkept.key
+name: Release desktop
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Sürüm (ör. 0.2.0)'
+        required: true
+      notes:
+        description: 'Sürüm notu'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # arm64 runner — latest.json only advertises darwin-aarch64
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Run the checks before shipping a binary
+        run: npm test
+
+      - name: Install signing key
+        env:
+          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY secret is missing — the updater rejects unsigned builds."
+            exit 1
+          fi
+          mkdir -p ~/.tauri
+          printf '%s' "$KEY" > ~/.tauri/upkept.key
+
+      # Inputs go through env, never straight into a run: string.
+      - name: Resolve version
+        id: v
+        env:
+          EVENT: ${{ github.event_name }}
+          IN_VERSION: ${{ inputs.version }}
+          IN_NOTES: ${{ inputs.notes }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            VER="$IN_VERSION"
+            NOTES="$IN_NOTES"
+          else
+            VER="${TAG#v}"
+            NOTES=""
+          fi
+          case "$VER" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "::error::Sürüm x.y.z biçiminde olmalı, gelen: $VER"; exit 1 ;;
+          esac
+          {
+            echo "ver=$VER"
+            echo "notes=${NOTES:-Upkept $VER}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Reuses the same script that has been publishing releases by hand, so CI
+      # and a local run cannot drift apart.
+      - name: Build, sign and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VER: ${{ steps.v.outputs.ver }}
+          NOTES: ${{ steps.v.outputs.notes }}
+        run: scripts/release-desktop.sh "$VER" "$NOTES"

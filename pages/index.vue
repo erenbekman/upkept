@@ -78,7 +78,7 @@ const gridRows = computed(() => Object.entries(pats).map(([name, p]) => {
   const cells = []
   for (let i = 0; i < dim.value; i++) {
     if (i > todayIdx.value) {
-      cells.push({ glyph: '', bg: 'transparent', color: 'transparent', border: '1px dashed #ece3ce', opacity: 0.55, ring: 'none' })
+      cells.push({ glyph: '', bg: 'transparent', color: 'transparent', border: '1px dashed #ece3ce', opacity: 0.55, today: false })
       continue
     }
     const st = cm[full[i]] ?? null
@@ -90,7 +90,7 @@ const gridRows = computed(() => Object.entries(pats).map(([name, p]) => {
       color: none ? '#c3b79b' : m.color,
       border: none ? '1px dashed #ece3ce' : '1px solid transparent',
       opacity: 1,
-      ring: i === todayIdx.value ? '0 0 0 2px #6d6fae' : 'none',
+      today: i === todayIdx.value,
     })
   }
   return { name, cells }
@@ -108,11 +108,25 @@ const steps = [
   { n: '2', title: 'Günü işaretle', body: 'Yaptım, kısmen ya da yapamadım. İstersen sebebini bırak — hepsi opsiyonel.' },
   { n: '3', title: 'Süreklilik gör', body: 'Grid ve istatistiklerde ilerlemeni izle. Kusursuzluk değil, devamlılık.' },
 ]
+// Inline SVG, not emoji: these read as interface icons, and emoji render as a
+// different picture on every platform.
 const privacy = [
-  { title: 'Hesap yok', body: 'Ne e-posta ne şifre. Aç ve başla.' },
-  { title: 'Bulut opsiyonel', body: 'İstersen anonim kodla senkronla, istemezsen cihazda kalır.' },
-  { title: 'İnternetsiz', body: 'Uçakta, dağda, her yerde çalışır.' },
-  { title: 'Dışa aktar', body: 'Verini dilediğin an yedekle, taşı.' },
+  {
+    title: 'Hesap yok', body: 'Ne e-posta ne şifre. Aç ve başla.',
+    icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8 5 5M22 8l-5 5"/>',
+  },
+  {
+    title: 'Bulut opsiyonel', body: 'İstersen anonim kodla senkronla, istemezsen cihazda kalır.',
+    icon: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+  },
+  {
+    title: 'İnternetsiz', body: 'Uçakta, dağda, her yerde çalışır.',
+    icon: '<path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 5.2-2.7"/><path d="M2 8.8a15 15 0 0 1 4.2-2.5"/><path d="m2 2 20 20"/><path d="M16.8 13.7a10 10 0 0 1 2.2-.8"/>',
+  },
+  {
+    title: 'Dışa aktar', body: 'Verini dilediğin an yedekle, taşı.',
+    icon: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  },
 ]
 const platforms = [
   { title: 'Web', body: 'Tarayıcıda anında aç, kurulum yok. Günün durumunu hızlıca gözden geçir.', soon: false, cta: { label: 'Tarayıcıda aç', to: '/app' } },
@@ -273,21 +287,22 @@ const phoneTabs = [
               </div>
             </div>
           </div>
-          <div class="grid-scroll" aria-hidden="true">
-            <div class="grid-inner">
-              <div class="day-row">
-                <div v-for="d in gDays" :key="d.n" class="day-num" :style="{ color: d.color }">{{ d.n }}</div>
-              </div>
-              <div class="grid-body">
-                <div v-for="row in gridRows" :key="row.name" class="grid-line">
-                  <div class="row-name">{{ row.name }}</div>
-                  <div
-                    v-for="(c, i) in row.cells" :key="i" class="lp-cell"
-                    :style="{ background: c.bg, color: c.color, border: c.border, opacity: c.opacity, boxShadow: c.ring }"
-                  >{{ c.glyph }}</div>
-                </div>
-              </div>
-            </div>
+          <!-- One CSS grid with fractional day columns: the headline promises the
+               whole month, so it has to fit at every width instead of scrolling. -->
+          <div
+            class="monthgrid" aria-hidden="true"
+            :style="{ gridTemplateColumns: `minmax(60px, 128px) repeat(${dim}, minmax(0, 1fr))` }"
+          >
+            <div class="mg-corner" />
+            <div v-for="d in gDays" :key="d.n" class="mg-day" :style="{ color: d.color }">{{ d.n }}</div>
+
+            <template v-for="row in gridRows" :key="row.name">
+              <div class="mg-name">{{ row.name }}</div>
+              <div
+                v-for="(c, i) in row.cells" :key="i" class="mg-cell" :class="{ 'mg-today': c.today }"
+                :style="{ background: c.bg, color: c.color, border: c.border, opacity: c.opacity }"
+              >{{ c.glyph }}</div>
+            </template>
           </div>
         </div>
       </section>
@@ -317,9 +332,23 @@ const phoneTabs = [
           </div>
           <div class="privacy-grid">
             <div v-for="p in privacy" :key="p.title" class="pv">
+              <div class="pv-ic">
+                <svg
+                  width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                  v-html="p.icon"
+                />
+              </div>
               <div class="pv-title">{{ p.title }}</div>
               <div class="pv-body">{{ p.body }}</div>
             </div>
+          </div>
+          <div class="pv-foot">
+            <svg
+              width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+              stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
+            ><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /></svg>
+            <span>Sunucularımızda hesabın yok — çünkü hesap diye bir şey yok.</span>
           </div>
         </div>
       </section>
@@ -493,14 +522,32 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 .lp-legend-item { display: flex; align-items: center; gap: 6px; }
 .lp-legend-box { width: 18px; height: 18px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
 .lp-legend-item span { font-size: 12.5px; color: #9a917f; font-weight: 600; }
-.grid-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
-.grid-inner { min-width: max-content; }
-.day-row { display: flex; gap: 4px; margin-bottom: 6px; padding-left: 132px; }
-.day-num { width: 24px; flex: 0 0 24px; text-align: center; font-size: 10.5px; font-weight: 700; }
-.grid-body { display: flex; flex-direction: column; gap: 5px; }
-.grid-line { display: flex; align-items: center; gap: 4px; }
-.row-name { width: 128px; flex: 0 0 128px; font-size: 14px; font-weight: 600; color: #3a352d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
-.lp-cell { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+/* Fractional day columns, so all 28-31 days fit whatever the width is.
+   Column count comes from the template (the month's real length). */
+.monthgrid { display: grid; gap: 5px 3px; align-items: center; }
+.mg-day { text-align: center; font-size: 10.5px; font-weight: 700; padding-bottom: 2px; }
+.mg-name { font-size: 14px; font-weight: 600; color: #3a352d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+.mg-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.mg-cell.mg-today { box-shadow: 0 0 0 2px #6d6fae; }
+/* Below this the cells are too small to carry a glyph — the colour alone still
+   reads as a month of progress, which is the whole point of the picture. */
+@media (max-width: 760px) {
+  .monthgrid { gap: 4px 2px; }
+  .mg-cell { font-size: 0; border-radius: 4px; }
+  .mg-day { font-size: 8px; }
+  .mg-name { font-size: 11.5px; padding-right: 6px; }
+}
+/* On phones a name column would squeeze the days to 3px. Stack instead: the
+   label gets its own line and the month becomes a full-width colour band.
+   !important because the column count is set inline from the month length. */
+@media (max-width: 640px) {
+  .monthgrid { grid-template-columns: repeat(31, minmax(0, 1fr)) !important; gap: 3px 2px; }
+  .mg-corner, .mg-day { display: none; }
+  .mg-name { grid-column: 1 / -1; font-size: 13px; padding: 10px 0 2px; }
+  .mg-cell { border-radius: 3px; }
+  /* A 2px ring on an 8px cell reads as a blob and breaks the band's rhythm. */
+  .mg-cell.mg-today { box-shadow: 0 0 0 1.5px #6d6fae; border-radius: 2px; }
+}
 
 /* 3-column layout (how + platforms) */
 .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
@@ -511,9 +558,20 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 
 /* Privacy */
 .privacy-card { background: #f2ede2; border: 1px solid #e6dcc7; border-radius: 26px; padding: 44px 44px 40px; }
-.privacy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.privacy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.pv { background: #fbf8f0; border: 1px solid #e6dcc7; border-radius: 18px; padding: 22px 20px 20px; }
+.pv-ic {
+  width: 38px; height: 38px; border-radius: 11px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: #eceaf5; color: #6d6fae;
+}
 .pv-title { font-family: 'Spectral', serif; font-size: 18.5px; font-weight: 500; color: #201e1a; margin-bottom: 6px; }
 .pv-body { font-size: 14.5px; line-height: 1.55; color: #6b6459; }
+.pv-foot {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin-top: 26px; color: #8a8172; font-size: 14px;
+  font-family: 'Spectral', serif; font-style: italic;
+}
 
 /* Platforms */
 .plat { border-top: 1.5px solid #262420; padding-top: 22px; }

@@ -5,7 +5,7 @@ const TABLES = ['app_meta', 'habits', 'reason_tags', 'entries'] as const
 // inject SQL; unknown keys are dropped. Values are always parameterized.
 const COLUMNS: Record<string, Set<string>> = {
   app_meta: new Set(['key', 'value']),
-  habits: new Set(['id', 'user_id', 'name', 'target_desc', 'color', 'sort_order', 'active', 'created_at']),
+  habits: new Set(['id', 'user_id', 'name', 'target_desc', 'color', 'icon', 'sort_order', 'active', 'created_at']),
   reason_tags: new Set(['id', 'user_id', 'name', 'sort_order']),
   entries: new Set(['id', 'user_id', 'habit_id', 'date', 'status', 'reason_tag_id', 'note', 'created_at']),
 }

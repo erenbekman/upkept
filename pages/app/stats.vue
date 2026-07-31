@@ -13,7 +13,7 @@ const today = todayStr()
 const habitCount = ref(0)
 const completion = ref(0)
 const consistency = ref(0)
-const streaks = ref<{ name: string; days: number; barW: string }[]>([])
+const streaks = ref<{ name: string; days: number; color: string | null; icon: string | null; barW: string }[]>([])
 const topReason = ref<string>('—')
 const topReasonCount = ref(0)
 const dayNo = ref<number | null>(null)
@@ -88,8 +88,11 @@ watch([year, month, useSync().dataVersion], load)
     <div class="card" style="margin-top:12px; padding:8px 18px 14px;">
       <div class="stat-label" style="padding:12px 0 6px;">ALIŞKANLIK BAŞINA GÜNCEL SERİ</div>
       <div v-for="s in streaks" :key="s.name" class="streak-row">
-        <div class="flex1" style="font-size:15px; font-weight:600; color:var(--ink2);">{{ s.name }}</div>
-        <div class="streak-bar" :style="{ width: s.barW }" />
+        <div class="flex1" style="font-size:15px; font-weight:600; color:var(--ink2); display:flex; align-items:center; gap:8px;">
+          <span :class="s.icon ? 'habit-mark sm' : 'habit-bar'" :style="{ background: s.color || 'var(--accent)' }">{{ s.icon || '' }}</span>
+          <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ s.name }}</span>
+        </div>
+        <div class="streak-bar" :style="{ width: s.barW, background: s.color || 'var(--accent)' }" />
         <div class="streak-days">{{ s.days }} gün</div>
       </div>
     </div>

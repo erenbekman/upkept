@@ -1,6 +1,6 @@
 import { daysInMonth, shiftDate } from './useDates.ts'
 
-export interface StatHabit { id: number; name: string; created_at: string }
+export interface StatHabit { id: number; name: string; created_at: string; color?: string | null; icon?: string | null }
 export interface StatEntry { habit_id: number; date: string; status: string; reason_tag_id: number | null }
 
 export interface MonthStats {
@@ -71,7 +71,7 @@ export function monthStats(input: {
 // haven't had the chance yet. The count starts from yesterday in that case.
 export function currentStreaks(
   habits: StatHabit[], entries: StatEntry[], today: string,
-): { name: string; days: number }[] {
+): { name: string; days: number; color: string | null; icon: string | null }[] {
   const kept = new Map<number, Set<string>>()
   for (const e of entries) {
     if (e.status !== 'done' && e.status !== 'partial') continue
@@ -83,6 +83,6 @@ export function currentStreaks(
     let cursor = set.has(today) ? today : shiftDate(today, -1)
     let days = 0
     while (set.has(cursor)) { days++; cursor = shiftDate(cursor, -1) }
-    return { name: h.name, days }
+    return { name: h.name, days, color: h.color ?? null, icon: h.icon ?? null }
   })
 }

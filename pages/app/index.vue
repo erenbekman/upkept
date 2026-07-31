@@ -120,6 +120,7 @@ async function syncNow() {
       @keydown.enter.prevent="editing = h"
       @keydown.space.prevent="editing = h"
     >
+      <div :class="h.icon ? 'habit-mark' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</div>
       <div class="flex1">
         <div class="habit-name">{{ h.name }}</div>
         <div class="habit-sub" :class="meta(h.id).cls">{{ subLabel(h.id) }}</div>

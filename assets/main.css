@@ -175,6 +175,8 @@ table.grid th.hname, table.grid td.hname {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   border-right: 1px solid var(--line);
 }
+.hname-inner { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.hname-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 table.grid thead th.hname { z-index: 6; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(--muted2); text-transform: uppercase; }
 /* min-width, not width: the table layout compresses a plain width down to
    29px and the tap target silently fails the 44px minimum. */
@@ -249,6 +251,54 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 .manage-row { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); }
 .grab { font-size: 18px; color: var(--muted2); line-height: 1; letter-spacing: -3px; }
 .color-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+/* Habit colour + icon. Squares, not the native <input type="color"> — that one
+   renders as a rounded pill whose shape drifts and cannot be styled reliably. */
+.picker-label { font-size: 13px; font-weight: 600; color: var(--ink2); margin-bottom: 10px; }
+.picker-label span { color: var(--muted2); font-weight: 500; }
+.color-swatch {
+  width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
+  border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+  padding: 0;
+}
+.color-swatch.on { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--sheet); }
+.icon-swatch {
+  width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 20px; line-height: 1; text-align: center; padding: 0;
+  color: var(--ink2);
+}
+.icon-swatch.on { border-color: var(--accent); background: var(--card2); }
+.icon-free { font-size: 17px; }
+.icon-free::placeholder { color: var(--muted2); }
+/* The habit's own mark in the manage list: colour block, icon on top when set. */
+.habit-mark {
+  width: 30px; height: 30px; border-radius: 9px; flex: 0 0 30px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.habit-mark.sm { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 7px; font-size: 12px; }
+/* No icon chosen: the colour still has to identify the habit, so it becomes a
+   slim bar rather than an empty coloured square. */
+.habit-bar { width: 5px; height: 26px; border-radius: 3px; flex: 0 0 5px; display: block; }
+
+/* Compact triggers; the panels used to sit open and fill the sheet. */
+.picker-trigger {
+  flex: 1; display: flex; align-items: center; gap: 10px; cursor: pointer;
+  min-height: 52px; padding: 8px 14px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--border); color: var(--ink2);
+  font-size: 14.5px; font-weight: 600;
+}
+.picker-trigger.open { border-color: var(--accent); background: var(--card2); }
+.picker-trigger:active { background: var(--card2); }
+.pt-preview {
+  width: 32px; height: 32px; flex: 0 0 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  background: var(--card2); color: var(--muted);
+}
+.picker-trigger.open .pt-preview { background: var(--card); }
+.pt-color { background: var(--accent); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+.picker-panel { animation: fadeIn 0.18s ease; }
+.picker-hint { margin-top: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .field { padding: 16px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
 .date-pill { font-size: 14.5px; font-weight: 700; color: var(--accent-text); background: var(--card2); padding: 9px 14px; border-radius: 12px; border: none; min-height: 44px; }
 

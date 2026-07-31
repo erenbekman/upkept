@@ -5,7 +5,7 @@ import {
   type SQLiteDBConnection,
 } from '@capacitor-community/sqlite'
 import { defineCustomElements as defineJeep } from 'jeep-sqlite/loader'
-import { SCHEMA_SQL, SCHEMA_VERSION, DEFAULT_REASON_TAGS } from '~/db/schema'
+import { SCHEMA_SQL, SCHEMA_VERSION, DEFAULT_REASON_TAGS, ALTERS } from '~/db/schema'
 
 const DB_NAME = 'lifebootstrap'
 
@@ -50,6 +50,13 @@ export default defineNuxtPlugin(async () => {
     db = await sqlite.createConnection(DB_NAME, false, 'no-encryption', SCHEMA_VERSION, false)
     if (!(await db.isDBOpen()).result) await db.open()
     await db.execute(SCHEMA_SQL)
+    // Additive column adds for pre-existing databases; already-applied ones throw
+    // "duplicate column name", which is the expected steady state.
+    // Braces are required: Nuxt's unctx transform rewrites `await` into a
+    // statement, and a brace-less loop body ends up outside the loop.
+    for (const sql of ALTERS) {
+      await db.execute(sql).catch(() => null)
+    }
 
     const rt = await db.query('SELECT COUNT(*) AS c FROM reason_tags')
     if ((rt.values?.[0]?.c ?? 0) === 0) {

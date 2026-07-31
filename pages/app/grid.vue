@@ -118,7 +118,12 @@ async function onSaved() { await load(); editing.value = null }
         </thead>
         <tbody>
           <tr v-for="h in habits" :key="h.id">
-            <td class="hname">{{ h.name }}</td>
+            <td class="hname">
+              <span class="hname-inner">
+                <span :class="h.icon ? 'habit-mark sm' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</span>
+                <span class="hname-text">{{ h.name }}</span>
+              </span>
+            </td>
             <td
               v-for="d in days"
               :key="d"

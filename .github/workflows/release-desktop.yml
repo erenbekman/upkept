@@ -89,4 +89,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VER: ${{ steps.v.outputs.ver }}
           NOTES: ${{ steps.v.outputs.notes }}
+          # Optional — until these exist the build is ad-hoc signed and macOS
+          # keeps warning. Set all five to get a notarized, warning-free app.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: bash scripts/release-desktop.sh "$VER" "$NOTES"

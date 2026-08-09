@@ -21,6 +21,15 @@ export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
 # entirely (plus APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID to notarize).
 export APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY:--}"
 
+# CI hands these over as empty strings when the secrets are unset, and Tauri
+# treats "set but empty" as "notarize with these", which fails the build.
+for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+  [ -n "${!v:-}" ] || unset "$v"
+done
+if [ "$APPLE_SIGNING_IDENTITY" = "-" ]; then
+  echo "note: ad-hoc signing — macOS will still warn until a Developer ID notarizes it"
+fi
+
 # keep app version in sync so the updater compares correctly
 sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
 

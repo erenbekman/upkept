@@ -10,7 +10,7 @@ Sakin ve yargısız bir aylık alışkanlık takipçisi. Bir günü kaçırmak b
 
 <br/>
 
-**[🌐 Web'de aç](https://upkept.pages.dev/app)**  ·  **[⬇︎ macOS için indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg)**  ·  **[📱 App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887)**
+**[🌐 Web'de aç](https://up-kept.app/app)**  ·  **[⬇︎ macOS için indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg)**  ·  **[📱 App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887)**
 
 ![platform](https://img.shields.io/badge/web·macOS·iOS-6d6fae?style=flat-square)
 ![hesap](https://img.shields.io/badge/hesap-gerekmez-5f8a58?style=flat-square)
@@ -51,7 +51,7 @@ Bir günü kaçırdığında sebebini bir dokunuşla bırakırsın (*yorgundum, 
 
 | Platform | Nasıl |
 |---|---|
-| **Web / PWA** | [upkept.pages.dev](https://upkept.pages.dev/app) — tarayıcıda aç, "Ana ekrana ekle" ile kur |
+| **Web / PWA** | [up-kept.app](https://up-kept.app/app) — tarayıcıda aç, "Ana ekrana ekle" ile kur |
 | **macOS** | [Upkept.dmg indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg) → Applications'a sürükle · Apple onaylı olmadığı için ilk açılışta **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** |
 | **iOS** | [App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887) — iPhone & iPad |
 | **Windows / Android** | Yakında |
@@ -60,7 +60,7 @@ macOS uygulaması açılışta kendini otomatik günceller — yeni sürüm içi
 
 ## Gizlilik
 
-Veriler (alışkanlıklar, durumlar, notlar) cihazında **yerel SQLite**'ta tutulur. Zorunlu hesap, bulut ya da izleme yok. Cihazlar arası senkronu açarsan verin Cloudflare'de anonim bir koda göre saklanır — kimliğine bağlı değil, istediğin an durdurabilirsin. Ayrıntı: [Gizlilik Politikası](https://upkept.pages.dev/privacy).
+Veriler (alışkanlıklar, durumlar, notlar) cihazında **yerel SQLite**'ta tutulur. Zorunlu hesap, bulut ya da izleme yok. Cihazlar arası senkronu açarsan verin Cloudflare'de anonim bir koda göre saklanır — kimliğine bağlı değil, istediğin an durdurabilirsin. Ayrıntı: [Gizlilik Politikası](https://up-kept.app/privacy).
 
 ---
 

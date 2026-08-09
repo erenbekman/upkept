@@ -89,4 +89,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VER: ${{ steps.v.outputs.ver }}
           NOTES: ${{ steps.v.outputs.notes }}
-        run: scripts/release-desktop.sh "$VER" "$NOTES"
+        run: bash scripts/release-desktop.sh "$VER" "$NOTES"

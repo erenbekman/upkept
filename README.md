@@ -52,7 +52,7 @@ Bir günü kaçırdığında sebebini bir dokunuşla bırakırsın (*yorgundum, 
 | Platform | Nasıl |
 |---|---|
 | **Web / PWA** | [up-kept.app](https://up-kept.app/app) — tarayıcıda aç, "Ana ekrana ekle" ile kur |
-| **macOS** | [Upkept.dmg indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg) → Applications'a sürükle · Apple onaylı olmadığı için ilk açılışta **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** |
+| **macOS** | [Upkept.dmg indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg) → Applications'a sürükle · Apple tarafından onaylı, uyarı çıkmaz |
 | **iOS** | [App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887) — iPhone & iPad |
 | **Windows / Android** | Yakında |
 

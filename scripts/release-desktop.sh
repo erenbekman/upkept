@@ -23,11 +23,26 @@ export APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY:--}"
 
 # CI hands these over as empty strings when the secrets are unset, and Tauri
 # treats "set but empty" as "notarize with these", which fails the build.
-for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_API_ISSUER APPLE_API_KEY APPLE_API_KEY_PATH; do
   [ -n "${!v:-}" ] || unset "$v"
 done
+# A local release picks the Developer ID out of the keychain and the notarizing
+# credentials off disk, so no secret has to be typed or pasted per release.
+NOTARY="$HOME/.tauri/apple-notary"   # 3 lines: issuer id, key id, path to the .p8
+if [ "$APPLE_SIGNING_IDENTITY" = "-" ] && [ -f "$NOTARY" ]; then
+  IDENT="$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -1)"
+  if [ -n "$IDENT" ]; then
+    export APPLE_SIGNING_IDENTITY="$IDENT"
+    { read -r APPLE_API_ISSUER; read -r APPLE_API_KEY; read -r APPLE_API_KEY_PATH; } < "$NOTARY"
+    export APPLE_API_ISSUER APPLE_API_KEY APPLE_API_KEY_PATH
+    [ -f "$APPLE_API_KEY_PATH" ] || { echo "!! API key missing at $APPLE_API_KEY_PATH"; exit 1; }
+  fi
+fi
+
 if [ "$APPLE_SIGNING_IDENTITY" = "-" ]; then
   echo "note: ad-hoc signing — macOS will still warn until a Developer ID notarizes it"
+else
+  echo "signing as: $APPLE_SIGNING_IDENTITY${APPLE_API_KEY:+ · notarizing with key $APPLE_API_KEY}"
 fi
 
 # keep app version in sync so the updater compares correctly

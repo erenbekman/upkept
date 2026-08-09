@@ -39,10 +39,13 @@ rm -rf "$STAGE"
 # updater manifest (embeds the signature; url resolves to the latest release)
 SIG="$(cat "$B/upkept.app.tar.gz.sig")"
 PUBDATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+# A quote or backslash in the notes would produce invalid JSON and the updater
+# would silently stop seeing new versions.
+NOTES_JSON="${NOTES//\\/\\\\}"; NOTES_JSON="${NOTES_JSON//\"/\\\"}"
 cat > "$B/latest.json" <<JSON
 {
   "version": "$VER",
-  "notes": "$NOTES",
+  "notes": "$NOTES_JSON",
   "pub_date": "$PUBDATE",
   "platforms": {
     "darwin-aarch64": {

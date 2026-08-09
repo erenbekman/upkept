@@ -370,7 +370,7 @@ const phoneTabs = [
             <a v-else-if="p.cta?.href" :href="p.cta.href" class="plat-cta" target="_blank" rel="noopener">{{ p.cta.label }} ↓</a>
           </div>
         </div>
-        <div class="plat-note">macOS uygulaması imzasız — ilk açılışta sağ tık → <b>Aç</b>. Windows &amp; Android yakında.</div>
+        <div class="plat-note">macOS uygulaması Apple onaylı değil — ilk açılışta <b>Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç</b>. Windows &amp; Android yakında.</div>
       </section>
 
       <!-- KAPANIŞ -->

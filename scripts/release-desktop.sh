@@ -15,6 +15,12 @@ cd "$ROOT"
 export TAURI_SIGNING_PRIVATE_KEY="$(cat "$KEY")"
 export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
 
+# Without this the bundle keeps only the linker's ad-hoc signature on the inner
+# binary and has no _CodeSignature, so a downloaded copy fails Gatekeeper with
+# "upkept is damaged". "-" means ad-hoc; set a Developer ID to drop the warning
+# entirely (plus APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID to notarize).
+export APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY:--}"
+
 # keep app version in sync so the updater compares correctly
 sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
 

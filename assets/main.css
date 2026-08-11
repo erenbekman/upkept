@@ -269,8 +269,13 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   color: var(--ink2);
 }
 .icon-swatch.on { border-color: var(--accent); background: var(--card2); }
-.icon-free { font-size: 17px; }
-.icon-free::placeholder { color: var(--muted2); }
+.chips-scroll { max-height: 232px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.icon-free-btn { flex: none; border-style: dashed; border-color: var(--dash); color: var(--accent-text); }
+.icon-free-input {
+  flex: 1; min-height: 44px; padding: 0 14px; font-size: 15px;
+  border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--ink2);
+}
+.icon-free-input::placeholder { color: var(--muted2); }
 /* The habit's own mark in the manage list: colour block, icon on top when set. */
 .habit-mark {
   width: 30px; height: 30px; border-radius: 9px; flex: 0 0 30px;

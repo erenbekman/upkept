@@ -14,11 +14,33 @@ watch(useSync().dataVersion, load)
 // a rounded pill that drifts out of the row, and a habit tracker does not need
 // 16 million colours.
 const COLORS = ['#7d9a6f', '#6d6fae', '#c79433', '#bd7659', '#5f8a58', '#8a6ea8', '#4f8a94', '#9a5236']
-const ICONS = ['🏃', '💧', '📖', '🧘', '😴', '🥗', '💊', '✍️', '🎸', '🧹', '☎️', '🚭']
+const ICONS = [
+  '🏃', '🚶', '🚴', '🏋️', '🧘', '🤸', '🏊', '🥊', '⚽', '⛰️',
+  '💧', '🥗', '🍎', '🥦', '🍳', '☕', '🧃', '💊',
+  '📖', '✍️', '🧠', '📝', '🎧', '🎸', '🎨', '🧩', '🗣️', '🌐',
+  '😴', '🛏️', '🪥', '🚿', '🧴', '🌱', '🧹', '🧺',
+  '💻', '📵', '⏰', '📅', '💰', '🎯', '📞', '🙏',
+  '🚭', '🍺', '🍬', '🎰',
+]
 
 const sheetRef = ref<InstanceType<typeof AppSheet> | null>(null)
 const iconInput = ref('')
+const iconField = ref<HTMLInputElement | null>(null)
 const open = ref<'icon' | 'color' | null>(null)
+
+// The only way to reach the phone's own emoji set is the system keyboard, so
+// "+" just focuses a real input — iOS then offers the emoji key.
+function pickOwnIcon() {
+  iconField.value?.focus()
+}
+
+// One emoji can be several code units (🏋️ is 3, ZWJ sequences more), so slice
+// by grapheme instead of by character or the icon comes out broken.
+function onIconInput() {
+  const first = [...new Intl.Segmenter().segment(iconInput.value)][0]?.segment ?? ''
+  iconInput.value = first
+  editing.value!.icon = first || null
+}
 
 function openNew() {
   editing.value = { name: '', target_desc: '', color: COLORS[0], icon: null }
@@ -131,17 +153,22 @@ async function remove(h: Habit) {
       </div>
 
       <div v-if="open === 'icon'" class="field picker-panel">
-        <div class="chips-wrap">
+        <div class="chips-wrap chips-scroll">
           <button
             v-for="e in ICONS" :key="e"
             class="icon-swatch" :class="{ on: editing.icon === e }"
             :aria-label="`Simge ${e}`" :aria-pressed="editing.icon === e"
             @click="editing.icon = editing.icon === e ? null : e"
           >{{ e }}</button>
+        </div>
+        <div class="row" style="gap:9px; margin-top:12px; align-items:center;">
+          <button class="icon-swatch icon-free-btn" aria-label="Kendi simgen" @click="pickOwnIcon">
+            {{ iconInput || '+' }}
+          </button>
           <input
-            v-model="iconInput" class="icon-swatch icon-free" maxlength="2"
-            aria-label="Kendi simgen" placeholder="+"
-            @input="editing.icon = iconInput.trim() || null"
+            ref="iconField" v-model="iconInput" class="icon-free-input"
+            aria-label="Kendi simgen" placeholder="Klavyeden emoji seç"
+            @input="onIconInput"
           />
         </div>
       </div>

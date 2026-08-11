@@ -15,7 +15,12 @@ export function useUpdater() {
       const { check: checkUpdate } = await import('@tauri-apps/plugin-updater')
       const update = await checkUpdate()
       if (!update) return manual ? 'En güncel sürümdesin ✓' : null
-      if (!confirm(`Yeni sürüm var (${update.version}). Şimdi güncellensin mi?`)) return null
+      const ok = await useAsk().confirm({
+        title: `Yeni sürüm var: ${update.version}`,
+        message: 'İndirilip kurulacak, sonra uygulama yeniden başlayacak.',
+        okLabel: 'Güncelle',
+      })
+      if (!ok) return null
       await update.downloadAndInstall()
       const { relaunch } = await import('@tauri-apps/plugin-process')
       await relaunch()

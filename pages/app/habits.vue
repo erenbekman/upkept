@@ -59,7 +59,13 @@ async function move(i: number, dir: -1 | 1) {
 }
 
 async function remove(h: Habit) {
-  if (!confirm(`"${h.name}" kaldırılsın mı? Geçmiş kayıtlar silinmez.`)) return
+  const ok = await useAsk().confirm({
+    title: `"${h.name}" kaldırılsın mı?`,
+    message: 'Geçmiş kayıtlar silinmez, alışkanlık listeden çıkar.',
+    okLabel: 'Kaldır',
+    danger: true,
+  })
+  if (!ok) return
   await repo.deactivate(h.id)
   await load()
   toast(h.name + ' kaldırıldı')

@@ -113,6 +113,8 @@ const tabs = [
       </NuxtLink>
     </nav>
 
+    <AppAsk />
+
     <div v-if="msg" :key="msg" class="toast">{{ msg }}</div>
   </div>
 </template>

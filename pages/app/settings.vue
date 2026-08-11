@@ -23,8 +23,14 @@ async function linkSync() {
   await syncApi.sync()
   toast('Bağlandı ✓')
 }
-function unlinkSync() {
-  if (!confirm('Bu cihazın senkron bağlantısı kesilsin mi? Veriler cihazda kalır.')) return
+async function unlinkSync() {
+  const ok = await useAsk().confirm({
+    title: 'Bağlantı kesilsin mi?',
+    message: 'Bu cihazın senkronu durur. Veriler cihazda kalır.',
+    okLabel: 'Kes',
+    danger: true,
+  })
+  if (!ok) return
   syncApi.setCode(null)
   toast('Bağlantı kesildi')
 }
@@ -60,7 +66,7 @@ async function saveStart() {
 }
 
 async function addReason() {
-  const n = prompt('Yeni etiket')?.trim()
+  const n = await useAsk().text({ title: 'Yeni etiket', input: 'Örn. yorgundum', okLabel: 'Ekle' })
   if (!n) return
   await reasonsRepo.create(n)
   reasons.value = await reasonsRepo.list()
@@ -86,7 +92,13 @@ async function doExport() {
 async function onImportFile(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
-  if (!confirm('Mevcut tüm veri silinip yedekle değiştirilecek. Emin misin?')) {
+  const ok = await useAsk().confirm({
+    title: 'Yedek geri yüklensin mi?',
+    message: 'Mevcut tüm veri silinip yedekle değiştirilecek.',
+    okLabel: 'Geri yükle',
+    danger: true,
+  })
+  if (!ok) {
     if (fileInput.value) fileInput.value.value = ''
     return
   }
@@ -95,7 +107,7 @@ async function onImportFile(e: Event) {
     await load()
     toast('İçe aktarıldı ✓')
   } catch (err: any) {
-    alert('Hata: ' + (err?.message ?? 'içe aktarılamadı'))
+    toast('Hata: ' + (err?.message ?? 'içe aktarılamadı'))
   } finally {
     if (fileInput.value) fileInput.value.value = ''
   }

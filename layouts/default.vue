@@ -1,12 +1,13 @@
 <script setup lang="ts">
-const { msg, show: toast } = useToast()
+const { msg, isError, show: toast, dismiss: dismissToast } = useToast()
 const { code, sync, status, dataVersion } = useSync()
 
-// Pinch-zoom has no useful state in a fixed-width tracker — it just strands the
-// tab bar off-screen. Scoped to /app so the marketing pages stay zoomable, and
-// mobile Safari ignores maximum-scale anyway; only the native webview obeys it.
+// No maximum-scale: it was the one thing the native webview actually obeyed, so
+// it capped pinch zoom there and nowhere else — a WCAG 1.4.4 failure on the only
+// platform it reached. touch-action: manipulation on .app-shell still kills the
+// double-tap delay while leaving pinch zoom alone.
 useHead({
-  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover' }],
+  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' }],
 })
 
 let debounce: ReturnType<typeof setTimeout>
@@ -49,7 +50,8 @@ async function onTouchEnd() {
   try {
     const ok = code.value ? await sync() : true
     dataVersion.value++
-    toast(code.value ? (ok ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et') : 'Yenilendi ✓')
+    if (code.value && !ok) toast('Güncellenemedi — bağlantını kontrol et', true)
+    else toast(code.value ? 'Güncel ✓' : 'Yenilendi ✓')
   } finally {
     refreshing.value = false
   }
@@ -100,7 +102,9 @@ const tabs = [
       <span>{{ refreshing ? 'Güncelleniyor…' : (pull >= 62 ? 'Bırak, güncellensin' : 'Aşağı çek') }}</span>
     </div>
 
-    <slot />
+    <main>
+      <slot />
+    </main>
 
     <nav class="tabbar">
       <NuxtLink v-for="t in tabs" :key="t.to" :to="t.to" class="tab" :aria-label="t.label" :title="t.label">
@@ -115,6 +119,18 @@ const tabs = [
 
     <AppAsk />
 
-    <div v-if="msg" :key="msg" class="toast">{{ msg }}</div>
+    <!-- The live region has to exist before the message lands or a screen reader
+         never announces it — so the wrapper stays mounted, not the toast.
+         An error is urgent and persistent: assertive, no auto-dismiss, and a real
+         button so it can be cleared by pointer and keyboard alike. -->
+    <div role="status" aria-live="polite">
+      <div v-if="msg && !isError" :key="msg" class="toast">{{ msg }}</div>
+    </div>
+    <div role="alert">
+      <button v-if="msg && isError" class="toast toast-error" @click="dismissToast">
+        {{ msg }}<span class="toast-x" aria-hidden="true">✕</span>
+        <span class="tab-label">Kapat</span>
+      </button>
+    </div>
   </div>
 </template>

@@ -40,7 +40,9 @@ async function copyCode() {
   toast('Kod kopyalandı')
 }
 async function syncNow() {
-  toast((await syncApi.sync()) ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et')
+  const ok = await syncApi.sync()
+  if (ok) toast('Güncel ✓')
+  else toast('Güncellenemedi — bağlantını kontrol et', true)
 }
 
 const updater = useUpdater()
@@ -107,7 +109,7 @@ async function onImportFile(e: Event) {
     await load()
     toast('İçe aktarıldı ✓')
   } catch (err: any) {
-    toast('Hata: ' + (err?.message ?? 'içe aktarılamadı'))
+    toast('Hata: ' + (err?.message ?? 'içe aktarılamadı'), true)
   } finally {
     if (fileInput.value) fileInput.value.value = ''
   }
@@ -116,28 +118,30 @@ async function onImportFile(e: Event) {
 
 <template>
   <div class="screen">
-    <div class="title">Ayarlar</div>
+    <h1 class="title">Ayarlar</h1>
   </div>
 
-  <div class="screen" style="padding-top:0; display:flex; flex-direction:column; gap:18px;">
+  <!-- 24px between sections against 12px inside a field: the gap has to be at
+       least double the intra-group one or the sections read as one list. -->
+  <div class="screen" style="padding-top:0; display:flex; flex-direction:column; gap:24px;">
     <div>
-      <div class="eyebrow">Challenge</div>
+      <h2 class="eyebrow">Challenge</h2>
       <div class="row spread field">
         <div>
-          <div style="font-size:15.5px; font-weight:600; color:var(--ink2);">Başlangıç tarihi</div>
-          <div style="font-size:13px; color:var(--muted); margin-top:2px;">Gün sayacı buradan başlar</div>
+          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Başlangıç tarihi</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">Gün sayacı buradan başlar</div>
         </div>
-        <input v-model="startDate" type="date" class="date-pill" @change="saveStart" />
+        <input v-model="startDate" type="date" class="date-pill" aria-label="Challenge başlangıç tarihi" @change="saveStart" />
       </div>
     </div>
 
     <div>
-      <div class="eyebrow">Sebep etiketleri</div>
+      <h2 class="eyebrow">Sebep etiketleri</h2>
       <div class="field">
         <div class="chips-wrap">
           <div v-for="r in reasons" :key="r.id" class="chip">
             {{ r.name }}
-            <button class="chip-x" @click="removeReason(r)">✕</button>
+            <button class="chip-x" :aria-label="`${r.name} etiketini sil`" @click="removeReason(r)">✕</button>
           </div>
           <button class="chip-add" @click="addReason">+ Etiket</button>
         </div>
@@ -145,7 +149,7 @@ async function onImportFile(e: Event) {
     </div>
 
     <div>
-      <div class="eyebrow">Veri</div>
+      <h2 class="eyebrow">Veri</h2>
       <div class="row" style="gap:12px;">
         <button class="btn" style="flex:1;" @click="doExport">↑ Dışa aktar</button>
         <button class="btn" style="flex:1;" @click="fileInput?.click()">↓ İçe aktar</button>
@@ -154,32 +158,36 @@ async function onImportFile(e: Event) {
     </div>
 
     <div>
-      <div class="eyebrow">Senkronizasyon</div>
+      <h2 class="eyebrow">Senkronizasyon</h2>
       <div class="field" style="display:flex; flex-direction:column; gap:12px;">
         <template v-if="!syncApi.code.value">
-          <div style="font-size:13px; color:var(--muted); line-height:1.5;">Cihazlarını login olmadan bağla. Bir cihazda başlat, çıkan kodu diğerlerine gir. En son değişen taraf kazanır.</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); line-height:1.5;">Cihazlarını login olmadan bağla. Bir cihazda başlat, çıkan kodu diğerlerine gir. En son değişen taraf kazanır.</div>
           <button class="btn btn-primary" @click="startSync">Bu cihazda başlat</button>
-          <div style="text-align:center; font-size:12px; color:var(--muted2);">veya</div>
+          <div style="text-align:center; font-size:var(--fs-xs); color:var(--muted2);">veya</div>
           <div class="row" style="gap:8px;">
-            <input v-model="codeInput" class="note-area" style="margin-top:0; flex:1;" placeholder="kodu yapıştır" />
+            <input
+              v-model="codeInput" class="note-area" style="margin-top:0; flex:1;"
+              aria-label="Senkron kodu" placeholder="kodu yapıştır"
+              autocomplete="off" autocapitalize="off" spellcheck="false"
+            />
             <button class="btn" @click="linkSync">Bağla</button>
           </div>
         </template>
         <template v-else>
           <div class="row spread">
             <div>
-              <div style="font-size:13px; color:var(--muted);">Senkron kodu</div>
-              <div style="font-family:monospace; font-size:18px; font-weight:700; color:var(--ink); letter-spacing:1px;">{{ syncApi.code.value }}</div>
+              <div style="font-size:var(--fs-sm); color:var(--muted);">Senkron kodu</div>
+              <div style="font-family:monospace; font-size:var(--fs-xl); font-weight:700; color:var(--ink); letter-spacing:1px;">{{ syncApi.code.value }}</div>
             </div>
             <button class="btn" @click="copyCode">Kopyala</button>
           </div>
-          <div style="font-size:12.5px; color:var(--muted);">
+          <div style="font-size:var(--fs-xs); color:var(--muted);">
             <span v-if="syncApi.status.value === 'syncing'">Güncelleniyor…</span>
             <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">Güncellenemedi — internetini kontrol edip tekrar dene</span>
             <span v-else>Son güncelleme: {{ fmtAgo(syncApi.lastAt.value) }}</span>
           </div>
-          <div style="font-size:12.5px; color:var(--muted); line-height:1.5;">
-            Başka bir cihazda işaretleme yaptıysan <b>Şimdi güncelle</b>'ye bas — ya da ekranı aşağı çek. Uygulamayı her açtığında da kendiliğinden güncellenir.
+          <div style="font-size:var(--fs-xs); color:var(--muted); line-height:1.5;">
+            Başka bir cihazda işaretleme yaptıysan <b>Şimdi güncelle</b>’ye bas — ya da ekranı aşağı çek. Uygulamayı her açtığında da kendiliğinden güncellenir.
           </div>
           <div class="row" style="gap:12px;">
             <button class="btn btn-primary" style="flex:1;" @click="syncNow">Şimdi güncelle</button>
@@ -190,11 +198,11 @@ async function onImportFile(e: Event) {
     </div>
 
     <div v-if="isDesktop()">
-      <div class="eyebrow">Uygulama</div>
+      <h2 class="eyebrow">Uygulama</h2>
       <div class="row spread field">
         <div>
-          <div style="font-size:15.5px; font-weight:600; color:var(--ink2);">Güncellemeler</div>
-          <div style="font-size:13px; color:var(--muted); margin-top:2px;">Açılışta kendiliğinden denetlenir</div>
+          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Güncellemeler</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">Açılışta kendiliğinden denetlenir</div>
         </div>
         <button class="btn" :disabled="updater.busy.value" @click="checkUpdate">
           {{ updater.busy.value ? 'Denetleniyor…' : 'Şimdi denetle' }}
@@ -203,12 +211,12 @@ async function onImportFile(e: Event) {
     </div>
 
     <div>
-      <div class="eyebrow">Görünüm</div>
+      <h2 class="eyebrow">Görünüm</h2>
       <div class="row spread field">
-        <span style="font-size:15.5px; font-weight:600; color:var(--ink2);">Tema</span>
+        <span style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Tema</span>
         <div class="seg">
-          <button :class="{ on: theme === 'light' }" @click="applyTheme('light')">Açık</button>
-          <button :class="{ on: theme === 'dark' }" @click="applyTheme('dark')">Koyu</button>
+          <button :class="{ on: theme === 'light' }" :aria-pressed="theme === 'light'" @click="applyTheme('light')">Açık</button>
+          <button :class="{ on: theme === 'dark' }" :aria-pressed="theme === 'dark'" @click="applyTheme('dark')">Koyu</button>
         </div>
       </div>
     </div>

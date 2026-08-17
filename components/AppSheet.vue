@@ -113,10 +113,32 @@ function onUp() {
   else spring(0, v, 0.8, 0.3) // carried momentum, so a little bounce is honest
 }
 
-const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') requestClose() }
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+// Focus reached the sheet but nothing held it: nine Tabs walked straight out into
+// the tab bar behind the overlay, and Escape then returned focus to whatever link
+// it had landed on rather than the row that opened the sheet.
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') return requestClose()
+  if (e.key !== 'Tab' || !sheet.value) return
+  const items = [...sheet.value.querySelectorAll<HTMLElement>(FOCUSABLE)]
+    .filter(el => el.offsetParent !== null)
+  if (!items.length) return
+  const first = items[0]
+  const last = items[items.length - 1]
+  const active = document.activeElement
+  if (e.shiftKey && (active === first || !sheet.value.contains(active))) {
+    e.preventDefault(); last.focus()
+  } else if (!e.shiftKey && active === last) {
+    e.preventDefault(); first.focus()
+  }
+}
+
+let returnTo: HTMLElement | null = null
 
 onMounted(() => {
   const el = sheet.value!
+  returnTo = document.activeElement as HTMLElement | null
   height.value = el.getBoundingClientRect().height
   if (reduced() || !isSheet()) {
     y.value = 0
@@ -132,6 +154,8 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('keydown', onKey)
   cancelAnimationFrame(raf)
+  // Back to the control that opened it, not wherever Tab wandered.
+  returnTo?.focus?.()
 })
 
 defineExpose({ dismiss })

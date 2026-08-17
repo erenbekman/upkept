@@ -7,7 +7,13 @@ useSeoMeta({
   ogDescription: 'Local-first habit tracker. No accounts, no ads, no tracking.',
   ogUrl: 'https://up-kept.app/privacy',
 })
-useHead({ link: [{ rel: 'canonical', href: 'https://up-kept.app/privacy' }] })
+// This page is written in English while the app ships lang="tr" globally. Without
+// the override, screen readers read English prose with Turkish pronunciation and
+// the browser hyphenates by the wrong ruleset.
+useHead({
+  htmlAttrs: { lang: 'en' },
+  link: [{ rel: 'canonical', href: 'https://up-kept.app/privacy' }],
+})
 </script>
 
 <template>
@@ -54,15 +60,22 @@ useHead({ link: [{ rel: 'canonical', href: 'https://up-kept.app/privacy' }] })
 </template>
 
 <style scoped>
-.pp { min-height: 100vh; background: #f7f4ed; color: #262420; font-family: 'Karla', system-ui, sans-serif; }
-.pp-wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+.pp { min-height: 100dvh; background: #f7f4ed; color: #262420; font-family: 'Karla', system-ui, sans-serif; }
+.pp-wrap {
+  max-width: 720px; margin: 0 auto; padding-block: 40px 80px;
+  padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right));
+}
 .pp-brand { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 36px; }
-.pp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.8px; color: #201e1a; }
-h1 { font-family: 'Spectral', serif; font-weight: 500; font-size: 40px; letter-spacing: -1px; margin: 0 0 6px; color: #201e1a; }
-.pp-date { font-size: 14px; color: #9a917f; margin: 0 0 28px; }
-h2 { font-family: 'Spectral', serif; font-weight: 500; font-size: 22px; margin: 32px 0 8px; color: #201e1a; }
-p { font-size: 16px; line-height: 1.7; color: #4a453c; margin: 0 0 12px; }
+.pp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: var(--ms-3xl); letter-spacing: -0.8px; color: #201e1a; }
+h1 { font-family: 'Spectral', serif; font-weight: 500; font-size: var(--ms-6xl); letter-spacing: -1px; margin: 0 0 6px; color: #201e1a; text-wrap: balance; }
+.pp-date { font-size: var(--ms-md); color: #726a5e; margin: 0 0 28px; }
+h2 { font-family: 'Spectral', serif; font-weight: 500; font-size: var(--ms-3xl); margin: 32px 0 8px; color: #201e1a; text-wrap: balance; }
+/* The only long-form prose in the project; the 720px wrapper ran ~90 characters
+   per line. 53ch, not 68: ch is the width of "0", and Karla's average lowercase
+   letter is far narrower, so 68ch measured out at 90 real characters. 53ch
+   renders ~70 — inside the 60–75 the eye tracks comfortably. */
+p { font-size: var(--ms-xl); line-height: 1.7; color: #4a453c; margin: 0 0 12px; max-width: 53ch; text-wrap: pretty; }
 b { color: #201e1a; }
-a { color: #6d6fae; }
-.pp-back { display: inline-block; margin-top: 40px; font-size: 15px; font-weight: 700; color: #6d6fae; }
+a { color: #6465a5; }
+.pp-back { display: inline-block; margin-top: 40px; font-size: var(--ms-lg); font-weight: 700; color: #6465a5; }
 </style>

@@ -114,7 +114,7 @@ function onPick(e: Event) {
       <label class="date-label">
         <span class="date-main">{{ date === todayStr() ? 'Bugün' : fmtShort(date) }}</span>
         <span class="date-sub">{{ fmtWeekdayLong(date) }}<template v-if="date !== todayStr()"> · {{ new Date(date + 'T00:00:00').getFullYear() }}</template></span>
-        <input type="date" :value="date" :max="todayStr()" @change="onPick" />
+        <input type="date" :value="date" :max="todayStr()" aria-label="Tarih seç" @change="onPick" />
       </label>
       <button
         class="date-nav" :disabled="!canNext"
@@ -128,6 +128,7 @@ function onPick(e: Event) {
         :key="s"
         class="status-btn"
         :class="[statusMeta(s).cls, { on: status === s }]"
+        :aria-pressed="status === s"
         @click="pick(s)"
       >
         <span class="glyph-dot">{{ statusMeta(s).glyph }}</span>
@@ -135,7 +136,8 @@ function onPick(e: Event) {
       </button>
     </div>
 
-    <div v-if="showReasons" style="margin-top:24px; animation: fadeIn 0.28s ease;">
+    <Transition name="reveal">
+    <div v-if="showReasons" style="margin-top:24px;">
       <div class="reason-title">Bir sebep eklemek istersen <span>(opsiyonel)</span></div>
       <div class="chips-wrap">
         <button
@@ -143,6 +145,7 @@ function onPick(e: Event) {
           :key="r.id"
           class="reason-chip"
           :class="{ on: reasonId === r.id }"
+          :aria-pressed="reasonId === r.id"
           @click="pickReason(r.id)"
         >{{ r.name }}</button>
       </div>
@@ -150,10 +153,12 @@ function onPick(e: Event) {
         v-model="note"
         class="note-area"
         rows="2"
+        aria-label="Not"
         placeholder="Kısa bir not… (opsiyonel)"
         @change="write"
       />
     </div>
+    </Transition>
 
     <button class="btn btn-primary" style="margin-top:24px; width:100%;" @click="leave('saved')">Bitti</button>
     <button v-if="current" class="clear-link" @click="clear">Kaydı temizle</button>

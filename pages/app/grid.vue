@@ -12,6 +12,7 @@ const month = useState('selMonth', () => now.getMonth() + 1)
 const habits = ref<Habit[]>([])
 const cells = ref<Record<string, Entry>>({})
 const editing = ref<{ habit: Habit; date: string } | null>(null)
+const loaded = ref(false)
 
 const today = todayStr()
 const days = computed(() => Array.from({ length: daysInMonth(year.value, month.value) }, (_, i) => i + 1))
@@ -24,6 +25,7 @@ async function load() {
   habits.value = await habitsRepo.listActive()
   const list = await entriesRepo.getMonth(year.value, month.value)
   cells.value = Object.fromEntries(list.map(e => [`${e.habit_id}-${e.date}`, e]))
+  loaded.value = true
 }
 onMounted(load)
 watch([year, month, useSync().dataVersion], load)
@@ -89,25 +91,26 @@ async function onSaved() { await load(); editing.value = null }
 </script>
 
 <template>
-  <div class="screen">
-    <div class="row spread">
-      <button class="icon-btn" @click="shift(-1)">‹</button>
-      <div class="title">{{ fmtMonth(year, month) }}</div>
-      <button class="icon-btn" @click="shift(1)">›</button>
+  <div class="screen wide">
+    <div class="row spread nowrap">
+      <button class="icon-btn" aria-label="Önceki ay" @click="shift(-1)">‹</button>
+      <h1 class="title">{{ fmtMonth(year, month) }}</h1>
+      <button class="icon-btn" aria-label="Sonraki ay" @click="shift(1)">›</button>
     </div>
-    <div class="sub">Kaydırarak tüm ayı gör · bugün vurgulu</div>
+    <!-- The scroll half of the hint is a lie once the whole month fits. -->
+    <div class="sub"><span class="scroll-hint">Kaydırarak tüm ayı gör · </span>bugün vurgulu</div>
   </div>
 
-  <p v-if="!habits.length" class="sub" style="padding:0 20px;">Alışkanlık yok.</p>
+  <p v-if="loaded && !habits.length" class="sub" style="padding:0 20px;">Alışkanlık yok.</p>
 
-  <template v-else>
-    <div class="grid-scroll" style="padding:8px 0;">
+  <template v-else-if="habits.length">
+    <div class="grid-scroll">
       <table class="grid">
         <thead>
           <tr>
-            <th class="hname">Gün</th>
+            <th class="hname" scope="col">Gün</th>
             <th
-              v-for="d in days" :key="d" class="day"
+              v-for="d in days" :key="d" class="day" scope="col"
               :class="{ sel: editing?.date === dateOf(d), weekend: isWeekend(dateOf(d)) }"
             >
               <div class="day-wd">{{ fmtWeekdayNarrow(dateOf(d)) }}</div>
@@ -118,12 +121,12 @@ async function onSaved() { await load(); editing.value = null }
         </thead>
         <tbody>
           <tr v-for="h in habits" :key="h.id">
-            <td class="hname">
+            <th class="hname" scope="row">
               <span class="hname-inner">
                 <span :class="h.icon ? 'habit-mark sm' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</span>
-                <span class="hname-text">{{ h.name }}</span>
+                <span class="hname-text" :title="h.name">{{ h.name }}</span>
               </span>
-            </td>
+            </th>
             <td
               v-for="d in days"
               :key="d"
@@ -146,7 +149,7 @@ async function onSaved() { await load(); editing.value = null }
       </table>
     </div>
 
-    <div class="legend">
+    <div class="legend wide">
       <div v-for="l in legend" :key="l.label" class="legend-item">
         <div class="legend-box" :class="[l.cls, l.extra]">{{ l.glyph }}</div>
         <span>{{ l.label }}</span>

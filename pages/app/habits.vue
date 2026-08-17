@@ -13,7 +13,35 @@ watch(useSync().dataVersion, load)
 // A fixed palette instead of <input type="color">: the native swatch renders as
 // a rounded pill that drifts out of the row, and a habit tracker does not need
 // 16 million colours.
-const COLORS = ['#7d9a6f', '#6d6fae', '#c79433', '#bd7659', '#5f8a58', '#8a6ea8', '#4f8a94', '#9a5236']
+//
+// Habit colour is identity; the status palette is meaning. Four of the old eight
+// swatches were byte-for-byte copies of a status token, so a habit could be
+// painted in the exact green that means "done" or the exact terracotta that
+// means "missed". These sit in the hue windows the status set leaves free —
+// every one is at least 34° from --accent, --done-dot, --partial-dot, --miss-dot
+// and --danger-solid, and at least 21° from its neighbours. That rules out warm
+// and green entirely, which is the point: cool = which habit, warm = how it went.
+// All eight hold L≈0.60 so no swatch shouts louder than the rest and the 5px
+// habit bar stays visible on both the light and the dark card (~3.8:1 either way).
+const COLORS = [
+  { hex: '#11957c', name: 'Deniz yeşili' },
+  { hex: '#019295', name: 'Turkuaz' },
+  { hex: '#078ead', name: 'Gök mavisi' },
+  { hex: '#4086bd', name: 'Mavi' },
+  { hex: '#996bad', name: 'Leylak' },
+  { hex: '#aa6598', name: 'Erguvan' },
+  { hex: '#b4627f', name: 'Gül' },
+  { hex: '#78818b', name: 'Kurşun' },
+]
+
+// A habit saved under the old palette keeps its stored colour, so offer it as a
+// swatch too — otherwise the picker opens with nothing selected.
+const swatches = computed(() => {
+  const c = editing.value?.color
+  return c && !COLORS.some(x => x.hex === c)
+    ? [{ hex: c, name: 'Mevcut renk' }, ...COLORS]
+    : COLORS
+})
 const ICONS = [
   '🏃', '🚶', '🚴', '🏋️', '🧘', '🤸', '🏊', '🥊', '⚽', '⛰️',
   '💧', '🥗', '🍎', '🥦', '🍳', '☕', '🧃', '💊',
@@ -43,7 +71,7 @@ function onIconInput() {
 }
 
 function openNew() {
-  editing.value = { name: '', target_desc: '', color: COLORS[0], icon: null }
+  editing.value = { name: '', target_desc: '', color: COLORS[0].hex, icon: null }
   iconInput.value = ''
   open.value = null
 }
@@ -82,7 +110,7 @@ async function move(i: number, dir: -1 | 1) {
 
 async function remove(h: Habit) {
   const ok = await useAsk().confirm({
-    title: `"${h.name}" kaldırılsın mı?`,
+    title: `“${h.name}” kaldırılsın mı?`,
     message: 'Geçmiş kayıtlar silinmez, alışkanlık listeden çıkar.',
     okLabel: 'Kaldır',
     danger: true,
@@ -96,20 +124,20 @@ async function remove(h: Habit) {
 
 <template>
   <div class="screen">
-    <div class="title">Alışkanlıklar</div>
+    <h1 class="title">Alışkanlıklar</h1>
     <div class="sub">Sırala · düzenle · kaldır</div>
   </div>
 
   <div class="habit-list" style="gap:10px;">
     <div v-for="(h, i) in habits" :key="h.id" class="manage-row">
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <button class="grab" style="background:none;border:none;padding:0;color:var(--muted2);cursor:pointer;line-height:0.6;" :disabled="i === 0" @click="move(i, -1)">▴</button>
-        <button class="grab" style="background:none;border:none;padding:0;color:var(--muted2);cursor:pointer;line-height:0.6;" :disabled="i === habits.length - 1" @click="move(i, 1)">▾</button>
+      <div style="display:flex; flex-direction:column;">
+        <button class="grab" :disabled="i === 0" :aria-label="`${h.name} yukarı taşı`" @click="move(i, -1)">▴</button>
+        <button class="grab" :disabled="i === habits.length - 1" :aria-label="`${h.name} aşağı taşı`" @click="move(i, 1)">▾</button>
       </div>
       <div :class="h.icon ? 'habit-mark' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</div>
-      <div class="flex1" style="font-size:16px; font-weight:600; color:var(--ink2);">{{ h.name }}</div>
-      <button class="icon-btn" @click="openEdit(h)">✎</button>
-      <button class="icon-btn danger" @click="remove(h)">✕</button>
+      <div class="flex1" style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ h.name }}</div>
+      <button class="icon-btn" :aria-label="`${h.name} düzenle`" @click="openEdit(h)">✎</button>
+      <button class="icon-btn danger" :aria-label="`${h.name} kaldır`" @click="remove(h)">✕</button>
     </div>
 
     <button class="btn btn-dashed" style="width:100%; padding:16px; border-radius:18px;" @click="openNew">+ Yeni alışkanlık</button>
@@ -128,8 +156,8 @@ async function remove(h: Habit) {
     </template>
 
     <div style="display:flex; flex-direction:column; gap:12px; margin-top:4px;">
-      <input v-model="editing.name" class="note-area" style="margin-top:0;" placeholder="Ad" />
-      <input v-model="editing.target_desc" class="note-area" style="margin-top:0;" placeholder="Hedef açıklaması (opsiyonel)" />
+      <input v-model="editing.name" class="note-area" style="margin-top:0;" aria-label="Alışkanlık adı" placeholder="Ad" />
+      <input v-model="editing.target_desc" class="note-area" style="margin-top:0;" aria-label="Hedef açıklaması" placeholder="Hedef açıklaması (opsiyonel)" />
 
       <!-- Two compact triggers instead of two always-open grids: the pickers used
            to fill the whole sheet before the user had chosen anything. -->
@@ -152,6 +180,7 @@ async function remove(h: Habit) {
         </button>
       </div>
 
+      <Transition name="reveal">
       <div v-if="open === 'icon'" class="field picker-panel">
         <div class="chips-wrap chips-scroll">
           <button
@@ -172,19 +201,22 @@ async function remove(h: Habit) {
           />
         </div>
       </div>
+      </Transition>
 
+      <Transition name="reveal">
       <div v-if="open === 'color'" class="field picker-panel">
         <div class="chips-wrap">
           <button
-            v-for="c in COLORS" :key="c"
-            class="color-swatch" :class="{ on: editing.color === c }"
-            :style="{ background: c }"
-            :aria-label="`Renk ${c}`" :aria-pressed="editing.color === c"
-            @click="editing.color = c"
+            v-for="c in swatches" :key="c.hex"
+            class="color-swatch" :class="{ on: editing.color === c.hex }"
+            :style="{ background: c.hex }"
+            :aria-label="c.name" :aria-pressed="editing.color === c.hex"
+            @click="editing.color = c.hex"
           />
         </div>
-        <div class="picker-hint">Grid'de ve istatistikte bu alışkanlığı bu renk temsil eder.</div>
+        <div class="picker-hint">Grid’de ve istatistikte bu alışkanlığı bu renk temsil eder.</div>
       </div>
+      </Transition>
 
       <button class="btn btn-primary" style="width:100%;" @click="save">Kaydet</button>
     </div>

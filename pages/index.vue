@@ -22,8 +22,8 @@ const IOS_URL = 'https://apps.apple.com/us/app/upkept/id6794236887'
 
 // ---- "Fark" section (illustrative, static) ----
 const missBtns = [
-  { glyph: '✓', label: 'Yaptım', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#5f8a58', labelColor: '#8a8172' },
-  { glyph: '~', label: 'Kısmen', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#c79433', labelColor: '#8a8172' },
+  { glyph: '✓', label: 'Yaptım', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#5f8a58', labelColor: '#726a5e' },
+  { glyph: '~', label: 'Kısmen', border: '#e6ddc8', bg: '#fbf8f0', dotBg: '#ba8a2f', labelColor: '#726a5e' },
   { glyph: '✕', label: 'Yapamadım', border: '#c07d63', bg: '#f2e1d9', dotBg: '#bd7659', labelColor: '#9a5236' },
 ]
 const missChips = [
@@ -56,9 +56,9 @@ const monthTitle = computed(() => `${MONTHS_TR[today.value.getMonth()]} ${today.
 function gmeta(s: string | null) {
   switch (s) {
     case 'done': return { glyph: '✓', bg: '#e6efe1', color: '#3f6b3a' }
-    case 'partial': return { glyph: '~', bg: '#f5ead1', color: '#8a6414' }
+    case 'partial': return { glyph: '~', bg: '#f5ead1', color: '#886214' }
     case 'miss': return { glyph: '✕', bg: '#f2e1d9', color: '#9a5236' }
-    default: return { glyph: '·', bg: 'transparent', color: '#c3b79b' }
+    default: return { glyph: '·', bg: 'transparent', color: '#8e8778' }
   }
 }
 const pats: Record<string, string> = {
@@ -71,7 +71,7 @@ const pats: Record<string, string> = {
 const cm: Record<string, string | null> = { d: 'done', p: 'partial', m: 'miss', n: null }
 const gDays = computed(() => Array.from({ length: dim.value }, (_, i) => ({
   n: i + 1,
-  color: i === todayIdx.value ? '#6d6fae' : (i > todayIdx.value ? '#cbc1ac' : '#a89f8c'),
+  color: i === todayIdx.value ? '#6d6fae' : (i > todayIdx.value ? '#8e8778' : '#726a5e'),
 })))
 const gridRows = computed(() => Object.entries(pats).map(([name, p]) => {
   const full = (p + p).slice(0, 31) // repeat the hand-tuned pattern to cover any month length
@@ -87,7 +87,7 @@ const gridRows = computed(() => Object.entries(pats).map(([name, p]) => {
     cells.push({
       glyph: none ? '·' : m.glyph,
       bg: none ? 'transparent' : m.bg,
-      color: none ? '#c3b79b' : m.color,
+      color: none ? '#8e8778' : m.color,
       border: none ? '1px dashed #ece3ce' : '1px solid transparent',
       opacity: 1,
       today: i === todayIdx.value,
@@ -99,7 +99,7 @@ const gLegend = [
   { ...gmeta('done'), label: 'Yaptım', border: '1px solid transparent' },
   { ...gmeta('partial'), label: 'Kısmen', border: '1px solid transparent' },
   { ...gmeta('miss'), label: 'Yapamadım', border: '1px solid transparent' },
-  { glyph: '·', bg: 'transparent', color: '#c3b79b', label: 'Kayıt yok', border: '1px dashed #e6ddc8' },
+  { glyph: '·', bg: 'transparent', color: '#8e8778', label: 'Kayıt yok', border: '1px dashed #e6ddc8' },
 ]
 
 // ---- Steps / Privacy / Platforms ----
@@ -136,18 +136,18 @@ const platforms = [
 
 // ---- Hero phone mockup (mirrors the app's Bugün screen) ----
 const phoneRows = [
-  { name: 'Egzersiz', sub: 'Henüz işaretlemedin', subColor: '#b0a894', glyph: '+', dotBg: 'transparent', dotText: '#c3b79b', dotBorder: '1.5px dashed #cdc2a8' },
-  { name: 'Su içmek', sub: 'Bugün yaptın', subColor: '#5f8a58', glyph: '✓', dotBg: '#5f8a58', dotText: '#fbf8f0', dotBorder: 'none' },
-  { name: 'Kitap okumak', sub: 'Yorgundum', subColor: '#b3862c', glyph: '~', dotBg: '#c79433', dotText: '#fbf8f0', dotBorder: 'none' },
-  { name: 'Meditasyon', sub: 'Yarın yeni bir gün', subColor: '#b57254', glyph: '✕', dotBg: '#bd7659', dotText: '#fbf8f0', dotBorder: 'none' },
-  { name: 'Erken uyumak', sub: 'Henüz işaretlemedin', subColor: '#b0a894', glyph: '+', dotBg: 'transparent', dotText: '#c3b79b', dotBorder: '1.5px dashed #cdc2a8' },
+  { name: 'Egzersiz', sub: 'Henüz işaretlemedin', subColor: '#726a5e', glyph: '+', dotBg: 'transparent', dotText: '#8e8778', dotBorder: '1.5px dashed #cdc2a8' },
+  { name: 'Su içmek', sub: 'Bugün yaptın', subColor: '#3f6b3a', glyph: '✓', dotBg: '#5f8a58', dotText: '#ffffff', dotBorder: 'none' },
+  { name: 'Kitap okumak', sub: 'Yorgundum', subColor: '#886214', glyph: '~', dotBg: '#ba8a2f', dotText: '#ffffff', dotBorder: 'none' },
+  { name: 'Meditasyon', sub: 'Yarın yeni bir gün', subColor: '#9a5236', glyph: '✕', dotBg: '#bd7659', dotText: '#ffffff', dotBorder: 'none' },
+  { name: 'Erken uyumak', sub: 'Henüz işaretlemedin', subColor: '#726a5e', glyph: '+', dotBg: 'transparent', dotText: '#8e8778', dotBorder: '1.5px dashed #cdc2a8' },
 ]
 const phoneTabs = [
   { label: 'Bugün', icon: '☼', color: '#6d6fae' },
-  { label: 'Grid', icon: '▦', color: '#b0a894' },
-  { label: 'İstatistik', icon: '◔', color: '#b0a894' },
-  { label: 'Alışkanlık', icon: '❋', color: '#b0a894' },
-  { label: 'Ayarlar', icon: '⚙︎', color: '#b0a894' },
+  { label: 'Grid', icon: '▦', color: '#8e8778' },
+  { label: 'İstatistik', icon: '◔', color: '#8e8778' },
+  { label: 'Alışkanlık', icon: '❋', color: '#8e8778' },
+  { label: 'Ayarlar', icon: '⚙︎', color: '#8e8778' },
 ]
 </script>
 
@@ -157,6 +157,8 @@ const phoneTabs = [
       <path d="M470 220 A190 190 0 1 0 490 340" fill="none" stroke="#6d6fae" stroke-width="2" stroke-linecap="round" stroke-dasharray="620" />
       <circle cx="470" cy="140" r="14" fill="#6d6fae" opacity="0.5" />
     </svg>
+
+    <a href="#main" class="skip">İçeriğe geç</a>
 
     <div class="wrap">
       <nav class="nav">
@@ -176,6 +178,7 @@ const phoneTabs = [
       </nav>
 
       <!-- HERO -->
+      <main id="main">
       <section class="lp-hero">
         <div class="hero-copy">
           <h1>Kusursuz değil,<br><span class="em">sürekli</span> ol.</h1>
@@ -245,7 +248,7 @@ const phoneTabs = [
               <div
                 v-for="c in missChips" :key="c.label" class="fark-chip"
                 :style="c.on
-                  ? { borderColor: '#6d6fae', background: '#6d6fae', color: '#fbf8f0' }
+                  ? { borderColor: '#6d6fae', background: '#6d6fae', color: '#ffffff' }
                   : { borderColor: '#e2d8c1', background: '#fbf8f0', color: '#6b6459' }"
               >{{ c.label }}</div>
             </div>
@@ -289,10 +292,10 @@ const phoneTabs = [
           </div>
           <!-- One CSS grid with fractional day columns: the headline promises the
                whole month, so it has to fit at every width instead of scrolling. -->
-          <div
-            class="monthgrid" aria-hidden="true"
-            :style="{ gridTemplateColumns: `minmax(60px, 128px) repeat(${dim}, minmax(0, 1fr))` }"
-          >
+          <!-- Column count as a custom property, not an inline grid-template: the
+               phone layout has to restate the template and a hardcoded repeat(31)
+               there left February's colour band 3 columns short of its label. -->
+          <div class="monthgrid" aria-hidden="true" :style="{ '--cols': dim }">
             <div class="mg-corner" />
             <div v-for="d in gDays" :key="d.n" class="mg-day" :style="{ color: d.color }">{{ d.n }}</div>
 
@@ -327,7 +330,7 @@ const phoneTabs = [
         <div class="privacy-card">
           <div class="sec-head wide" style="margin-bottom:34px;">
             <div class="lp-eyebrow">Gizlilik</div>
-            <h2 class="h2-sm">Verilerin <span class="em">sende kalır.</span></h2>
+            <h2>Verilerin <span class="em">sende kalır.</span></h2>
             <p class="lead">Ne zorunlu hesap, ne reklam, ne izleme. upkept cihazında çalışır — internetin olmasa bile.</p>
           </div>
           <div class="privacy-grid">
@@ -370,7 +373,7 @@ const phoneTabs = [
             <a v-else-if="p.cta?.href" :href="p.cta.href" class="plat-cta" target="_blank" rel="noopener">{{ p.cta.label }} ↓</a>
           </div>
         </div>
-        <div class="plat-note">macOS uygulaması Apple tarafından onaylı — indir, Applications'a sürükle, aç. Windows &amp; Android yakında.</div>
+        <div class="plat-note">macOS uygulaması Apple tarafından onaylı — indir, Applications’a sürükle, aç. Windows &amp; Android yakında.</div>
       </section>
 
       <!-- KAPANIŞ -->
@@ -379,6 +382,8 @@ const phoneTabs = [
         <p class="close-p">Hesap gerekmez. Bugünden başla.</p>
         <NuxtLink to="/app" class="btn-dark">Bugün başla</NuxtLink>
       </section>
+
+      </main>
 
       <!-- FOOTER -->
       <footer class="foot">
@@ -420,39 +425,58 @@ const phoneTabs = [
 </template>
 
 <style scoped>
+/* Text tones are verified against every surface this page paints on
+   (#f7f4ed page, #fbf8f0 card, #f2ede2 soft, #fdfbf5 note, #f4efe3 phone):
+   #726a5e clears AA 4.5:1 for copy, #8e8778 clears 3:1 for graphic glyphs, and
+   #7d6758 is the eyebrow tan at 4.5:1. The lighter tones these replaced ran as
+   low as 1.68:1. #6465a5 is the accent as small text; #6d6fae stays the fill.
+   Locked by test/contrast.test.mjs. */
 .lp {
-  position: relative; min-height: 100vh; overflow: hidden;
+  position: relative; min-height: 100dvh; overflow: hidden;
   background: #f7f4ed; color: #262420;
   font-family: 'Karla', system-ui, sans-serif;
 }
 .arc { position: absolute; pointer-events: none; }
+/* Four nav links precede the content, so the first focusable thing is a way past
+   them. Off-screen until focused. */
+.skip {
+  position: absolute; left: 8px; top: -60px; z-index: 50;
+  background: #262420; color: #f7f4ed; font-weight: 700; font-size: var(--ms-md);
+  padding: 12px 18px; border-radius: 0 0 12px 12px; transition: top 0.15s;
+}
+.skip:focus { top: 0; }
 .arc-tr { top: -160px; right: -180px; width: 600px; height: 600px; opacity: 0.45; }
 .arc-tr path { animation: drawArc 2.2s ease forwards; }
 @keyframes drawArc { from { stroke-dashoffset: 620; } to { stroke-dashoffset: 0; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 
-.wrap { position: relative; max-width: 1140px; margin: 0 auto; padding: 0 44px; }
+/* viewport-fit=cover is set globally, so landscape on a notched phone puts the
+   viewport edge under the notch — the inline margin has to win against it. */
+.wrap {
+  position: relative; max-width: 1140px; margin: 0 auto;
+  padding-inline: max(44px, env(safe-area-inset-left)) max(44px, env(safe-area-inset-right));
+}
 
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; }
 .lp-brand { display: flex; align-items: center; gap: 10px; }
-.lp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 23px; letter-spacing: -0.8px; color: #262420; }
-.nav-links { display: flex; align-items: center; gap: 34px; font-size: 15px; font-weight: 600; color: #6b6459; }
+.lp-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: var(--ms-3xl); letter-spacing: -0.8px; color: #262420; }
+.nav-links { display: flex; align-items: center; gap: 34px; font-size: var(--ms-md); font-weight: 600; color: #6b6459; }
 .nav-links a { color: #6b6459; }
 .nav-links a:hover { opacity: 0.7; }
 .nav-cta { border: 1.5px solid #262420; color: #262420 !important; padding: 10px 20px; border-radius: 999px; font-weight: 700; }
 
 .lp-hero { display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: center; padding: 56px 0 88px; }
 .hero-copy { animation: fadeUp 0.7s ease; }
-h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-height: 1.02; letter-spacing: -2.5px; margin: 0 0 24px; color: #201e1a; }
+h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: var(--ms-8xl); line-height: 1.02; letter-spacing: -2.5px; margin: 0 0 24px; color: #201e1a; }
 .em { font-style: italic; color: #6d6fae; }
-.hero-copy p { font-size: 19px; line-height: 1.6; color: #6b6459; max-width: 430px; margin: 0 0 34px; }
+.hero-copy p { font-size: var(--ms-2xl); line-height: 1.6; color: #6b6459; max-width: 430px; margin: 0 0 34px; text-wrap: pretty; }
 .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.btn-store { border: 1.5px solid #d8cfba; color: #4a463f !important; background: #fbf8f0; font-size: 15px; font-weight: 700; padding: 14px 24px; border-radius: 999px; display: inline-block; }
+.btn-store { border: 1.5px solid #d8cfba; color: #4a463f !important; background: #fbf8f0; font-size: var(--ms-lg); font-weight: 700; padding: 14px 24px; border-radius: 999px; display: inline-block; }
 .btn-store:hover { background: #f4efe2; }
-.btn-dark { background: #262420; color: #f7f4ed !important; font-size: 16px; font-weight: 700; padding: 16px 32px; border-radius: 999px; display: inline-block; }
+.btn-dark { background: #262420; color: #f7f4ed !important; font-size: var(--ms-xl); font-weight: 700; padding: 16px 32px; border-radius: 999px; display: inline-block; }
 .btn-dark:hover { opacity: 0.85; }
-.hero-note { font-size: 14.5px; font-weight: 600; color: #8a8172; }
+.hero-note { font-size: var(--ms-md); font-weight: 600; color: #726a5e; }
 
 .phone-wrap { justify-self: center; animation: floaty 6s ease-in-out infinite; }
 .phone {
@@ -465,8 +489,11 @@ h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-hei
 .ph-head { padding: 8px 18px 0; }
 .ph-brand { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
 .ph-brand span { font-family: 'Spectral', serif; font-weight: 500; font-size: 17px; letter-spacing: -0.6px; color: #33302b; }
+.ph-day, .ph-date, .mg-day, .bar-count, .grid-title {
+  font-variant-numeric: tabular-nums;
+}
 .ph-day { font-family: 'Spectral', serif; font-size: 32px; font-weight: 500; line-height: 1; color: #33302b; letter-spacing: -0.8px; }
-.ph-date { margin-top: 7px; font-size: 12.5px; color: #9a917f; font-weight: 500; }
+.ph-date { margin-top: 7px; font-size: 12.5px; color: #726a5e; font-weight: 500; }
 .ph-rows { display: flex; flex-direction: column; gap: 9px; padding: 16px 14px 0; }
 .ph-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 17px; background: #fbf8f0; border: 1px solid #ece3ce; box-shadow: 0 5px 14px -12px rgba(74,63,44,0.4); }
 .ph-rowmain { flex: 1; min-width: 0; }
@@ -480,10 +507,9 @@ h1 { font-family: 'Spectral', serif; font-weight: 400; font-size: 74px; line-hei
 .sec { padding: 40px 0 92px; }
 .sec-head { margin-bottom: 40px; max-width: 560px; }
 .sec-head.wide { max-width: 620px; }
-.lp-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #b0917d; text-transform: uppercase; margin-bottom: 12px; }
-h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-spacing: -1.6px; margin: 0; color: #201e1a; line-height: 1.04; }
-.h2-sm { font-size: 44px; letter-spacing: -1.5px; }
-.lead { font-size: 18px; line-height: 1.6; color: #6b6459; margin: 16px 0 0; }
+.lp-eyebrow { font-size: var(--ms-sm); font-weight: 700; letter-spacing: 1px; color: #7d6758; text-transform: uppercase; margin-bottom: 12px; }
+h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: var(--ms-7xl); letter-spacing: -1.6px; margin: 0; color: #201e1a; line-height: 1.04; text-wrap: balance; }
+.lead { font-size: var(--ms-2xl); line-height: 1.6; color: #6b6459; margin: 16px 0 0; text-wrap: pretty; }
 .lead b, .sec-head b { color: #262420; font-weight: 600; }
 
 .lp-card { background: #fbf8f0; border: 1px solid #eadfc9; border-radius: 26px; box-shadow: 0 20px 50px -34px rgba(74,63,44,0.5); }
@@ -491,40 +517,43 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 /* Fark */
 .fark-two { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 28px; align-items: stretch; }
 .miss-card { padding: 30px 30px 32px; }
-.miss-title { font-family: 'Spectral', serif; font-size: 22px; color: #33302b; margin-bottom: 4px; }
-.miss-sub { font-size: 14px; color: #9a917f; margin-bottom: 20px; }
+.miss-title { font-family: 'Spectral', serif; font-size: var(--ms-3xl); color: #33302b; margin-bottom: 4px; }
+.miss-sub { font-size: var(--ms-md); color: #726a5e; margin-bottom: 20px; }
 .sbtns { display: flex; gap: 10px; margin-bottom: 24px; }
-.sbtn { flex: 1; border: 2px solid; border-radius: 18px; padding: 16px 6px 13px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.sdot { width: 42px; height: 42px; border-radius: 50%; color: #fbf8f0; display: flex; align-items: center; justify-content: center; font-size: 21px; font-weight: 700; }
-.slabel { font-size: 12.5px; font-weight: 700; }
-.reason-label { font-size: 13.5px; color: #6b6459; font-weight: 600; margin-bottom: 12px; }
-.reason-label span { color: #b0a894; font-weight: 500; }
+.sbtn { flex: 1 1 0; min-width: 0; border: 2px solid; border-radius: 18px; padding: 16px 6px 13px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.sdot { width: 42px; height: 42px; border-radius: 50%; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: var(--ms-3xl); font-weight: 700; }
+.slabel { font-size: var(--ms-xs); font-weight: 700; }
+.reason-label { font-size: var(--ms-sm); color: #6b6459; font-weight: 600; margin-bottom: 12px; }
+.reason-label span { color: #726a5e; font-weight: 500; }
 .fark-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 18px; }
-.fark-chip { border: 1.5px solid; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 999px; }
-.note-prev { border: 1.5px solid #e2d8c1; background: #fdfbf5; border-radius: 14px; padding: 12px 15px; font-size: 14.5px; color: #b0a894; font-style: italic; }
+.fark-chip { border: 1.5px solid; font-size: var(--ms-md); font-weight: 600; padding: 9px 16px; border-radius: 999px; }
+.note-prev { border: 1.5px solid #e2d8c1; background: #fdfbf5; border-radius: 14px; padding: 12px 15px; font-size: var(--ms-md); color: #726a5e; font-style: italic; }
 
 .summary-card { background: #f2ede2; border-color: #e6dcc7; box-shadow: none; padding: 30px 30px 28px; display: flex; flex-direction: column; }
-.sum-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.5px; color: #9a917f; text-transform: uppercase; margin-bottom: 6px; }
-.sum-title { font-family: 'Spectral', serif; font-size: 25px; color: #33302b; line-height: 1.15; margin-bottom: 22px; }
+.sum-eyebrow { font-size: var(--ms-xs); font-weight: 700; letter-spacing: 0.5px; color: #726a5e; text-transform: uppercase; margin-bottom: 6px; }
+.sum-title { font-family: 'Spectral', serif; font-size: var(--ms-4xl); color: #33302b; line-height: 1.15; margin-bottom: 22px; }
 .bars { display: flex; flex-direction: column; gap: 16px; flex: 1; }
 .bar-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
-.bar-label { font-size: 15px; font-weight: 600; color: #3a352d; }
-.bar-count { font-size: 14px; font-weight: 700; color: #9a917f; }
+.bar-label { font-size: var(--ms-lg); font-weight: 600; color: #3a352d; }
+.bar-count { font-size: var(--ms-md); font-weight: 700; color: #726a5e; }
 .bar-track { height: 9px; border-radius: 6px; background: #e3d9c6; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 6px; }
-.sum-foot { margin-top: 24px; font-family: 'Spectral', serif; font-style: italic; font-size: 16px; color: #6b6459; line-height: 1.45; }
+.sum-foot { margin-top: 24px; font-family: 'Spectral', serif; font-style: italic; font-size: var(--ms-xl); color: #6b6459; line-height: 1.45; text-wrap: pretty; }
 
 /* Grid showcase */
 .grid-card { padding: 26px 26px 22px; overflow: hidden; }
 .grid-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
-.grid-title { font-family: 'Spectral', serif; font-size: 22px; color: #33302b; }
+.grid-title { font-family: 'Spectral', serif; font-size: var(--ms-3xl); color: #33302b; }
 .lp-legend { display: flex; gap: 16px; flex-wrap: wrap; }
 .lp-legend-item { display: flex; align-items: center; gap: 6px; }
-.lp-legend-box { width: 18px; height: 18px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
-.lp-legend-item span { font-size: 12.5px; color: #9a917f; font-weight: 600; }
+.lp-legend-box { width: 18px; height: 18px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: var(--ms-2xs); font-weight: 700; }
+.lp-legend-item span { font-size: var(--ms-xs); color: #726a5e; font-weight: 600; }
 /* Fractional day columns, so all 28-31 days fit whatever the width is.
    Column count comes from the template (the month's real length). */
-.monthgrid { display: grid; gap: 5px 3px; align-items: center; }
+.monthgrid {
+  display: grid; gap: 5px 3px; align-items: center;
+  grid-template-columns: minmax(60px, 128px) repeat(var(--cols), minmax(0, 1fr));
+}
 .mg-day { text-align: center; font-size: 10.5px; font-weight: 700; padding-bottom: 2px; }
 .mg-name { font-size: 14px; font-weight: 600; color: #3a352d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
 .mg-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
@@ -538,10 +567,9 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
   .mg-name { font-size: 11.5px; padding-right: 6px; }
 }
 /* On phones a name column would squeeze the days to 3px. Stack instead: the
-   label gets its own line and the month becomes a full-width colour band.
-   !important because the column count is set inline from the month length. */
+   label gets its own line and the month becomes a full-width colour band. */
 @media (max-width: 640px) {
-  .monthgrid { grid-template-columns: repeat(31, minmax(0, 1fr)) !important; gap: 3px 2px; }
+  .monthgrid { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 3px 2px; }
   .mg-corner, .mg-day { display: none; }
   .mg-name { grid-column: 1 / -1; font-size: 13px; padding: 10px 0 2px; }
   .mg-cell { border-radius: 3px; }
@@ -552,9 +580,9 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 /* 3-column layout (how + platforms) */
 .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
 .hstep { border-top: 1.5px solid #262420; padding-top: 22px; }
-.hstep-n { font-family: 'Spectral', serif; font-size: 30px; color: #6d6fae; margin-bottom: 12px; }
-.hstep-title { font-family: 'Spectral', serif; font-size: 22px; font-weight: 500; color: #201e1a; margin-bottom: 8px; }
-.hstep-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
+.hstep-n { font-family: 'Spectral', serif; font-size: var(--ms-5xl); color: #6d6fae; margin-bottom: 12px; }
+.hstep-title { font-family: 'Spectral', serif; font-size: var(--ms-3xl); font-weight: 500; color: #201e1a; margin-bottom: 8px; }
+.hstep-body { font-size: var(--ms-lg); line-height: 1.6; color: #6b6459; text-wrap: pretty; }
 
 /* Privacy */
 .privacy-card { background: #f2ede2; border: 1px solid #e6dcc7; border-radius: 26px; padding: 44px 44px 40px; }
@@ -565,11 +593,11 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
   display: flex; align-items: center; justify-content: center;
   background: #eceaf5; color: #6d6fae;
 }
-.pv-title { font-family: 'Spectral', serif; font-size: 18.5px; font-weight: 500; color: #201e1a; margin-bottom: 6px; }
-.pv-body { font-size: 14.5px; line-height: 1.55; color: #6b6459; }
+.pv-title { font-family: 'Spectral', serif; font-size: var(--ms-2xl); font-weight: 500; color: #201e1a; margin-bottom: 6px; }
+.pv-body { font-size: var(--ms-md); line-height: 1.55; color: #6b6459; text-wrap: pretty; }
 .pv-foot {
   display: flex; align-items: center; justify-content: center; gap: 9px;
-  margin-top: 26px; color: #8a8172; font-size: 14px;
+  margin-top: 26px; color: #726a5e; font-size: var(--ms-md);
   font-family: 'Spectral', serif; font-style: italic;
 }
 
@@ -577,43 +605,49 @@ h2 { font-family: 'Spectral', serif; font-weight: 400; font-size: 48px; letter-s
 .plat { border-top: 1.5px solid #262420; padding-top: 22px; }
 .plat.soon { opacity: 0.55; border-top-color: #d8cdb4; }
 .plat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.plat-title { font-family: 'Spectral', serif; font-size: 24px; font-weight: 500; color: #201e1a; }
-.plat-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #a89f8c; border: 1px solid #d8cdb4; padding: 3px 9px; border-radius: 999px; }
-.plat-body { font-size: 15.5px; line-height: 1.6; color: #6b6459; }
-.plat-cta { display: inline-block; margin-top: 14px; font-size: 14.5px; font-weight: 700; color: #6d6fae; }
+.plat-title { font-family: 'Spectral', serif; font-size: var(--ms-3xl); font-weight: 500; color: #201e1a; }
+.plat-badge { font-size: var(--ms-2xs); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #726a5e; border: 1px solid #d8cdb4; padding: 3px 9px; border-radius: 999px; }
+.plat-body { font-size: var(--ms-lg); line-height: 1.6; color: #6b6459; text-wrap: pretty; }
+.plat-cta { display: inline-block; margin-top: 14px; font-size: var(--ms-md); font-weight: 700; color: #6465a5; }
 .plat-cta:hover { opacity: 0.7; }
-.plat-note { margin-top: 26px; font-size: 13px; color: #9a917f; line-height: 1.6; }
+.plat-note { margin-top: 26px; font-size: var(--ms-sm); color: #726a5e; line-height: 1.6; text-wrap: pretty; }
 
 /* Closing */
 .closing { padding: 30px 0 80px; text-align: center; }
-.close-h { font-size: 52px; letter-spacing: -1.8px; max-width: 640px; margin: 0 auto 12px; line-height: 1.08; }
-.close-p { font-size: 17px; color: #6b6459; margin: 0 0 30px; }
+.close-h { font-size: var(--ms-7xl); letter-spacing: -1.8px; max-width: 640px; margin: 0 auto 12px; line-height: 1.08; text-wrap: balance; }
+.close-p { font-size: var(--ms-xl); color: #6b6459; margin: 0 0 30px; }
 .closing .btn-dark { padding: 17px 40px; }
 
 /* Footer */
 .foot { border-top: 1.5px solid #e2d9c8; padding: 40px 0 56px; }
 .foot-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
-.foot-desc { font-size: 15px; line-height: 1.55; color: #8a8172; max-width: 300px; margin: 0; }
-.foot-col-title { font-size: 12.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #b0a894; margin-bottom: 14px; }
-.foot-col { display: flex; flex-direction: column; gap: 10px; font-size: 15px; font-weight: 600; }
+.foot-desc { font-size: var(--ms-lg); line-height: 1.55; color: #726a5e; max-width: 300px; margin: 0; text-wrap: pretty; }
+.foot-col-title { font-size: var(--ms-xs); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #726a5e; margin-bottom: 14px; }
+.foot-col { display: flex; flex-direction: column; gap: 10px; font-size: var(--ms-lg); font-weight: 600; }
 .foot-col a { color: #6b6459; }
-.foot-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eadfc9; padding-top: 20px; font-size: 13.5px; color: #a89f8c; gap: 16px; flex-wrap: wrap; }
+.foot-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eadfc9; padding-top: 20px; font-size: var(--ms-sm); color: #726a5e; gap: 16px; flex-wrap: wrap; }
 .foot-quote { font-family: 'Spectral', serif; font-style: italic; }
 
+/* The hero breaks here, not at 780: below ~940px the copy column drops under
+   460px and the 74px headline goes from two lines to three — measured 226px
+   tall across the whole 781–900 band before the old breakpoint rescued it. */
+@media (max-width: 940px) {
+  .lp-hero { grid-template-columns: 1fr; gap: 40px; }
+}
 @media (max-width: 860px) {
   .fark-two { grid-template-columns: 1fr; }
   .privacy-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 780px) {
-  .wrap { padding: 0 20px; }
-  .nav-links a:not(.nav-cta) { display: none; }
-  .lp-hero { grid-template-columns: 1fr; gap: 40px; padding: 24px 0 60px; }
-  h1 { font-size: 46px; letter-spacing: -1.5px; }
-  .hero-copy p { font-size: 17px; }
+  .wrap { padding-inline: max(20px, env(safe-area-inset-left)) max(20px, env(safe-area-inset-right)); }
+  /* The three anchors used to vanish outright with nothing standing in for
+     them. They fit on one line down to ~390px and wrap below that. */
+  .nav { flex-wrap: wrap; row-gap: 14px; }
+  .nav-links { flex-wrap: wrap; gap: 18px; }
+  .lp-hero { padding: 24px 0 60px; }
+  h1 { letter-spacing: -1.5px; }
   .phone-wrap { order: 2; }
-  h2 { font-size: 34px; }
-  .h2-sm { font-size: 32px; }
-  .close-h { font-size: 34px; letter-spacing: -1px; }
+  .close-h { letter-spacing: -1px; }
   .cols3 { grid-template-columns: 1fr; gap: 32px; }
   .privacy-grid { grid-template-columns: 1fr; gap: 22px; }
   .privacy-card { padding: 32px 24px 30px; }

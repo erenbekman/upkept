@@ -15,6 +15,9 @@ const byHabit = ref<Record<number, Entry>>({})
 const reasonName = ref<Record<number, string>>({})
 const startDate = ref<string | null>(null)
 const editing = ref<Habit | null>(null)
+// Without this the first paint asserts "Henüz alışkanlık yok" before the query
+// has even run — the empty state flashed on every visit.
+const loaded = ref(false)
 
 const isToday = computed(() => date.value === today)
 const dayNo = computed(() => (startDate.value ? challengeDay(startDate.value, date.value) : null))
@@ -26,6 +29,7 @@ async function load() {
   const reasons = await entriesRepo.listReasons()
   reasonName.value = Object.fromEntries(reasons.map((r: ReasonTag) => [r.id, r.name]))
   startDate.value = await db.getMeta('challenge_start_date')
+  loaded.value = true
 }
 onMounted(load)
 watch(date, load)
@@ -62,7 +66,9 @@ const syncLabel = computed(() => {
 
 async function syncNow() {
   if (!syncApi.code.value) return navigateTo('/app/settings')
-  toast((await syncApi.sync()) ? 'Güncel ✓' : 'Güncellenemedi — bağlantını kontrol et')
+  const ok = await syncApi.sync()
+  if (ok) toast('Güncel ✓')
+  else toast('Güncellenemedi — bağlantını kontrol et', true)
 }
 </script>
 
@@ -86,13 +92,13 @@ async function syncNow() {
       </button>
     </div>
 
-    <div class="row spread">
+    <div class="row spread nowrap">
       <button class="icon-btn" aria-label="Önceki gün" @click="step(-1)">‹</button>
       <div style="text-align:center;">
-        <div class="big-day">{{ dayNo != null ? `Gün ${dayNo}` : (isToday ? 'Bugün' : fmtShort(date)) }}</div>
-        <div class="sub" style="font-size:15px;">{{ fmtLong(date) }}</div>
+        <h1 class="big-day">{{ dayNo != null ? `Gün ${dayNo}` : (isToday ? 'Bugün' : fmtShort(date)) }}</h1>
+        <div class="sub" style="font-size:var(--fs-lg);">{{ fmtLong(date) }}</div>
       </div>
-      <button class="icon-btn" aria-label="Sonraki gün" :disabled="isToday" :style="{ opacity: isToday ? 0.25 : 1 }" @click="step(1)">›</button>
+      <button class="icon-btn" aria-label="Sonraki gün" :disabled="isToday" @click="step(1)">›</button>
     </div>
 
     <div v-if="!isToday" class="row" style="justify-content:center; margin-top:10px;">
@@ -101,14 +107,14 @@ async function syncNow() {
     <div v-else class="serif-note">Bugün nasıl geçti? Acele yok.</div>
   </div>
 
-  <div v-if="!habits.length" class="empty-card">
+  <div v-if="loaded && !habits.length" class="empty-card">
     <div class="empty-icon">✿</div>
-    <div class="empty-title">Henüz alışkanlık yok</div>
+    <h2 class="empty-title">Henüz alışkanlık yok</h2>
     <div class="empty-text">Küçük başlamak yeterli. İlk alışkanlığını ekleyerek başla.</div>
     <NuxtLink to="/app/habits"><button class="btn btn-primary">İlk alışkanlığını ekle</button></NuxtLink>
   </div>
 
-  <div v-else class="habit-list">
+  <div v-else-if="habits.length" class="habit-list">
     <div
       v-for="h in habits"
       :key="h.id"

@@ -50,25 +50,80 @@ function subLabel(id: number) {
   return meta(id).sub
 }
 
+const doneCount = computed(() => habits.value.filter(h => byHabit.value[h.id]?.status === 'done').length)
+const progress = computed(() => {
+  if (!habits.value.length) return 0
+  const partial = habits.value.filter(h => byHabit.value[h.id]?.status === 'partial').length
+  return Math.round(((doneCount.value + partial / 2) / habits.value.length) * 100)
+})
+const allDone = computed(() => habits.value.length > 0 && doneCount.value === habits.value.length)
+const summaryText = computed(() => {
+  if (allDone.value) return t('today.sumAll')
+  if (doneCount.value || progress.value) return t('today.sumSome')
+  return isToday.value ? t('today.prompt') : t('today.sumPast')
+})
+
+const popId = ref<number | null>(null)
+const celebrate = ref(false)
+let popTimer: ReturnType<typeof setTimeout>
+let celebrateTimer: ReturnType<typeof setTimeout>
+
+function feedback(habitId: number | null, wasAllDone: boolean) {
+  clearTimeout(popTimer)
+  popId.value = habitId
+  popTimer = setTimeout(() => { popId.value = null }, 450)
+  if (allDone.value && !wasAllDone) {
+    haptic('success')
+    clearTimeout(celebrateTimer)
+    celebrate.value = true
+    celebrateTimer = setTimeout(() => { celebrate.value = false }, 1200)
+  } else if (habitId != null) {
+    haptic()
+  }
+}
+
+// One tap marks done, a second tap takes it back; partial and missed go
+// straight to done. Anything finer (reasons, notes) lives behind the row.
+async function quickToggle(h: Habit) {
+  const wasAllDone = allDone.value
+  const cur = byHabit.value[h.id]
+  const d = date.value
+  if (cur?.status === 'done') {
+    const { [h.id]: _, ...rest } = byHabit.value
+    byHabit.value = rest
+    haptic()
+    await entriesRepo.remove(h.id, d)
+  } else {
+    byHabit.value = { ...byHabit.value, [h.id]: { ...(cur ?? {}), habit_id: h.id, date: d, status: 'done', reason_tag_id: null, note: null } as Entry }
+    feedback(h.id, wasAllDone)
+    await entriesRepo.upsert({ habit_id: h.id, date: d, status: 'done' })
+  }
+  await load()
+}
+
 async function onSaved() {
+  const wasAllDone = allDone.value
   await load()
   const h = editing.value
   editing.value = null
-  if (h && byHabit.value[h.id]) toast('Kaydedildi ✓')
+  if (h && byHabit.value[h.id]) {
+    feedback(byHabit.value[h.id].status === 'done' ? h.id : null, wasAllDone)
+    toast(t('common.saved'))
+  }
 }
 
 const syncLabel = computed(() => {
-  if (!syncApi.code.value) return 'Cihazları bağla'
-  if (syncApi.status.value === 'syncing') return 'Güncelleniyor…'
-  if (syncApi.status.value === 'error') return 'Güncellenemedi · dokun'
-  return `Güncellendi · ${fmtAgo(syncApi.lastAt.value)}`
+  if (!syncApi.code.value) return t('today.connect')
+  if (syncApi.status.value === 'syncing') return t('common.syncing')
+  if (syncApi.status.value === 'error') return t('today.syncError')
+  return t('today.syncedAgo', { ago: fmtAgo(syncApi.lastAt.value) })
 })
 
 async function syncNow() {
   if (!syncApi.code.value) return navigateTo('/app/settings')
   const ok = await syncApi.sync()
-  if (ok) toast('Güncel ✓')
-  else toast('Güncellenemedi — bağlantını kontrol et', true)
+  if (ok) toast(t('common.upToDate'))
+  else toast(t('common.syncFailed'), true)
 }
 </script>
 
@@ -93,48 +148,51 @@ async function syncNow() {
     </div>
 
     <div class="row spread nowrap">
-      <button class="icon-btn" aria-label="Önceki gün" @click="step(-1)">‹</button>
+      <button class="icon-btn" :aria-label="t('common.prevDay')" @click="step(-1)">‹</button>
       <div style="text-align:center;">
-        <h1 class="big-day">{{ dayNo != null ? `Gün ${dayNo}` : (isToday ? 'Bugün' : fmtShort(date)) }}</h1>
+        <h1 class="big-day">{{ dayNo != null ? t('today.dayN', { n: dayNo }) : (isToday ? t('common.today') : fmtShort(date)) }}</h1>
         <div class="sub" style="font-size:var(--fs-lg);">{{ fmtLong(date) }}</div>
       </div>
-      <button class="icon-btn" aria-label="Sonraki gün" :disabled="isToday" @click="step(1)">›</button>
+      <button class="icon-btn" :aria-label="t('common.nextDay')" :disabled="isToday" @click="step(1)">›</button>
     </div>
 
     <div v-if="!isToday" class="row" style="justify-content:center; margin-top:10px;">
-      <button class="back-today" @click="date = today">Bugüne dön</button>
+      <button class="back-today" @click="date = today">{{ t('today.backToToday') }}</button>
     </div>
-    <div v-else class="serif-note">Bugün nasıl geçti? Acele yok.</div>
+
+    <div v-if="habits.length" class="day-summary" :class="{ complete: allDone, celebrate }" role="status">
+      <svg class="ring" viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="ring-track" cx="24" cy="24" r="19" />
+        <circle class="ring-fill" cx="24" cy="24" r="19" pathLength="100" :style="{ strokeDashoffset: 100 - progress }" />
+        <path class="ring-check" d="M17 24.5l5 5 9-10" pathLength="1" />
+      </svg>
+      <div class="flex1">
+        <div class="sum-title">{{ t('today.summary', { done: doneCount, total: habits.length }) }}</div>
+        <div class="sum-sub">{{ summaryText }}</div>
+      </div>
+    </div>
   </div>
 
-  <div v-if="loaded && !habits.length" class="empty-card">
-    <div class="empty-icon">✿</div>
-    <h2 class="empty-title">Henüz alışkanlık yok</h2>
-    <div class="empty-text">Küçük başlamak yeterli. İlk alışkanlığını ekleyerek başla.</div>
-    <NuxtLink to="/app/habits"><button class="btn btn-primary">İlk alışkanlığını ekle</button></NuxtLink>
-  </div>
+  <Onboarding v-if="loaded && !habits.length" @done="load" />
 
   <div v-else-if="habits.length" class="habit-list">
-    <div
-      v-for="h in habits"
-      :key="h.id"
-      class="habit-row"
-      role="button"
-      tabindex="0"
-      :aria-label="`${h.name} — ${subLabel(h.id)}`"
-      @click="editing = h"
-      @keydown.enter.prevent="editing = h"
-      @keydown.space.prevent="editing = h"
-    >
-      <div :class="h.icon ? 'habit-mark' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</div>
-      <div class="flex1">
-        <div class="habit-name">{{ h.name }}</div>
-        <div class="habit-sub" :class="meta(h.id).cls">{{ subLabel(h.id) }}</div>
-      </div>
-      <div class="pill" :class="meta(h.id).cls">
+    <div v-for="h in habits" :key="h.id" class="habit-row" @click="editing = h">
+      <button class="habit-main" :aria-label="`${h.name} — ${subLabel(h.id)}`" @click.stop="editing = h">
+        <HabitMark :icon="h.icon" :color="h.color" />
+        <span class="flex1">
+          <span class="habit-name">{{ h.name }}</span>
+          <span class="habit-sub" :class="meta(h.id).cls">{{ subLabel(h.id) }}</span>
+        </span>
+      </button>
+      <button
+        class="pill" :class="[meta(h.id).cls, { pop: popId === h.id }]"
+        :aria-label="byHabit[h.id]?.status === 'done' ? t('today.unmark', { name: h.name }) : t('today.markDone', { name: h.name })"
+        :aria-pressed="byHabit[h.id]?.status === 'done'"
+        @click.stop="quickToggle(h)"
+      >
         <span v-if="byHabit[h.id]" class="pill-text">{{ meta(h.id).label }}</span>
-        <span class="glyph-dot">{{ meta(h.id).glyph }}</span>
-      </div>
+        <span class="glyph-dot">{{ byHabit[h.id] ? meta(h.id).glyph : '✓' }}</span>
+      </button>
     </div>
   </div>
 

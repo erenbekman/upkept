@@ -157,7 +157,6 @@ td.cell:focus-visible {
 .big-day { font-family: var(--serif); font-size: var(--fs-7xl); font-weight: 600; line-height: 1.02; color: var(--ink); letter-spacing: -0.025em; }
 .sub { margin-top: 8px; font-size: var(--fs-sm); color: var(--muted); font-weight: 500; }
 .micro { text-align: center; font-size: var(--fs-xs); font-style: italic; font-family: var(--serif); color: var(--muted2); margin: 16px 24px 4px; }
-.serif-note { margin-top: 16px; font-size: var(--fs-lg); font-style: italic; font-family: var(--serif); color: var(--serif-soft); }
 .eyebrow { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em; color: var(--muted2); text-transform: uppercase; padding: 6px 6px 8px; }
 
 .card {
@@ -183,7 +182,7 @@ td.cell:focus-visible {
 button:disabled { cursor: default; opacity: 0.4; }
 
 button.btn { border: none; cursor: pointer; font-weight: 700; border-radius: 16px; padding: 15px; min-height: 44px; color: var(--ink2); background: var(--card); border: 1px solid var(--border); font-size: var(--fs-md); }
-button.btn:active { background: var(--card2); }
+button.btn:not(.btn-primary, .btn-danger, .btn-dashed):active { background: var(--card2); }
 button.btn-primary { background: var(--accent); color: var(--on-accent); border: none; }
 button.btn-primary:active { transform: scale(0.96); }
 button.btn-dashed { background: transparent; border: 1px dashed var(--dash); color: var(--accent-text); }
@@ -208,7 +207,46 @@ button.btn-dashed:active { background: var(--card); }
 .habit-row:active { transform: scale(0.985); background: var(--card2); }
 .habit-name { font-size: var(--fs-xl); font-weight: 600; color: var(--ink2); overflow-wrap: break-word; }
 .habit-sub { font-size: var(--fs-sm); color: var(--s-text); margin-top: 3px; font-weight: 500; }
-.pill { display: flex; align-items: center; gap: 9px; padding: 7px 7px 7px 14px; border-radius: 999px; background: var(--s-bg); }
+.pill {
+  display: flex; align-items: center; gap: 9px; padding: 7px 7px 7px 14px; border-radius: 999px;
+  background: var(--s-bg); border: none; cursor: pointer; font: inherit; min-height: 48px;
+  transition: background-color 0.2s ease;
+}
+.pill:active .glyph-dot { transform: scale(0.88); }
+.glyph-dot { transition: transform 0.12s ease, background-color 0.2s ease; }
+.pill.pop .glyph-dot { animation: pop 0.42s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes pop { 0% { transform: scale(0.6); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.st-none .glyph-dot { font-size: var(--fs-md); }
+.habit-main {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; text-align: left;
+  background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer;
+}
+.habit-main .flex1, .habit-main .habit-name, .habit-main .habit-sub { display: block; }
+
+.day-summary {
+  display: flex; align-items: center; gap: 14px; margin-top: 18px;
+  padding: 12px 16px; border-radius: 20px; background: var(--card); border: 1px solid var(--border);
+}
+.ring { width: 48px; height: 48px; flex: 0 0 48px; transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: var(--card2); stroke-width: 5; }
+.ring-fill {
+  fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 100;
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), stroke 0.3s ease;
+}
+.ring-check {
+  fill: none; stroke: var(--done-dot); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; transform: rotate(90deg); transform-origin: 24px 24px;
+  transition: stroke-dashoffset 0.35s ease 0.25s;
+}
+.day-summary.complete .ring-fill { stroke: var(--done-dot); }
+.day-summary.complete .ring-check { stroke-dashoffset: 0; }
+.day-summary.celebrate { animation: celebrate 1.1s ease; }
+@keyframes celebrate {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--done-dot) 45%, transparent); }
+  100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--done-dot) 0%, transparent); }
+}
+.sum-title { font-family: var(--serif); font-size: var(--fs-2xl); font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sum-sub { font-size: var(--fs-sm); color: var(--muted); margin-top: 2px; }
 .pill.st-none { padding-left: 7px; }
 .pill-text { font-size: var(--fs-xs); font-weight: 700; color: var(--s-text); }
 .glyph-dot {
@@ -222,12 +260,46 @@ button.btn-dashed:active { background: var(--card); }
   margin: 40px 20px; padding: 44px 28px; border-radius: 26px;
   border: 1px dashed var(--dash); background: var(--card); text-align: center;
 }
-.empty-icon { width: 66px; height: 66px; margin: 0 auto 18px; border-radius: 50%; border: 1.5px dashed var(--dash2); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: var(--fs-5xl); color: var(--muted2); }
+.empty-art { display: block; height: 64px; width: auto; max-width: 100%; margin: 0 auto 22px; }
+.ea-done { fill: var(--done-dot); opacity: 0.85; }
+.ea-partial { fill: var(--partial-dot); opacity: 0.85; }
+.ea-miss { fill: var(--miss-dot); opacity: 0.6; }
+.ea-none { fill: none; stroke: var(--dash2); stroke-width: 1.2; stroke-dasharray: 3 2.5; }
+.ea-track { fill: none; stroke: var(--card2); stroke-width: 9; }
+.ea-arc { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 22 100; transform: rotate(-90deg); transform-origin: 36px 36px; }
+.ea-num { font-family: var(--serif); font-size: 18px; font-weight: 600; fill: var(--muted2); }
 .empty-title { font-family: var(--serif); font-size: var(--fs-3xl); color: var(--ink); letter-spacing: -0.01em; margin-bottom: 8px; text-wrap: balance; }
 .empty-text { font-size: var(--fs-md); color: var(--muted); line-height: 1.5; max-width: 240px; margin: 0 auto 22px; text-wrap: pretty; }
 
+/* ---------- Onboarding ---------- */
+.onboard {
+  margin: 28px 20px; padding: 28px 22px 18px; border-radius: 26px; text-align: center;
+  background: var(--card); border: 1px solid var(--border); animation: screenIn 0.25s ease;
+}
+.onboard-step { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.08em; color: var(--muted2); }
+.onboard-title { font-family: var(--serif); font-size: var(--fs-4xl); font-weight: 600; color: var(--ink); letter-spacing: -0.02em; margin: 8px 0 6px; }
+.onboard-text { font-size: var(--fs-md); color: var(--muted); line-height: 1.5; margin: 0 auto 20px; max-width: 300px; text-wrap: pretty; }
+.onboard-hint { font-size: var(--fs-xs); color: var(--partial-text); margin: 12px 0 0; }
+.onboard-cta { width: 100%; margin-top: 18px; }
+.onboard-cta:disabled { opacity: 0.5; cursor: default; }
+.onboard-bell { font-size: 40px; margin-top: 12px; }
+.onboard-time { font-size: var(--fs-2xl); padding: 10px 18px; }
+.suggest-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.suggest {
+  display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 10px 12px; text-align: left;
+  border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--ink2);
+  font: inherit; font-size: var(--fs-md); font-weight: 600; cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
+}
+.suggest:active { transform: scale(0.97); }
+.suggest.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+.suggest-icon { font-size: var(--fs-2xl); line-height: 1; }
+.suggest-name { min-width: 0; overflow-wrap: anywhere; }
+@media (hover: hover) { .suggest:hover:not(.on) { border-color: var(--dash2); } }
+
 /* ---------- Grid ---------- */
-.grid-scroll { overflow: auto; padding: 8px 0; }
+.grid-scroll { --hname: 104px; overflow: auto; padding: 8px 0; }
+.row.nowrap + .sub { text-align: center; }
 table.grid { border-collapse: collapse; }
 table.grid th.day { width: 44px; min-width: 44px; padding: 4px 0; background: var(--bg); }
 /* A bare 1..31 strip gives no landmarks while scrolling sideways; the weekday
@@ -241,7 +313,7 @@ table.grid th.day.weekend, table.grid td.cell.weekend { background: var(--card2)
 .day-marker.today { background: var(--accent); }
 table.grid th.hname, table.grid td.hname {
   position: sticky; left: 0; z-index: 4; background: var(--bg);
-  width: 104px; min-width: 104px; text-align: left;
+  width: var(--hname); min-width: var(--hname); text-align: left;
   padding: 8px 14px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   border-right: 1px solid var(--line);
@@ -249,7 +321,7 @@ table.grid th.hname, table.grid td.hname {
 /* The td's own width is only a hint in an auto-layout table, so a long habit
    name grew the sticky column to its full text and squeezed the month down to
    two visible days. Clamping the inner box is what actually holds. */
-.hname-inner { display: flex; align-items: center; gap: 8px; min-width: 0; max-width: calc(104px - 28px); }
+.hname-inner { display: flex; align-items: center; gap: 8px; min-width: 0; max-width: calc(var(--hname) - 28px); }
 .hname-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 table.grid thead th.hname { z-index: 6; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.05em; color: var(--muted2); text-transform: uppercase; }
 /* min-width, not width: the table layout compresses a plain width down to
@@ -311,7 +383,8 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 .streak-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; }
 .streak-row + .streak-row { margin-top: 6px; }
 .streak-bar { height: 8px; border-radius: 5px; background: var(--accent); opacity: 0.65; }
-.streak-days { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); min-width: 62px; text-align: right; }
+.streak-days { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); min-width: 62px; text-align: right; line-height: 1.15; }
+.streak-days small { display: block; font-size: var(--fs-2xs); font-weight: 600; color: var(--muted); }
 
 /* ---------- Settings / Habits chips ---------- */
 .chip {
@@ -330,16 +403,17 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 .seg button { border: none; background: transparent; color: var(--muted); font-size: var(--fs-md); font-weight: 700; padding: 9px 16px; border-radius: 9px; cursor: pointer; min-height: 44px; transition: background-color 0.15s, color 0.15s; }
 .seg button.on { background: var(--accent); color: var(--on-accent); }
 .manage-row { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); }
-/* Reorder arrows. Inline styles here fought the disabled rule — an inline
-   cursor:pointer beat it, so a dead arrow still claimed to be clickable. */
-.grab {
-  background: none; border: none; padding: 0; cursor: pointer;
-  /* The glyph stays small but the target is a real 24x24: measured 8x11px, under
-     the WCAG 2.5.8 AA baseline. Two of them stack, so they get 24 each rather
-     than a pseudo-element expansion that would overlap its neighbour. */
-  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-  font-size: var(--fs-xl); line-height: 1; color: var(--muted2);
+.manage-row { position: relative; transition: transform 0.2s cubic-bezier(0.3, 0.9, 0.3, 1), box-shadow 0.2s ease; }
+.settling .manage-row { transition: none; }
+.manage-row.dragging { box-shadow: 0 10px 28px rgba(0,0,0,0.18); border-color: var(--accent); }
+.drag-handle {
+  flex: 0 0 auto; width: 32px; height: 44px; margin: -6px -4px -6px -6px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; border-radius: 10px; color: var(--muted2);
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
 }
+.drag-handle svg { fill: currentColor; }
+.manage-row.dragging .drag-handle { cursor: grabbing; color: var(--accent-text); }
 .color-dot { width: 12px; height: 12px; border-radius: 50%; }
 
 /* Habit colour + icon. Squares, not the native <input type="color"> — that one
@@ -352,6 +426,15 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   padding: 0;
 }
 .color-swatch.on { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--sheet); }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; }
+.swatch-grid .color-swatch { width: 100%; height: auto; aspect-ratio: 1; }
+.color-custom {
+  display: flex; align-items: center; justify-content: center; position: relative;
+  border: 1px dashed var(--dash); box-shadow: none; color: var(--accent-text);
+  font-size: var(--fs-2xl); font-weight: 500;
+  background: conic-gradient(from 0deg, #c8626d33, #b3790333, #349d6233, #0891c933, #8c74cc33, #c8626d33);
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .icon-swatch {
   width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
   border: 1px solid var(--border); background: var(--card);
@@ -373,6 +456,9 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
   display: flex; align-items: center; justify-content: center; font-size: var(--fs-lg);
 }
 .habit-mark.sm { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 7px; font-size: var(--fs-xs); }
+.habit-mark.text { color: #fff; font-weight: 800; font-size: var(--fs-sm); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.habit-mark.sm.text { font-size: var(--fs-2xs); }
+.pt-mark { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 8px; }
 /* No icon chosen: the colour still has to identify the habit, so it becomes a
    slim bar rather than an empty coloured square. */
 .habit-bar { width: 5px; height: 26px; border-radius: 3px; flex: 0 0 5px; display: block; }
@@ -478,7 +564,6 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 /* Press feedback the two newest controls were missing. The toast keeps its
    centring translate, so the scale composes onto it rather than replacing it. */
 .toast-error:active { transform: translateX(-50%) scale(0.96); }
-.grab:not(:disabled):active { color: var(--ink); }
 
 /* ---------- Confirm / prompt ---------- */
 .ask-overlay { display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 60; }
@@ -586,7 +671,7 @@ button.btn-danger:active { transform: scale(0.96); }
    anywhere: every control read as inert until it was actually clicked. Gated on
    (hover: hover) so touch devices never latch a stuck hover after a tap. */
 @media (hover: hover) {
-  button.btn:hover:not(:disabled),
+  button.btn:not(.btn-primary, .btn-danger, .btn-dashed):hover:not(:disabled),
   .icon-btn:hover:not(:disabled),
   .date-nav:hover:not(:disabled),
   .date-pill:hover,
@@ -607,7 +692,7 @@ button.btn-danger:active { transform: scale(0.96); }
   .color-swatch:hover:not(.on) { border-color: var(--muted2); }
 
   .chip-x:hover { background: var(--dash); color: var(--ink2); }
-  .grab:hover:not(:disabled) { color: var(--ink2); }
+  .drag-handle:hover { color: var(--ink2); }
   .toast-error:hover { opacity: 0.92; }
   .seg button:hover:not(.on) { color: var(--ink2); }
   .clear-link:hover { color: var(--ink2); }
@@ -616,6 +701,13 @@ button.btn-danger:active { transform: scale(0.96); }
 }
 @media (hover: hover) and (min-width: 860px) {
   .tab:hover:not(.router-link-exact-active) { background: var(--card2); }
+}
+
+/* Tablet portrait: a 480px phone column left half the screen empty and cut the
+   month grid off at nine days. */
+@media (min-width: 600px) and (max-width: 859px) {
+  .app-shell, .tabbar { max-width: 680px; }
+  .screen, .habit-list, .legend { padding-inline: 28px; }
 }
 
 /* ---------- Desktop (geniş ekran): yan menü + geniş içerik ---------- */
@@ -643,16 +735,20 @@ button.btn-danger:active { transform: scale(0.96); }
   .screen, .habit-list, .grid-scroll, .legend { max-width: 760px; margin-left: auto; margin-right: auto; }
   /* The month table is data, not prose: 760px is the right measure for text but
      it forced horizontal scrolling while ~300px of content area sat empty.
-     1532px = 32px padding + a full 31-day month (104px name column + 31x44px)
+     1596px = 32px padding + a full 31-day month (168px name column + 31x44px)
      + 32px, so the grid stops growing exactly when the whole month fits. */
-  .screen.wide, .grid-scroll, .legend.wide { max-width: 1532px; }
+  .screen.wide, .grid-scroll, .legend.wide { max-width: 1596px; }
   .grid-scroll { padding-inline: 32px; }
   /* Spread across 1468px the month arrows would sit at opposite ends of the
-     screen — keep them a cluster on the table's leading edge. */
-  .screen.wide > .row { max-width: 520px; }
+     screen — keep them a centred cluster above the table. */
+  .screen.wide > .row { max-width: 520px; margin-inline: auto; }
+  table.grid { margin-inline: auto; }
+  .grid-scroll { --hname: 168px; }
+  /* The sidebar already carries the wordmark. */
+  .brand { visibility: hidden; }
   .screen { padding: 40px 32px 8px; }
   .habit-list { padding: 10px 32px; }
-  .empty-card { max-width: 620px; margin: 48px auto; }
+  .empty-card, .onboard { max-width: 620px; margin: 48px auto; }
 
   /* status editor → yan menü sağındaki alanda ortalanmış modal */
   .sheet {
@@ -664,8 +760,8 @@ button.btn-danger:active { transform: scale(0.96); }
   .toast { left: calc(232px + (100% - 232px) / 2); bottom: 40px; }
 }
 
-/* 232px sidebar + the grid's 1532px cap: past this the whole month is on screen
+/* 232px sidebar + the grid's 1596px cap: past this the whole month is on screen
    and there is nothing left to scroll to. */
-@media (min-width: 1764px) {
+@media (min-width: 1828px) {
   .scroll-hint { display: none; }
 }

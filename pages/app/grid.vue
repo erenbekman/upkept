@@ -27,8 +27,24 @@ async function load() {
   cells.value = Object.fromEntries(list.map(e => [`${e.habit_id}-${e.date}`, e]))
   loaded.value = true
 }
-onMounted(load)
-watch([year, month, useSync().dataVersion], load)
+const scroller = ref<HTMLElement | null>(null)
+
+// The month opens at day 1, so by the 20th today sat two screens to the right.
+// Only on opening a month — a data reload must not yank the user's scroll.
+async function centerToday() {
+  await nextTick()
+  const el = scroller.value
+  const th = el?.querySelector<HTMLElement>('th.day .day-num.today')?.closest('th')
+  const name = el?.querySelector<HTMLElement>('th.hname')
+  if (!el || !th) return
+  const nameW = name?.offsetWidth ?? 0
+  const left = th.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft
+  el.scrollLeft = left - nameW - (el.clientWidth - nameW) / 2 + th.offsetWidth / 2
+}
+
+onMounted(async () => { await load(); centerToday() })
+watch([year, month], async () => { await load(); centerToday() })
+watch(useSync().dataVersion, load)
 
 function shift(dir: -1 | 1) {
   let m = month.value + dir, y = year.value
@@ -47,12 +63,12 @@ function cell(habitId: number, day: number) {
   return { cls: m.cls, glyph: m.glyph, extra: '', isToday }
 }
 
-const legend = [
-  { ...statusMeta('done'), label: 'Yaptım' },
-  { ...statusMeta('partial'), label: 'Kısmen' },
-  { ...statusMeta('missed'), label: 'Yapamadım' },
-  { cls: 'st-none', glyph: '·', label: 'Kayıt yok', extra: 'empty' },
-]
+const legend = computed(() => [
+  { ...statusMeta('done'), extra: '' },
+  { ...statusMeta('partial'), extra: '' },
+  { ...statusMeta('missed'), extra: '' },
+  { cls: 'st-none', glyph: '·', label: t('status.empty'), extra: 'empty' },
+])
 
 function open(habit: Habit, day: number) {
   const date = dateOf(day)
@@ -93,22 +109,28 @@ async function onSaved() { await load(); editing.value = null }
 <template>
   <div class="screen wide">
     <div class="row spread nowrap">
-      <button class="icon-btn" aria-label="Önceki ay" @click="shift(-1)">‹</button>
+      <button class="icon-btn" :aria-label="t('common.prevMonth')" @click="shift(-1)">‹</button>
       <h1 class="title">{{ fmtMonth(year, month) }}</h1>
-      <button class="icon-btn" aria-label="Sonraki ay" @click="shift(1)">›</button>
+      <button class="icon-btn" :aria-label="t('common.nextMonth')" @click="shift(1)">›</button>
     </div>
     <!-- The scroll half of the hint is a lie once the whole month fits. -->
-    <div class="sub"><span class="scroll-hint">Kaydırarak tüm ayı gör · </span>bugün vurgulu</div>
+    <div v-if="habits.length" class="sub"><span class="scroll-hint">{{ t('grid.scrollHint') }}</span>{{ t('grid.todayHighlighted') }}</div>
   </div>
 
-  <p v-if="loaded && !habits.length" class="sub" style="padding:0 20px;">Alışkanlık yok.</p>
+  <EmptyState
+    v-if="loaded && !habits.length"
+    art="grid"
+    :title="t('grid.emptyTitle')"
+    :text="t('grid.emptyText')"
+    :cta="t('common.addHabit')"
+  />
 
   <template v-else-if="habits.length">
-    <div class="grid-scroll">
+    <div ref="scroller" class="grid-scroll">
       <table class="grid">
         <thead>
           <tr>
-            <th class="hname" scope="col">Gün</th>
+            <th class="hname" scope="col">{{ t('grid.dayCol') }}</th>
             <th
               v-for="d in days" :key="d" class="day" scope="col"
               :class="{ sel: editing?.date === dateOf(d), weekend: isWeekend(dateOf(d)) }"
@@ -123,7 +145,7 @@ async function onSaved() { await load(); editing.value = null }
           <tr v-for="h in habits" :key="h.id">
             <th class="hname" scope="row">
               <span class="hname-inner">
-                <span :class="h.icon ? 'habit-mark sm' : 'habit-bar'" :style="{ background: h.color || 'var(--accent)' }">{{ h.icon || '' }}</span>
+                <HabitMark :icon="h.icon" :color="h.color" sm />
                 <span class="hname-text" :title="h.name">{{ h.name }}</span>
               </span>
             </th>

@@ -14,11 +14,11 @@ export function useUpdater() {
     try {
       const { check: checkUpdate } = await import('@tauri-apps/plugin-updater')
       const update = await checkUpdate()
-      if (!update) return manual ? 'En güncel sürümdesin ✓' : null
+      if (!update) return manual ? t('updater.latest') : null
       const ok = await useAsk().confirm({
-        title: `Yeni sürüm var: ${update.version}`,
-        message: 'İndirilip kurulacak, sonra uygulama yeniden başlayacak.',
-        okLabel: 'Güncelle',
+        title: t('updater.available', { v: update.version }),
+        message: t('updater.availableText'),
+        okLabel: t('updater.update'),
       })
       if (!ok) return null
       await update.downloadAndInstall()
@@ -27,7 +27,7 @@ export function useUpdater() {
       return null
     } catch (e) {
       console.warn('updater:', e)
-      return manual ? 'Güncelleme denetlenemedi — bağlantını kontrol et' : null
+      return manual ? t('updater.failed') : null
     } finally {
       busy.value = false
     }

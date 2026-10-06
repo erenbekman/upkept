@@ -48,12 +48,3 @@ CREATE INDEX IF NOT EXISTS idx_entries_habit ON entries(habit_id);
 export const ALTERS = [
   'ALTER TABLE habits ADD COLUMN icon TEXT',
 ]
-
-export const DEFAULT_REASON_TAGS = [
-  'Yorgundum',
-  'Seyahatteydim',
-  'Hastaydım',
-  'Sosyal bir şey çıktı',
-  'Unuttum',
-  'Zaman yoktu',
-]

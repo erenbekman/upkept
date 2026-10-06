@@ -10,6 +10,40 @@ export interface Habit {
   created_at: string
 }
 
+// Full hue wheel at one OKLCH lightness (L 0.62) so no swatch outshouts another
+// and the 5px habit bar stays visible on both the light and the dark card.
+export const HABIT_COLORS = [
+  { hex: '#c8626d', name: 'raspberry' },
+  { hex: '#c8664e', name: 'coral' },
+  { hex: '#c16e2d', name: 'orange' },
+  { hex: '#b37903', name: 'mustard' },
+  { hex: '#9e840a', name: 'olive' },
+  { hex: '#848f1e', name: 'pistachio' },
+  { hex: '#629742', name: 'leaf' },
+  { hex: '#349d62', name: 'emerald' },
+  { hex: '#0c9c82', name: 'seaGreen' },
+  { hex: '#06999a', name: 'turquoise' },
+  { hex: '#1896ad', name: 'petrol' },
+  { hex: '#0891c9', name: 'skyBlue' },
+  { hex: '#4c88d3', name: 'blue' },
+  { hex: '#707ed4', name: 'indigo' },
+  { hex: '#8c74cc', name: 'lavender' },
+  { hex: '#a36cbc', name: 'lilac' },
+  { hex: '#b566a5', name: 'redbud' },
+  { hex: '#c1628a', name: 'rose' },
+  { hex: '#80878f', name: 'slate' },
+  { hex: '#928377', name: 'taupe' },
+]
+
+// Spread new habits around the wheel instead of stacking them on one colour.
+export function nextHabitColor(used: (string | null)[]): string {
+  const taken = new Set(used)
+  const pick = HABIT_COLORS[(used.length * 7) % HABIT_COLORS.length].hex
+  return taken.has(pick) ? HABIT_COLORS.find(c => !taken.has(c.hex))?.hex ?? pick : pick
+}
+
+export const isEmojiIcon = (s: string) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(s)
+
 export function useHabits() {
   const db = useDb()
 

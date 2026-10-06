@@ -28,6 +28,7 @@ const scrollTop = () => window.scrollY || document.documentElement.scrollTop || 
 
 function onTouchStart(e: TouchEvent) {
   if (refreshing.value || scrollTop() > 0 || e.touches.length !== 1) return
+  if ((e.target as Element).closest('[data-no-ptr]')) return
   startY = e.touches[0].clientY
   tracking = true
 }
@@ -50,8 +51,8 @@ async function onTouchEnd() {
   try {
     const ok = code.value ? await sync() : true
     dataVersion.value++
-    if (code.value && !ok) toast('Güncellenemedi — bağlantını kontrol et', true)
-    else toast(code.value ? 'Güncel ✓' : 'Yenilendi ✓')
+    if (code.value && !ok) toast(t('common.syncFailed'), true)
+    else toast(code.value ? t('common.upToDate') : t('ptr.refreshed'))
   } finally {
     refreshing.value = false
   }
@@ -77,17 +78,28 @@ onUnmounted(() => {
   window.removeEventListener('touchcancel', onTouchEnd)
 })
 
+const route = useRoute()
+const activePath = computed(() => route.path.replace(/(.)\/$/, '$1'))
 const spinning = computed(() => refreshing.value || status.value === 'syncing')
 
 // Inline SVG, not text glyphs: the labels are hidden on mobile, so the icon is
 // the only affordance — and ☼ ▦ ◔ ❋ ⚙︎ render from whatever font falls back,
 // inconsistently across iOS versions (⚙︎ turns into an emoji on some).
+const RAYS = '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>'
+const LEAVES = '<path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>'
+const STEM = '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/>'
+const SQUARES = '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'
+const KNOBS = '<circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>'
+const SLIDERS = '<path d="M20 7h-9"/><path d="M14 17H5"/>'
+const filled = (svg: string) => `<g fill="currentColor">${svg}</g>`
+
+// `on` is the solid variant shown for the active tab.
 const tabs = [
-  { to: '/app', label: 'Bugün', path: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>' },
-  { to: '/app/grid', label: 'Grid', path: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>' },
-  { to: '/app/stats', label: 'İstatistik', path: '<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>' },
-  { to: '/app/habits', label: 'Alışkanlıklar', path: '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>' },
-  { to: '/app/settings', label: 'Ayarlar', path: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>' },
+  { to: '/app', label: 'today', path: '<circle cx="12" cy="12" r="4"/>' + RAYS, on: filled('<circle cx="12" cy="12" r="4.5"/>') + RAYS },
+  { to: '/app/grid', label: 'grid', path: SQUARES, on: filled(SQUARES) },
+  { to: '/app/stats', label: 'stats', path: '<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>', on: filled('<path d="M10.5 4A9 9 0 1 0 19.5 13H10.5z"/><path d="M13.5 1.5A9 9 0 0 1 22.5 10.5H13.5z"/>') },
+  { to: '/app/habits', label: 'habits', path: STEM + LEAVES, on: STEM + filled(LEAVES) },
+  { to: '/app/settings', label: 'settings', path: SLIDERS + KNOBS, on: SLIDERS + filled(KNOBS) },
 ]
 </script>
 
@@ -99,7 +111,7 @@ const tabs = [
       :style="{ transform: `translate(-50%, ${refreshing ? 34 : pull}px)`, opacity: refreshing ? 1 : Math.min(1, pull / 40) }"
     >
       <span class="ptr-ic" :class="{ spin: spinning }">⟳</span>
-      <span>{{ refreshing ? 'Güncelleniyor…' : (pull >= 62 ? 'Bırak, güncellensin' : 'Aşağı çek') }}</span>
+      <span>{{ refreshing ? t('common.syncing') : (pull >= PULL_TRIGGER ? t('ptr.release') : t('ptr.pull')) }}</span>
     </div>
 
     <main>
@@ -107,13 +119,13 @@ const tabs = [
     </main>
 
     <nav class="tabbar">
-      <NuxtLink v-for="t in tabs" :key="t.to" :to="t.to" class="tab" :aria-label="t.label" :title="t.label">
+      <NuxtLink v-for="tab in tabs" :key="tab.to" :to="tab.to" class="tab" :aria-label="t(`tabs.${tab.label}`)" :title="t(`tabs.${tab.label}`)">
         <svg
           class="tab-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"
           stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
-          v-html="t.path"
+          v-html="activePath === tab.to ? tab.on : tab.path"
         />
-        <span class="tab-label">{{ t.label }}</span>
+        <span class="tab-label">{{ t(`tabs.${tab.label}`) }}</span>
       </NuxtLink>
     </nav>
 
@@ -129,7 +141,7 @@ const tabs = [
     <div role="alert">
       <button v-if="msg && isError" class="toast toast-error" @click="dismissToast">
         {{ msg }}<span class="toast-x" aria-hidden="true">✕</span>
-        <span class="tab-label">Kapat</span>
+        <span class="tab-label">{{ t('common.close') }}</span>
       </button>
     </div>
   </div>

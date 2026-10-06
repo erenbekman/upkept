@@ -3,7 +3,9 @@ export default defineNuxtConfig({
   // (/app/**) stays a client-only SPA because it needs SQLite/localStorage.
   routeRules: {
     '/': { prerender: true },
+    '/en': { prerender: true },
     '/privacy': { prerender: true },
+    '/gizlilik': { prerender: true },
     '/app/**': { ssr: false },
   },
   devtools: { enabled: false },

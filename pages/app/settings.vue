@@ -6,6 +6,22 @@ const reasonsRepo = useReasons()
 const backup = useBackup()
 const syncApi = useSync()
 const { theme, apply: applyTheme } = useTheme()
+const { locale, setLocale } = useLocale()
+const reminder = useReminder()
+const reminderAt = ref(reminder.time.value ?? DEFAULT_REMINDER)
+
+async function setReminder(on: boolean) {
+  if (!on) {
+    await reminder.disable()
+    toast(t('reminder.off'))
+    return
+  }
+  if (await reminder.enable(reminderAt.value)) toast(t('reminder.set', { time: reminderAt.value }))
+  else toast(t('reminder.denied'), true)
+}
+async function changeReminderTime() {
+  if (reminder.time.value) await setReminder(true)
+}
 const { show: toast } = useToast()
 
 const codeInput = ref('')
@@ -13,7 +29,7 @@ const codeInput = ref('')
 async function startSync() {
   syncApi.setCode(syncApi.generateCode())
   await syncApi.sync()
-  toast('Senkronizasyon başladı ✓')
+  toast(t('settings.syncStarted'))
 }
 async function linkSync() {
   const c = codeInput.value.trim().toLowerCase()
@@ -21,28 +37,28 @@ async function linkSync() {
   syncApi.setCode(c)
   codeInput.value = ''
   await syncApi.sync()
-  toast('Bağlandı ✓')
+  toast(t('settings.linked'))
 }
 async function unlinkSync() {
   const ok = await useAsk().confirm({
-    title: 'Bağlantı kesilsin mi?',
-    message: 'Bu cihazın senkronu durur. Veriler cihazda kalır.',
-    okLabel: 'Kes',
+    title: t('settings.unlinkTitle'),
+    message: t('settings.unlinkText'),
+    okLabel: t('settings.unlinkOk'),
     danger: true,
   })
   if (!ok) return
   syncApi.setCode(null)
-  toast('Bağlantı kesildi')
+  toast(t('settings.unlinked'))
 }
 async function copyCode() {
   if (!syncApi.code.value) return
   await navigator.clipboard.writeText(syncApi.code.value)
-  toast('Kod kopyalandı')
+  toast(t('settings.copied'))
 }
 async function syncNow() {
   const ok = await syncApi.sync()
-  if (ok) toast('Güncel ✓')
-  else toast('Güncellenemedi — bağlantını kontrol et', true)
+  if (ok) toast(t('common.upToDate'))
+  else toast(t('common.syncFailed'), true)
 }
 
 const updater = useUpdater()
@@ -64,11 +80,11 @@ watch(syncApi.dataVersion, load)
 
 async function saveStart() {
   await db.setMeta('challenge_start_date', startDate.value)
-  toast('Başlangıç tarihi güncellendi')
+  toast(t('settings.startDateSaved'))
 }
 
 async function addReason() {
-  const n = await useAsk().text({ title: 'Yeni etiket', input: 'Örn. yorgundum', okLabel: 'Ekle' })
+  const n = await useAsk().text({ title: t('settings.newReason'), input: t('settings.newReasonInput'), okLabel: t('settings.add') })
   if (!n) return
   await reasonsRepo.create(n)
   reasons.value = await reasonsRepo.list()
@@ -85,19 +101,19 @@ async function doExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `lifebootstrap-yedek-${todayStr()}.json`
+  a.download = `${t('settings.exportFile')}-${todayStr()}.json`
   a.click()
   URL.revokeObjectURL(url)
-  toast('Yedek dışa aktarıldı ✓')
+  toast(t('settings.exported'))
 }
 
 async function onImportFile(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   const ok = await useAsk().confirm({
-    title: 'Yedek geri yüklensin mi?',
-    message: 'Mevcut tüm veri silinip yedekle değiştirilecek.',
-    okLabel: 'Geri yükle',
+    title: t('settings.importTitle'),
+    message: t('settings.importText'),
+    okLabel: t('settings.importOk'),
     danger: true,
   })
   if (!ok) {
@@ -107,9 +123,9 @@ async function onImportFile(e: Event) {
   try {
     await backup.importAll(JSON.parse(await file.text()))
     await load()
-    toast('İçe aktarıldı ✓')
+    toast(t('settings.imported'))
   } catch (err: any) {
-    toast('Hata: ' + (err?.message ?? 'içe aktarılamadı'), true)
+    toast(t('settings.importError', { msg: err?.message ?? t('settings.importFailed') }), true)
   } finally {
     if (fileInput.value) fileInput.value.value = ''
   }
@@ -118,109 +134,139 @@ async function onImportFile(e: Event) {
 
 <template>
   <div class="screen">
-    <h1 class="title">Ayarlar</h1>
+    <h1 class="title">{{ t('settings.title') }}</h1>
   </div>
 
   <!-- 24px between sections against 12px inside a field: the gap has to be at
        least double the intra-group one or the sections read as one list. -->
   <div class="screen" style="padding-top:0; display:flex; flex-direction:column; gap:24px;">
     <div>
-      <h2 class="eyebrow">Challenge</h2>
+      <h2 class="eyebrow">{{ t('settings.challenge') }}</h2>
       <div class="row spread field">
         <div>
-          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Başlangıç tarihi</div>
-          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">Gün sayacı buradan başlar</div>
+          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('settings.startDate') }}</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">{{ t('settings.startDateSub') }}</div>
         </div>
-        <input v-model="startDate" type="date" class="date-pill" aria-label="Challenge başlangıç tarihi" @change="saveStart" />
+        <input v-model="startDate" type="date" class="date-pill" :aria-label="t('settings.startDateLabel')" @change="saveStart" />
       </div>
     </div>
 
     <div>
-      <h2 class="eyebrow">Sebep etiketleri</h2>
+      <h2 class="eyebrow">{{ t('settings.reasons') }}</h2>
       <div class="field">
         <div class="chips-wrap">
           <div v-for="r in reasons" :key="r.id" class="chip">
             {{ r.name }}
-            <button class="chip-x" :aria-label="`${r.name} etiketini sil`" @click="removeReason(r)">✕</button>
+            <button class="chip-x" :aria-label="t('settings.removeReason', { name: r.name })" @click="removeReason(r)">✕</button>
           </div>
-          <button class="chip-add" @click="addReason">+ Etiket</button>
+          <button class="chip-add" @click="addReason">{{ t('settings.addReason') }}</button>
         </div>
       </div>
     </div>
 
     <div>
-      <h2 class="eyebrow">Veri</h2>
+      <h2 class="eyebrow">{{ t('settings.data') }}</h2>
       <div class="row" style="gap:12px;">
-        <button class="btn" style="flex:1;" @click="doExport">↑ Dışa aktar</button>
-        <button class="btn" style="flex:1;" @click="fileInput?.click()">↓ İçe aktar</button>
+        <button class="btn" style="flex:1;" @click="doExport">{{ t('settings.export') }}</button>
+        <button class="btn" style="flex:1;" @click="fileInput?.click()">{{ t('settings.import') }}</button>
         <input ref="fileInput" type="file" accept="application/json" style="display:none" @change="onImportFile" />
       </div>
     </div>
 
     <div>
-      <h2 class="eyebrow">Senkronizasyon</h2>
+      <h2 class="eyebrow">{{ t('settings.sync') }}</h2>
       <div class="field" style="display:flex; flex-direction:column; gap:12px;">
         <template v-if="!syncApi.code.value">
-          <div style="font-size:var(--fs-sm); color:var(--muted); line-height:1.5;">Cihazlarını login olmadan bağla. Bir cihazda başlat, çıkan kodu diğerlerine gir. En son değişen taraf kazanır.</div>
-          <button class="btn btn-primary" @click="startSync">Bu cihazda başlat</button>
-          <div style="text-align:center; font-size:var(--fs-xs); color:var(--muted2);">veya</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); line-height:1.5;">{{ t('settings.syncIntro') }}</div>
+          <button class="btn btn-primary" @click="startSync">{{ t('settings.syncStart') }}</button>
+          <div style="text-align:center; font-size:var(--fs-xs); color:var(--muted2);">{{ t('settings.or') }}</div>
           <div class="row" style="gap:8px;">
             <input
               v-model="codeInput" class="note-area" style="margin-top:0; flex:1;"
-              aria-label="Senkron kodu" placeholder="kodu yapıştır"
+              :aria-label="t('settings.codeLabel')" :placeholder="t('settings.codePlaceholder')"
               autocomplete="off" autocapitalize="off" spellcheck="false"
             />
-            <button class="btn" @click="linkSync">Bağla</button>
+            <button class="btn" @click="linkSync">{{ t('settings.link') }}</button>
           </div>
         </template>
         <template v-else>
           <div class="row spread">
             <div>
-              <div style="font-size:var(--fs-sm); color:var(--muted);">Senkron kodu</div>
+              <div style="font-size:var(--fs-sm); color:var(--muted);">{{ t('settings.codeLabel') }}</div>
               <div style="font-family:monospace; font-size:var(--fs-xl); font-weight:700; color:var(--ink); letter-spacing:1px;">{{ syncApi.code.value }}</div>
             </div>
-            <button class="btn" @click="copyCode">Kopyala</button>
+            <button class="btn" @click="copyCode">{{ t('settings.copy') }}</button>
           </div>
           <div style="font-size:var(--fs-xs); color:var(--muted);">
-            <span v-if="syncApi.status.value === 'syncing'">Güncelleniyor…</span>
-            <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">Güncellenemedi — internetini kontrol edip tekrar dene</span>
-            <span v-else>Son güncelleme: {{ fmtAgo(syncApi.lastAt.value) }}</span>
+            <span v-if="syncApi.status.value === 'syncing'">{{ t('common.syncing') }}</span>
+            <span v-else-if="syncApi.status.value === 'error'" style="color:var(--miss-text);">{{ t('settings.syncErrorLong') }}</span>
+            <span v-else>{{ t('settings.lastSync', { ago: fmtAgo(syncApi.lastAt.value) }) }}</span>
           </div>
           <div style="font-size:var(--fs-xs); color:var(--muted); line-height:1.5;">
-            Başka bir cihazda işaretleme yaptıysan <b>Şimdi güncelle</b>’ye bas — ya da ekranı aşağı çek. Uygulamayı her açtığında da kendiliğinden güncellenir.
+            {{ t('settings.syncHelp') }}
           </div>
           <div class="row" style="gap:12px;">
-            <button class="btn btn-primary" style="flex:1;" @click="syncNow">Şimdi güncelle</button>
-            <button class="btn" style="flex:1;" @click="unlinkSync">Bağlantıyı kes</button>
+            <button class="btn btn-primary" style="flex:1;" @click="syncNow">{{ t('settings.syncNow') }}</button>
+            <button class="btn" style="flex:1;" @click="unlinkSync">{{ t('settings.unlink') }}</button>
           </div>
         </template>
       </div>
     </div>
 
+    <div v-if="reminder.supported">
+      <h2 class="eyebrow">{{ t('reminder.section') }}</h2>
+      <div class="field" style="display:flex; flex-direction:column; gap:12px;">
+        <div class="row spread">
+          <div>
+            <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('reminder.label') }}</div>
+            <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">{{ t('reminder.sub') }}</div>
+          </div>
+          <div class="seg">
+            <button :class="{ on: !reminder.time.value }" :aria-pressed="!reminder.time.value" @click="setReminder(false)">{{ t('settings.off') }}</button>
+            <button :class="{ on: !!reminder.time.value }" :aria-pressed="!!reminder.time.value" @click="setReminder(true)">{{ t('settings.on') }}</button>
+          </div>
+        </div>
+        <input
+          v-if="reminder.time.value" v-model="reminderAt" type="time" class="date-pill" style="align-self:flex-start;"
+          :aria-label="t('reminder.time')" @change="changeReminderTime"
+        />
+      </div>
+    </div>
+
     <div v-if="isDesktop()">
-      <h2 class="eyebrow">Uygulama</h2>
+      <h2 class="eyebrow">{{ t('settings.app') }}</h2>
       <div class="row spread field">
         <div>
-          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Güncellemeler</div>
-          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">Açılışta kendiliğinden denetlenir</div>
+          <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('settings.updates') }}</div>
+          <div style="font-size:var(--fs-sm); color:var(--muted); margin-top:2px;">{{ t('settings.updatesSub') }}</div>
         </div>
         <button class="btn" :disabled="updater.busy.value" @click="checkUpdate">
-          {{ updater.busy.value ? 'Denetleniyor…' : 'Şimdi denetle' }}
+          {{ updater.busy.value ? t('settings.checking') : t('settings.checkNow') }}
         </button>
       </div>
     </div>
 
     <div>
-      <h2 class="eyebrow">Görünüm</h2>
+      <h2 class="eyebrow">{{ t('settings.appearance') }}</h2>
       <div class="row spread field">
-        <span style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">Tema</span>
+        <span style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('settings.theme') }}</span>
         <div class="seg">
-          <button :class="{ on: theme === 'light' }" :aria-pressed="theme === 'light'" @click="applyTheme('light')">Açık</button>
-          <button :class="{ on: theme === 'dark' }" :aria-pressed="theme === 'dark'" @click="applyTheme('dark')">Koyu</button>
+          <button :class="{ on: theme === 'light' }" :aria-pressed="theme === 'light'" @click="applyTheme('light')">{{ t('settings.light') }}</button>
+          <button :class="{ on: theme === 'dark' }" :aria-pressed="theme === 'dark'" @click="applyTheme('dark')">{{ t('settings.dark') }}</button>
+        </div>
+      </div>
+      <div class="row spread field" style="margin-top:12px;">
+        <span style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('settings.language') }}</span>
+        <div class="seg">
+          <button
+            v-for="l in LOCALES" :key="l.code" :lang="l.code"
+            :class="{ on: locale === l.code }" :aria-pressed="locale === l.code"
+            @click="setLocale(l.code)"
+          >{{ l.label }}</button>
         </div>
       </div>
     </div>
 
-    <div class="micro" style="margin-top:2px;">{{ syncApi.code.value ? 'Verilerin cihazlarında ve bulutta senkron.' : 'Verilerin cihazında kalır.' }}</div>
+    <div class="micro" style="margin-top:2px;">{{ syncApi.code.value ? t('settings.footerSynced') : t('settings.footerLocal') }}</div>
   </div>
 </template>

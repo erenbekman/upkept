@@ -109,6 +109,19 @@ test('a missed day does break the streak', () => {
   assert.equal(st[0].days, 1)
 })
 
+test('best streak survives a later break', () => {
+  const st = currentStreaks(
+    [h(1, 'A', '2026-06-01')],
+    [
+      e(1, '2026-06-28', 'done'), e(1, '2026-06-29', 'done'), e(1, '2026-06-30', 'partial'), e(1, '2026-07-01', 'done'),
+      e(1, '2026-07-02', 'missed'), e(1, '2026-07-09', 'done'),
+    ],
+    '2026-07-10',
+  )
+  assert.equal(st[0].days, 1)
+  assert.equal(st[0].best, 4)
+})
+
 test('partial keeps the streak alive', () => {
   const st = currentStreaks(
     [h(1, 'A', '2026-06-01')],

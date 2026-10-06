@@ -3,5 +3,5 @@ definePageMeta({ layout: false })
 </script>
 
 <template>
-  <Landing lang="tr" />
+  <PrivacyPolicy lang="tr" />
 </template>

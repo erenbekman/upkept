@@ -70,6 +70,7 @@ async function write() {
 
 async function pick(s: EntryStatus) {
   status.value = s
+  haptic()
   if (s === 'done') reasonId.value = null
   await write()
   if (s === 'done') {
@@ -99,7 +100,7 @@ function onPick(e: Event) {
     <template #head>
       <div class="row spread" style="align-items:baseline;">
         <div class="sheet-title">{{ habitName }}</div>
-        <span class="saved-flag" :style="{ opacity: saved ? 1 : 0 }">✓ Kaydedildi</span>
+        <span class="saved-flag" :style="{ opacity: saved ? 1 : 0 }">{{ t('editor.saved') }}</span>
       </div>
     </template>
 
@@ -109,16 +110,16 @@ function onPick(e: Event) {
     <div class="sheet-date">
       <button
         class="date-nav" :disabled="!canPrev"
-        aria-label="Önceki gün" @click="emit('goto', shiftDate(date, -1))"
+        :aria-label="t('common.prevDay')" @click="emit('goto', shiftDate(date, -1))"
       >‹</button>
       <label class="date-label">
-        <span class="date-main">{{ date === todayStr() ? 'Bugün' : fmtShort(date) }}</span>
+        <span class="date-main">{{ date === todayStr() ? t('common.today') : fmtShort(date) }}</span>
         <span class="date-sub">{{ fmtWeekdayLong(date) }}<template v-if="date !== todayStr()"> · {{ new Date(date + 'T00:00:00').getFullYear() }}</template></span>
-        <input type="date" :value="date" :max="todayStr()" aria-label="Tarih seç" @change="onPick" />
+        <input type="date" :value="date" :max="todayStr()" :aria-label="t('editor.pickDate')" @change="onPick" />
       </label>
       <button
         class="date-nav" :disabled="!canNext"
-        aria-label="Sonraki gün" @click="emit('goto', shiftDate(date, 1))"
+        :aria-label="t('common.nextDay')" @click="emit('goto', shiftDate(date, 1))"
       >›</button>
     </div>
 
@@ -138,7 +139,7 @@ function onPick(e: Event) {
 
     <Transition name="reveal">
     <div v-if="showReasons" style="margin-top:24px;">
-      <div class="reason-title">Bir sebep eklemek istersen <span>(opsiyonel)</span></div>
+      <div class="reason-title">{{ t('editor.reasonTitle') }} <span>{{ t('editor.optional') }}</span></div>
       <div class="chips-wrap">
         <button
           v-for="r in reasons"
@@ -153,15 +154,15 @@ function onPick(e: Event) {
         v-model="note"
         class="note-area"
         rows="2"
-        aria-label="Not"
-        placeholder="Kısa bir not… (opsiyonel)"
+        :aria-label="t('editor.note')"
+        :placeholder="t('editor.notePlaceholder')"
         @change="write"
       />
     </div>
     </Transition>
 
-    <button class="btn btn-primary" style="margin-top:24px; width:100%;" @click="leave('saved')">Bitti</button>
-    <button v-if="current" class="clear-link" @click="clear">Kaydı temizle</button>
-    <div class="micro" style="margin-top:14px;">Kaçırmak da yolculuğun bir parçası.</div>
+    <button class="btn btn-primary" style="margin-top:24px; width:100%;" @click="leave('saved')">{{ t('editor.done') }}</button>
+    <button v-if="current" class="clear-link" @click="clear">{{ t('editor.clear') }}</button>
+    <div class="micro" style="margin-top:14px;">{{ t('editor.micro') }}</div>
   </AppSheet>
 </template>

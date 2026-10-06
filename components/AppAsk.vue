@@ -55,9 +55,9 @@ function ok() {
         style="margin-top:0;" :aria-label="pending.input" :placeholder="pending.input" @keydown.enter="ok"
       />
       <div class="ask-actions">
-        <button class="btn" @click="cancel">Vazgeç</button>
+        <button class="btn" @click="cancel">{{ t('common.cancel') }}</button>
         <button class="btn" :class="pending.danger ? 'btn-danger' : 'btn-primary'" @click="ok">
-          {{ pending.okLabel ?? 'Tamam' }}
+          {{ pending.okLabel ?? t('common.ok') }}
         </button>
       </div>
     </div>

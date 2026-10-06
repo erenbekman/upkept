@@ -71,7 +71,7 @@ export function monthStats(input: {
 // haven't had the chance yet. The count starts from yesterday in that case.
 export function currentStreaks(
   habits: StatHabit[], entries: StatEntry[], today: string,
-): { name: string; days: number; color: string | null; icon: string | null }[] {
+): { name: string; days: number; best: number; color: string | null; icon: string | null }[] {
   const kept = new Map<number, Set<string>>()
   for (const e of entries) {
     if (e.status !== 'done' && e.status !== 'partial') continue
@@ -83,6 +83,14 @@ export function currentStreaks(
     let cursor = set.has(today) ? today : shiftDate(today, -1)
     let days = 0
     while (set.has(cursor)) { days++; cursor = shiftDate(cursor, -1) }
-    return { name: h.name, days, color: h.color ?? null, icon: h.icon ?? null }
+    let best = 0
+    let run = 0
+    let prev: string | null = null
+    for (const d of [...set].sort()) {
+      run = prev && shiftDate(prev, 1) === d ? run + 1 : 1
+      best = Math.max(best, run)
+      prev = d
+    }
+    return { name: h.name, days, best, color: h.color ?? null, icon: h.icon ?? null }
   })
 }

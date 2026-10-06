@@ -5,7 +5,7 @@ import {
   type SQLiteDBConnection,
 } from '@capacitor-community/sqlite'
 import { defineCustomElements as defineJeep } from 'jeep-sqlite/loader'
-import { SCHEMA_SQL, SCHEMA_VERSION, DEFAULT_REASON_TAGS, ALTERS } from '~/db/schema'
+import { SCHEMA_SQL, SCHEMA_VERSION, ALTERS } from '~/db/schema'
 
 const DB_NAME = 'lifebootstrap'
 
@@ -15,9 +15,9 @@ function fatal(err: unknown): never {
   const box = document.createElement('div')
   box.setAttribute('style', 'font:15px/1.5 system-ui;padding:40px 24px;color:#4a463f;background:#fbf8f0;min-height:100vh')
   const head = document.createElement('b')
-  head.textContent = 'Veritabanı açılamadı.'
+  head.textContent = t('boot.dbFailed')
   const hint = document.createElement('p')
-  hint.textContent = 'Uygulamayı tamamen kapatıp yeniden açmayı dene.'
+  hint.textContent = t('boot.dbHint')
   const detail = document.createElement('pre')
   detail.setAttribute('style', 'font-size:12px;color:#9a5236;white-space:pre-wrap')
   detail.textContent = (err as any)?.message ?? String(err)
@@ -60,10 +60,11 @@ export default defineNuxtPlugin(async () => {
 
     const rt = await db.query('SELECT COUNT(*) AS c FROM reason_tags')
     if ((rt.values?.[0]?.c ?? 0) === 0) {
-      for (let i = 0; i < DEFAULT_REASON_TAGS.length; i++) {
+      const defaults = tList('reasons')
+      for (let i = 0; i < defaults.length; i++) {
         await db.run(
           'INSERT INTO reason_tags (name, sort_order) VALUES (?, ?)',
-          [DEFAULT_REASON_TAGS[i], i],
+          [defaults[i], i],
         )
       }
     }

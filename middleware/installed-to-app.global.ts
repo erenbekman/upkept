@@ -6,7 +6,7 @@
 // that stuck for the whole session — /app rendered with no layout at all, so
 // the native app had no tab bar and no safe-area padding.
 export default defineNuxtRouteMiddleware((to) => {
-  if (!import.meta.client || to.path !== '/') return
+  if (!import.meta.client || (to.path !== '/' && to.path !== '/en')) return
   const w = window as any
   const installed =
     w.__TAURI_INTERNALS__ || w.__TAURI__ ||

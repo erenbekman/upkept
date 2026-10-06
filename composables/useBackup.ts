@@ -27,7 +27,7 @@ export function useBackup() {
 
   // Overwrites everything. Preserves ids so FK links stay intact.
   async function importAll(data: Backup) {
-    if (!data?.tables) throw new Error('Geçersiz yedek dosyası')
+    if (!data?.tables) throw new Error(t('settings.invalidBackup'))
     // Suppress the local-mutation stamp/event so a pull doesn't echo back as a push.
     if (import.meta.client) (window as any).__upkeptImporting = true
     try {

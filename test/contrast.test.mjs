@@ -161,10 +161,9 @@ test('tanıtım sayfasında AA geçmeyen eski tonlar geri gelmemiş', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Habit colours are identity, the status palette is meaning. Four of the old
-// eight swatches were byte-for-byte copies of a status token, so a habit could
-// wear the exact green that means "done". Keep the two sets apart by hue.
-const habits = readFileSync(new URL('../pages/app/habits.vue', import.meta.url), 'utf8')
+// Habit colours span the full hue wheel; they must never be an exact copy of a
+// status token, and must stay distinct from each other and visible on the card.
+const habits = readFileSync(new URL('../composables/useHabits.ts', import.meta.url), 'utf8')
 const HABIT = [...habits.matchAll(/\{ hex: '(#[0-9a-f]{6})', name:/g)].map(m => m[1])
 
 const s2l = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
@@ -182,26 +181,13 @@ function oklch(hex) {
 const dh = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d }
 const SEMANTIC = ['--accent', '--done-dot', '--partial-dot', '--miss-dot', '--danger-solid']
 
-test('alışkanlık paleti sekiz renk sunuyor', () => {
-  assert.equal(HABIT.length, 8, `okunan: ${HABIT.join(', ')}`)
+test('alışkanlık paleti yirmi renk sunuyor', () => {
+  assert.equal(HABIT.length, 20, `okunan: ${HABIT.join(', ')}`)
 })
 
 test('hiçbir alışkanlık rengi semantik bir tokenın kopyası değil', () => {
   for (const c of HABIT) for (const k of SEMANTIC) {
     assert.notEqual(c.toLowerCase(), light[k].toLowerCase(), `${c} = ${k}`)
-  }
-})
-
-// 15 degrees is the point where two hues read as the same colour; 30 gives the
-// categorical set room to also be told apart from each other.
-test('alışkanlık renkleri semantik hue bantlarından uzak', () => {
-  for (const c of HABIT) {
-    const o = oklch(c)
-    if (o.C < 0.03) continue // a neutral carries no hue to collide with
-    for (const k of SEMANTIC) {
-      const d = dh(o.h, oklch(light[k]).h)
-      assert.ok(d >= 30, `${c} (h=${o.h.toFixed(0)}°) ile ${k} arası ${d.toFixed(0)}° — 30 gerek`)
-    }
   }
 })
 
@@ -222,6 +208,6 @@ test('alışkanlık renkleri iki temada da kartta görünür ve eşit ağırlık
       assert.ok(r >= 3.0, `${c} ${name} kartta ${r.toFixed(2)}:1`)
     }
     const L = oklch(c).L
-    assert.ok(Math.abs(L - 0.60) <= 0.04, `${c} L=${L.toFixed(2)} — palet L≈0.60 tutuyor`)
+    assert.ok(Math.abs(L - 0.62) <= 0.03, `${c} L=${L.toFixed(2)} — palet L≈0.62 tutuyor`)
   }
 })

@@ -5,7 +5,7 @@ const db = useDb()
 const reasonsRepo = useReasons()
 const backup = useBackup()
 const syncApi = useSync()
-const { theme, apply: applyTheme } = useTheme()
+const { theme, apply: applyTheme, palette, applyPalette } = useTheme()
 const { locale, setLocale } = useLocale()
 const reminder = useReminder()
 const reminderAt = ref(reminder.time.value ?? DEFAULT_REMINDER)
@@ -253,6 +253,22 @@ async function onImportFile(e: Event) {
         <div class="seg">
           <button :class="{ on: theme === 'light' }" :aria-pressed="theme === 'light'" @click="applyTheme('light')">{{ t('settings.light') }}</button>
           <button :class="{ on: theme === 'dark' }" :aria-pressed="theme === 'dark'" @click="applyTheme('dark')">{{ t('settings.dark') }}</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <div style="font-size:var(--fs-lg); font-weight:600; color:var(--ink2);">{{ t('settings.palette') }}</div>
+        <div style="font-size:var(--fs-sm); color:var(--muted); margin:2px 0 12px;">{{ t('settings.paletteSub') }}</div>
+        <div class="palette-grid">
+          <button
+            v-for="pal in PALETTES" :key="pal.id"
+            class="palette-opt" :class="{ on: palette === pal.id }" :aria-pressed="palette === pal.id"
+            @click="applyPalette(pal.id)"
+          >
+            <span class="palette-strip" aria-hidden="true">
+              <span v-for="c in pal.swatch" :key="c" :style="{ background: c }" />
+            </span>
+            <span class="palette-name">{{ t(`palettes.${pal.id}`) }}</span>
+          </button>
         </div>
       </div>
       <div class="row spread field" style="margin-top:12px;">

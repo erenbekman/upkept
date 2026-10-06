@@ -234,6 +234,8 @@ export default {
     light: 'Açık',
     dark: 'Koyu',
     language: 'Dil',
+    palette: 'Renk teması',
+    paletteSub: 'Açık ve koyu modda çalışır. Paletler Color Hunt’tan.',
     on: 'Açık',
     off: 'Kapalı',
     footerSynced: 'Verilerin cihazlarında ve bulutta senkron.',
@@ -245,6 +247,19 @@ export default {
     availableText: 'İndirilip kurulacak, sonra uygulama yeniden başlayacak.',
     update: 'Güncelle',
     failed: 'Güncelleme denetlenemedi — bağlantını kontrol et',
+  },
+  palettes: {
+    upkept: 'upkept',
+    pastel: 'Pastel',
+    bordo: 'Bordo',
+    night: 'Gece',
+    garden: 'Bahçe',
+    forest: 'Orman',
+  },
+  widget: {
+    done: '{done}/{total} tamam',
+    allDone: 'Hepsi tamam',
+    empty: 'Alışkanlık ekle',
   },
   boot: {
     dbFailed: 'Veritabanı açılamadı.',

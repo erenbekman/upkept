@@ -236,6 +236,8 @@ export default {
     light: 'Light',
     dark: 'Dark',
     language: 'Language',
+    palette: 'Colour theme',
+    paletteSub: 'Works in light and dark mode. Palettes from Color Hunt.',
     on: 'On',
     off: 'Off',
     footerSynced: 'Your data is synced across your devices and the cloud.',
@@ -247,6 +249,19 @@ export default {
     availableText: 'It will be downloaded and installed, then the app restarts.',
     update: 'Update',
     failed: 'Couldn’t check for updates — check your connection',
+  },
+  palettes: {
+    upkept: 'upkept',
+    pastel: 'Pastel',
+    bordo: 'Burgundy',
+    night: 'Night',
+    garden: 'Garden',
+    forest: 'Forest',
+  },
+  widget: {
+    done: '{done}/{total} done',
+    allDone: 'All done',
+    empty: 'Add a habit',
   },
   boot: {
     dbFailed: 'Couldn’t open the database.',

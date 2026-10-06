@@ -75,6 +75,62 @@
   --done-dot: #5f8a58; --partial-dot: #ba8a2f; --miss-dot: #bd7659;
 }
 
+/* ---- Colour themes (Settings → Renk teması) ----
+   Five Color Hunt palettes. Each sets the same tokens in both modes, so the
+   light block can never leak into dark (the dark block is more specific).
+   Accents are darkened until white text clears 4.5:1; checked by
+   test/contrast.test.mjs like the base palette. */
+[data-palette="pastel"] {
+  --accent: #b3595b; --accent-text: #ab5154;
+  --bg: #ebfbfa; --card: #ffffff; --card2: #e1f5f4; --border: #daeae9;
+  --line: #e1f5f4; --input: #ebfbfa; --bar: rgba(235,251,250,0.85); --sheet: #ffffff;
+}
+[data-palette="pastel"][data-theme="dark"] {
+  --accent: #b3595b; --accent-text: #f29191;
+  --bg: #0f1515; --card: #1a1f1f; --card2: #212727; --border: #272d2d;
+  --line: #212727; --input: #0f1515; --bar: rgba(15,21,21,0.9); --sheet: #1a1f1f;
+}
+[data-palette="bordo"] {
+  --accent: #800020; --accent-text: #800020;
+  --bg: #fdf8f2; --card: #ffffff; --card2: #f4ede4; --border: #ebe3d9;
+  --line: #f4ede4; --input: #fdf8f2; --bar: rgba(253,248,242,0.85); --sheet: #ffffff;
+}
+[data-palette="bordo"][data-theme="dark"] {
+  --accent: #c94657; --accent-text: #e6606e;
+  --bg: #1f0e0f; --card: #29191a; --card2: #312021; --border: #362727;
+  --line: #312021; --input: #1f0e0f; --bar: rgba(31,14,15,0.9); --sheet: #29191a;
+}
+[data-palette="night"] {
+  --accent: #22396f; --accent-text: #22396f;
+  --bg: #faf7eb; --card: #ffffff; --card2: #f5f0e1; --border: #eae6db;
+  --line: #f5f0e1; --input: #faf7eb; --bar: rgba(250,247,235,0.85); --sheet: #ffffff;
+}
+[data-palette="night"][data-theme="dark"] {
+  --accent: #5974b0; --accent-text: #708dca;
+  --bg: #0b1130; --card: #141a3c; --card2: #1b2245; --border: #222a4d;
+  --line: #1b2245; --input: #0b1130; --bar: rgba(11,17,48,0.9); --sheet: #141a3c;
+}
+[data-palette="garden"] {
+  --accent: #657b42; --accent-text: #5c7239;
+  --bg: #f9f7eb; --card: #ffffff; --card2: #f3f1e1; --border: #e9e7db;
+  --line: #f3f1e1; --input: #f9f7eb; --bar: rgba(249,247,235,0.85); --sheet: #ffffff;
+}
+[data-palette="garden"][data-theme="dark"] {
+  --accent: #667c43; --accent-text: #8ea66b;
+  --bg: #12150e; --card: #1c1f18; --card2: #23271f; --border: #2a2c26;
+  --line: #23271f; --input: #12150e; --bar: rgba(18,21,14,0.9); --sheet: #1c1f18;
+}
+[data-palette="forest"] {
+  --accent: #2a6b5c; --accent-text: #2a6b5c;
+  --bg: #fbf6ee; --card: #ffffff; --card2: #f5f0e5; --border: #eae6dd;
+  --line: #f5f0e5; --input: #fbf6ee; --bar: rgba(251,246,238,0.85); --sheet: #ffffff;
+}
+[data-palette="forest"][data-theme="dark"] {
+  --accent: #407f70; --accent-text: #5a9989;
+  --bg: #0e1613; --card: #19201e; --card2: #202725; --border: #262d2b;
+  --line: #202725; --input: #0e1613; --bar: rgba(14,22,19,0.9); --sheet: #19201e;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #__nuxt { margin: 0; min-height: 100%; }
 body {
@@ -398,6 +454,16 @@ table.grid th.day.sel .day-marker { background: var(--accent); }
 .chip-x::after { content: ""; position: absolute; inset: -11px; border-radius: 50%; }
 .chip-add { border: 1px dashed var(--dash); background: transparent; color: var(--accent-text); font-size: var(--fs-md); font-weight: 700; padding: 8px 16px; border-radius: 999px; cursor: pointer; min-height: 44px; }
 .chips-wrap { display: flex; flex-wrap: wrap; gap: 9px; }
+.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.palette-opt {
+  display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 14px; cursor: pointer;
+  background: var(--card); border: 1.5px solid var(--border); color: var(--ink2); font: inherit; text-align: left;
+}
+.palette-opt.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.palette-strip { display: flex; height: 34px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+.palette-strip span { flex: 1; }
+.palette-name { font-size: var(--fs-sm); font-weight: 600; padding: 0 2px; }
+@media (hover: hover) { .palette-opt:hover:not(.on) { border-color: var(--dash2); } }
 .seg { display: flex; gap: 4px; background: var(--card2); border-radius: 13px; padding: 4px; }
 /* 9px, not 10px: the track is 13px with 4px padding, so the thumb has to be 9. */
 .seg button { border: none; background: transparent; color: var(--muted); font-size: var(--fs-md); font-weight: 700; padding: 9px 16px; border-radius: 9px; cursor: pointer; min-height: 44px; transition: background-color 0.15s, color 0.15s; }
@@ -749,6 +815,16 @@ button.btn-danger:active { transform: scale(0.96); }
   .screen { padding: 40px 32px 8px; }
   .habit-list { padding: 10px 32px; }
   .empty-card, .onboard { max-width: 620px; margin: 48px auto; }
+
+  /* Stats: the phone stack blown up to 760px made the hero a billboard. On a
+     wide screen the three figures share one row at the scale of the other tabs. */
+  .stats-top { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; margin-top: 12px; }
+  .stats-top .hero { margin: 0; padding: 20px 22px; }
+  .stats-top .hero-num b { font-size: var(--fs-6xl); }
+  .stats-top .hero-num span { font-size: var(--fs-2xl); }
+  .stats-top .stat-grid { grid-template-columns: 1fr; margin-top: 0; }
+  .stats-top .stat-card { padding: 14px 18px; }
+  .stats-top .stat-num { font-size: var(--fs-4xl); }
 
   /* status editor → yan menü sağındaki alanda ortalanmış modal */
   .sheet {

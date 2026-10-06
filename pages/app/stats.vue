@@ -88,6 +88,7 @@ watch([year, month, useSync().dataVersion], load)
   />
 
   <div v-else-if="habitCount" class="screen" style="padding-top:0;">
+    <div class="stats-top">
     <div class="hero">
       <div class="hero-label">{{ t('stats.consistency') }}</div>
       <div class="hero-num"><b>{{ consistency }}</b><span>%</span></div>
@@ -105,6 +106,7 @@ watch([year, month, useSync().dataVersion], load)
         <div class="stat-num" style="font-size:var(--fs-3xl); margin-top:6px; line-height:1.1;">{{ topReason }}</div>
         <div class="stat-sub">{{ t('stats.topReasonSub', { n: topReasonCount }) }}</div>
       </div>
+    </div>
     </div>
 
     <div class="card" style="margin-top:12px; padding:8px 18px 14px;">

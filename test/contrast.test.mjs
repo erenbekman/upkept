@@ -42,7 +42,20 @@ function check(theme, P, fg, bg, min) {
 const TEXT = ['--ink', '--ink2', '--muted', '--muted2', '--serif-soft', '--accent-text',
   '--done-text', '--partial-text', '--miss-text']
 
-for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
+// Colour themes override a subset of tokens on top of the base light/dark set.
+const PALETTES = [...css.matchAll(/\[data-palette="(\w+)"\] \{/g)].map(m => m[1])
+const THEMES = [['açık', light], ['koyu', dark]]
+for (const name of PALETTES) {
+  THEMES.push([`${name} açık`, { ...light, ...vars(`[data-palette="${name}"] {`) }])
+  THEMES.push([`${name} koyu`, { ...dark, ...vars(`[data-palette="${name}"][data-theme="dark"] {`) }])
+}
+
+test('beş renk teması tanımlı ve her birinin iki modu var', () => {
+  assert.deepEqual(PALETTES, ['pastel', 'bordo', 'night', 'garden', 'forest'])
+  for (const name of PALETTES) assert.ok(css.includes(`[data-palette="${name}"][data-theme="dark"] {`), name)
+})
+
+for (const [theme, P] of THEMES) {
   test(`${theme} tema: metin renkleri --bg ve --card üstünde AA (4.5:1)`, () => {
     for (const fg of TEXT) for (const bg of ['--bg', '--card']) check(theme, P, fg, bg, 4.5)
   })
@@ -118,8 +131,8 @@ for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
 // Marketing pages. They carry their own hardcoded palette rather than the app
 // tokens, and nothing checked it: 27 of 55 pairs missed AA, some as low as
 // 1.68:1. Scanned from source so a stray light tone fails here, not in the wild.
-const lp = readFileSync(new URL('../pages/index.vue', import.meta.url), 'utf8')
-const pp = readFileSync(new URL('../pages/privacy.vue', import.meta.url), 'utf8')
+const lp = readFileSync(new URL('../components/Landing.vue', import.meta.url), 'utf8')
+const pp = readFileSync(new URL('../components/PrivacyPolicy.vue', import.meta.url), 'utf8')
 
 // every surface the marketing pages paint text on
 const LP_SURFACES = ['#f7f4ed', '#fbf8f0', '#f2ede2', '#fdfbf5', '#f4efe3']
@@ -153,8 +166,8 @@ test('tanıtım sayfası: dolgu üstündeki glifler beyaz ve 3:1 geçiyor', () =
 test('tanıtım sayfasında AA geçmeyen eski tonlar geri gelmemiş', () => {
   const banned = ['#8a8172', '#9a917f', '#a89f8c', '#b0a894', '#b0917d', '#cbc1ac', '#c3b79b']
   for (const c of banned) {
-    assert.ok(!lp.includes(c), `pages/index.vue hâlâ ${c} kullanıyor`)
-    assert.ok(!pp.includes(c), `pages/privacy.vue hâlâ ${c} kullanıyor`)
+    assert.ok(!lp.includes(c), `Landing.vue hâlâ ${c} kullanıyor`)
+    assert.ok(!pp.includes(c), `PrivacyPolicy.vue hâlâ ${c} kullanıyor`)
   }
   // #6d6fae is the fill; as small text it only reaches 4.22:1
   assert.ok(!/color: #6d6fae/.test(pp), 'privacy.vue accent dolgusunu metin rengi olarak kullanıyor')

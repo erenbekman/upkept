@@ -11,8 +11,19 @@ useHead({
 })
 
 let debounce: ReturnType<typeof setTimeout>
-const onMutated = () => { clearTimeout(debounce); debounce = setTimeout(() => sync(), 1500) }
-const onVisible = () => { if (!document.hidden) sync() }
+const widget = useWidget()
+const { locale } = useLocale()
+let widgetDebounce: ReturnType<typeof setTimeout>
+const refreshWidget = () => { clearTimeout(widgetDebounce); widgetDebounce = setTimeout(() => widget.refresh(), 300) }
+const onMutated = () => {
+  clearTimeout(debounce); debounce = setTimeout(() => sync(), 1500)
+  refreshWidget()
+}
+const onVisible = () => {
+  if (!document.hidden) sync()
+  else widget.refresh()
+}
+watch([dataVersion, locale], refreshWidget)
 
 // Pull-to-refresh: at the top of the page, dragging down past the threshold
 // re-syncs and reloads the screens. Gives touch users the "get the other
@@ -60,6 +71,7 @@ async function onTouchEnd() {
 
 onMounted(() => {
   if (code.value) sync()
+  widget.refresh()
   window.addEventListener('upkept:mutated', onMutated)
   window.addEventListener('focus', sync)
   document.addEventListener('visibilitychange', onVisible)

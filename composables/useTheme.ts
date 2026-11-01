@@ -1,28 +1,35 @@
 export type Theme = 'light' | 'dark'
-export type PaletteId = 'upkept' | 'pastel' | 'bordo' | 'night' | 'garden' | 'forest'
+export type ThemePref = Theme | 'auto'
+export type AccentId = 'coral' | 'indigo' | 'emerald' | 'sky' | 'ink'
 
-// Swatches are the original Color Hunt palettes; the app tokens derived from
-// them live in assets/main.css under [data-palette].
-export const PALETTES: { id: PaletteId; swatch: string[] }[] = [
-  { id: 'upkept', swatch: ['#6d6fae', '#898abd', '#e6efe1', '#f6f5f2'] },
-  { id: 'pastel', swatch: ['#f29191', '#f7adad', '#b1e5e6', '#ccfbfa'] },
-  { id: 'bordo', swatch: ['#800020', '#d45060', '#f3e6d5', '#fff9f2'] },
-  { id: 'night', swatch: ['#010736', '#0d1c42', '#22396f', '#fcf1d0'] },
-  { id: 'garden', swatch: ['#8ea66b', '#d8a2a2', '#ffdcdc', '#fff9d6'] },
-  { id: 'forest', swatch: ['#123f36', '#2a6b5c', '#c49a45', '#e8dcc4'] },
+export const ACCENTS: { id: AccentId; hex: string }[] = [
+  { id: 'coral', hex: '#ff5a36' },
+  { id: 'indigo', hex: '#6c4cff' },
+  { id: 'emerald', hex: '#14a37f' },
+  { id: 'sky', hex: '#2f80ed' },
+  { id: 'ink', hex: '#111114' },
 ]
 
 export const systemTheme = (): Theme =>
   matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 
-export function setPaletteAttr(id: PaletteId) {
-  if (id === 'upkept') document.documentElement.removeAttribute('data-palette')
-  else document.documentElement.setAttribute('data-palette', id)
+export const resolveTheme = (pref: ThemePref): Theme => (pref === 'auto' ? systemTheme() : pref)
+
+export function readThemePref(): ThemePref {
+  const v = localStorage.getItem('theme')
+  return v === 'light' || v === 'dark' ? v : 'auto'
 }
 
-// A theme flip recolours nearly every element at once, so every colour
-// transition on the page fires together and the switch smears. Kill them
-// for one frame, then hand them back.
+export function readAccent(): AccentId {
+  const v = localStorage.getItem('accent') as AccentId | null
+  return ACCENTS.some(a => a.id === v) ? v! : 'coral'
+}
+
+export function setAccentAttr(id: AccentId) {
+  if (id === 'coral') document.documentElement.removeAttribute('data-accent')
+  else document.documentElement.setAttribute('data-accent', id)
+}
+
 function withoutTransitions(change: () => void) {
   const kill = document.createElement('style')
   kill.textContent = '*,*::before,*::after{transition:none !important}'
@@ -33,22 +40,36 @@ function withoutTransitions(change: () => void) {
 }
 
 export function useTheme() {
+  const pref = useState<ThemePref>('theme_pref', () => 'auto')
   const theme = useState<Theme>('theme', () => 'light')
-  const palette = useState<PaletteId>('palette', () => 'upkept')
+  const accent = useState<AccentId>('accent', () => 'coral')
+  const mono = useState<boolean>('mono_fill', () => false)
 
-  function apply(t: Theme) {
-    theme.value = t
+  function apply(next: ThemePref) {
+    pref.value = next
+    theme.value = resolveTheme(next)
     if (!import.meta.client) return
-    localStorage.setItem('theme', t)
-    withoutTransitions(() => document.documentElement.setAttribute('data-theme', t))
+    if (next === 'auto') localStorage.removeItem('theme')
+    else localStorage.setItem('theme', next)
+    withoutTransitions(() => document.documentElement.setAttribute('data-theme', theme.value))
   }
 
-  function applyPalette(id: PaletteId) {
-    palette.value = id
+  function applyAccent(id: AccentId) {
+    accent.value = id
     if (!import.meta.client) return
-    localStorage.setItem('palette', id)
-    withoutTransitions(() => setPaletteAttr(id))
+    localStorage.setItem('accent', id)
+    withoutTransitions(() => setAccentAttr(id))
   }
 
-  return { theme, apply, palette, applyPalette }
+  function setMono(on: boolean) {
+    mono.value = on
+    if (import.meta.client) localStorage.setItem('mono_fill', on ? '1' : '0')
+  }
+
+  const accentHex = computed(() => {
+    const a = ACCENTS.find(x => x.id === accent.value)!
+    return a.id === 'ink' && theme.value === 'dark' ? '#f4f5f7' : a.hex
+  })
+
+  return { pref, theme, apply, accent, accentHex, applyAccent, mono, setMono }
 }

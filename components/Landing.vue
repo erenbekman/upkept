@@ -5,7 +5,7 @@ import enDict from '~/lang/en'
 const props = defineProps<{ lang: 'tr' | 'en' }>()
 const L = props.lang === 'en' ? enDict.landing : trDict.landing
 const fill = (s: string, n: number) => s.replace('{n}', String(n))
-const home = props.lang === 'en' ? 'https://up-kept.app/en' : 'https://up-kept.app/'
+const home = props.lang === 'en' ? 'https://up-kept.app/' : 'https://up-kept.app/tr'
 
 useSeoMeta({
   title: L.seoTitle,
@@ -24,16 +24,14 @@ useHead({
   htmlAttrs: { lang: props.lang },
   link: [
     { rel: 'canonical', href: home },
-    { rel: 'alternate', hreflang: 'tr', href: 'https://up-kept.app/' },
-    { rel: 'alternate', hreflang: 'en', href: 'https://up-kept.app/en' },
+    { rel: 'alternate', hreflang: 'en', href: 'https://up-kept.app/' },
+    { rel: 'alternate', hreflang: 'tr', href: 'https://up-kept.app/tr' },
     { rel: 'alternate', hreflang: 'x-default', href: 'https://up-kept.app/' },
   ],
 })
 
-// Arriving on the English page is a language choice; carry it into the app
-// unless the visitor already picked one there.
 function startApp() {
-  if (props.lang === 'en' && !localStorage.getItem('locale')) localStorage.setItem('locale', 'en')
+  if (!localStorage.getItem('locale')) localStorage.setItem('locale', props.lang)
 }
 
 // Installed contexts redirect to /app in middleware/installed-to-app.global.ts.
@@ -188,7 +186,17 @@ const phoneTabs = [
           <a href="#fark">{{ L.nav.diff }}</a>
           <a href="#grid">{{ L.nav.grid }}</a>
           <a href="#how">{{ L.nav.how }}</a>
-          <NuxtLink :to="lang === 'en' ? '/' : '/en'" class="nav-lang" :lang="lang === 'en' ? 'tr' : 'en'" :hreflang="lang === 'en' ? 'tr' : 'en'">{{ L.switchLabel }}</NuxtLink>
+          <NuxtLink
+            :to="lang === 'en' ? '/tr' : '/'" class="nav-lang"
+            :lang="lang === 'en' ? 'tr' : 'en'" :hreflang="lang === 'en' ? 'tr' : 'en'" :aria-label="L.switchLabel" :title="L.switchLabel"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>{{ lang === 'en' ? 'TR' : 'EN' }}</span>
+          </NuxtLink>
           <NuxtLink to="/app" class="nav-cta" @click="startApp">{{ L.nav.start }}</NuxtLink>
         </div>
       </nav>
@@ -480,7 +488,7 @@ const phoneTabs = [
 .nav-links { display: flex; align-items: center; gap: 34px; font-size: var(--ms-md); font-weight: 600; color: #6b6459; }
 .nav-links a { color: #6b6459; }
 .nav-links a:hover { opacity: 0.7; }
-.nav-lang { font-size: var(--ms-sm); padding: 6px 12px; border-radius: 999px; border: 1px solid #e2d8c1; }
+.nav-lang { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; font-size: var(--ms-sm); font-weight: 700; letter-spacing: 0.04em; padding: 6px 12px; border-radius: 999px; border: 1px solid #e2d8c1; }
 .nav-cta { border: 1.5px solid #262420; color: #262420 !important; padding: 10px 20px; border-radius: 999px; font-weight: 700; }
 
 .lp-hero { display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: center; padding: 56px 0 88px; }

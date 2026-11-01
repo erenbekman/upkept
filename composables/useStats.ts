@@ -1,6 +1,6 @@
-import { daysInMonth, shiftDate } from './useDates.ts'
+import { daysInMonth, scheduledOn, shiftDate } from './useDates.ts'
 
-export interface StatHabit { id: number; name: string; created_at: string; color?: string | null; icon?: string | null }
+export interface StatHabit { id: number; name: string; created_at: string; color?: string | null; icon?: string | null; days?: number | null }
 export interface StatEntry { habit_id: number; date: string; status: string; reason_tag_id: number | null }
 
 export interface MonthStats {
@@ -34,7 +34,9 @@ export function monthStats(input: {
   const day = (d: number) => `${year}-${mm}-${String(d).padStart(2, '0')}`
 
   const active = new Set(habits.map(h => h.id))
-  const own = entries.filter(e => active.has(e.habit_id))
+  const scoped = entries.filter(e => active.has(e.habit_id))
+  const rested = new Set(scoped.filter(e => e.status === 'rest').map(e => `${e.habit_id}-${e.date}`))
+  const own = scoped.filter(e => e.status !== 'rest')
   const marked = new Set(own.map(e => `${e.habit_id}-${e.date}`))
 
   let slots = 0
@@ -42,7 +44,8 @@ export function monthStats(input: {
     const from = maxDate(day(1), h.created_at, challengeStart)
     for (let d = 1; d <= last; d++) {
       const date = day(d)
-      if ((date >= from && date <= today) || marked.has(`${h.id}-${date}`)) slots++
+      if (rested.has(`${h.id}-${date}`)) continue
+      if (marked.has(`${h.id}-${date}`) || (date >= from && date <= today && scheduledOn(h.days, date))) slots++
     }
   }
 
@@ -73,21 +76,33 @@ export function currentStreaks(
   habits: StatHabit[], entries: StatEntry[], today: string,
 ): { name: string; days: number; best: number; color: string | null; icon: string | null }[] {
   const kept = new Map<number, Set<string>>()
+  const rest = new Map<number, Set<string>>()
   for (const e of entries) {
-    if (e.status !== 'done' && e.status !== 'partial') continue
-    if (!kept.has(e.habit_id)) kept.set(e.habit_id, new Set())
-    kept.get(e.habit_id)!.add(e.date)
+    const bucket = e.status === 'done' || e.status === 'partial' ? kept : e.status === 'rest' ? rest : null
+    if (!bucket) continue
+    if (!bucket.has(e.habit_id)) bucket.set(e.habit_id, new Set())
+    bucket.get(e.habit_id)!.add(e.date)
   }
   return habits.map(h => {
-    const set = kept.get(h.id) ?? new Set<string>()
-    let cursor = set.has(today) ? today : shiftDate(today, -1)
+    const k = kept.get(h.id) ?? new Set<string>()
+    const r = rest.get(h.id) ?? new Set<string>()
+    const counts = (d: string) => k.has(d) || r.has(d) || !scheduledOn(h.days, d)
+    const bridged = (from: string, to: string) => {
+      for (let d = shiftDate(from, 1); d < to; d = shiftDate(d, 1)) if (scheduledOn(h.days, d)) return false
+      return true
+    }
+    let cursor = counts(today) ? today : shiftDate(today, -1)
     let days = 0
-    while (set.has(cursor)) { days++; cursor = shiftDate(cursor, -1) }
+    while (counts(cursor)) {
+      if (k.has(cursor)) days++
+      cursor = shiftDate(cursor, -1)
+    }
     let best = 0
     let run = 0
     let prev: string | null = null
-    for (const d of [...set].sort()) {
-      run = prev && shiftDate(prev, 1) === d ? run + 1 : 1
+    for (const d of [...new Set([...k, ...r])].sort()) {
+      if (!prev || !bridged(prev, d)) run = 0
+      if (k.has(d)) run++
       best = Math.max(best, run)
       prev = d
     }

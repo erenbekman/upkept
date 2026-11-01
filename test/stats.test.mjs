@@ -130,3 +130,39 @@ test('partial keeps the streak alive', () => {
   )
   assert.equal(st[0].days, 2)
 })
+
+test('a rest day leaves the month slots instead of counting as missed', () => {
+  const s = monthStats({
+    ...base,
+    habits: [h(1, 'A', '2026-06-01 09:00:00')],
+    entries: [e(1, '2026-07-01', 'done'), e(1, '2026-07-02', 'rest')],
+  })
+  assert.equal(s.slots, 9)
+  assert.equal(s.filled, 1)
+})
+
+test('a rest day bridges a streak without adding to it', () => {
+  const st = currentStreaks(
+    [h(1, 'A', '2026-06-01')],
+    [e(1, '2026-07-07', 'done'), e(1, '2026-07-08', 'rest'), e(1, '2026-07-09', 'done')],
+    '2026-07-10',
+  )
+  assert.equal(st[0].days, 2)
+  assert.equal(st[0].best, 2)
+})
+
+test('unscheduled days are not slots unless marked', () => {
+  const weekdays = 0b0111110
+  const s = monthStats({ ...base, habits: [{ ...h(1, 'A', '2026-06-01 09:00:00'), days: weekdays }], entries: [e(1, '2026-07-04', 'done')] })
+  assert.equal(s.slots, 9)
+  assert.equal(s.filled, 1)
+})
+
+test('unscheduled days bridge a streak without counting', () => {
+  const weekdays = 0b0111110
+  const habit = { ...h(1, 'A', '2026-06-01 09:00:00'), days: weekdays }
+  const entries = ['2026-07-02', '2026-07-03', '2026-07-06'].map(d => e(1, d, 'done'))
+  const [s] = currentStreaks([habit], entries, '2026-07-07')
+  assert.equal(s.days, 3)
+  assert.equal(s.best, 3)
+})

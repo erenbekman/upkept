@@ -10,6 +10,7 @@
 		026822DF6CA85EBD68EA9EC1 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0C52B0E3C5C03341041381 /* MainViewController.swift */; };
 		06FE38162DE28757FA224D8D /* UpkeptWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E2E426570BC4393086811E /* UpkeptWidget.swift */; };
 		251CEFE2852DDB568149EA49 /* UpkeptWidgetPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* UpkeptTabBarPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		3F8ABAE28559F75316FE8C4A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FFEE3E5A15302B9913C610D /* Foundation.framework */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -51,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpkeptWidgetPlugin.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpkeptTabBarPlugin.swift; sourceTree = "<group>"; };
 		1D0C52B0E3C5C03341041381 /* MainViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		382C9B380DE9F9F0D8157093 /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
 				17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */,
+				B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */,
 				1D0C52B0E3C5C03341041381 /* MainViewController.swift */,
 				382C9B380DE9F9F0D8157093 /* App.entitlements */,
 				B4667E8586E6F3857ACCB69E /* SceneDelegate.swift */,
@@ -317,6 +320,7 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				251CEFE2852DDB568149EA49 /* UpkeptWidgetPlugin.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* UpkeptTabBarPlugin.swift in Sources */,
 				026822DF6CA85EBD68EA9EC1 /* MainViewController.swift in Sources */,
 				941BB54AA2E5586976BEEC71 /* SceneDelegate.swift in Sources */,
 			);
@@ -368,13 +372,13 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = UpkeptWidget/UpkeptWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = VSQKF92XRM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UpkeptWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.erenbekman.upkept.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -499,12 +503,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = VSQKF92XRM;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.9;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.erenbekman.upkept;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -521,12 +525,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = VSQKF92XRM;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.erenbekman.upkept;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
@@ -542,13 +546,13 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = UpkeptWidget/UpkeptWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = VSQKF92XRM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UpkeptWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.erenbekman.upkept.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

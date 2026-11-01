@@ -3,5 +3,6 @@ import Capacitor
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(UpkeptWidgetPlugin())
+        bridge?.registerPluginInstance(UpkeptTabBarPlugin())
     }
 }

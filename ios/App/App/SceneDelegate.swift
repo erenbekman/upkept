@@ -1,9 +1,6 @@
 import Capacitor
 import UIKit
 
-// iOS 27 terminates apps built against its SDK that still run without a scene
-// lifecycle. The window comes from Main.storyboard via the scene manifest in
-// Info.plist; URL and activity hand-offs now arrive here instead of AppDelegate.
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 

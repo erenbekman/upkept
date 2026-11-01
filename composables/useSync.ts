@@ -1,3 +1,5 @@
+import { DATA_VERSION } from '~/db/schema'
+
 // Web: same-origin so /api hits the Pages Functions on whatever domain served
 // the app (up-kept.app, *.pages.dev). Native (Capacitor/Tauri) loads from a
 // localhost/file origin, so it needs the absolute production URL.
@@ -19,7 +21,7 @@ export function useSync() {
   const backup = useBackup()
   const code = useState<string | null>('sync_code', () =>
     import.meta.client ? localStorage.getItem(CODE_KEY) : null)
-  const status = useState<'idle' | 'syncing' | 'ok' | 'error'>('sync_status', () => 'idle')
+  const status = useState<'idle' | 'syncing' | 'ok' | 'error' | 'outdated'>('sync_status', () => 'idle')
   const lastAt = useState<number | null>('sync_last', () =>
     import.meta.client ? Number(localStorage.getItem(AT_KEY)) || null : null)
   // Bumped after a pull; screens watch it and reload their data. Replaces a
@@ -71,8 +73,14 @@ export function useSync() {
       const remote = await res.json()
       const lm = localMut()
 
-      if (remote.exists && Number(remote.mutatedAt) > lm) {
-        await backup.importAll(JSON.parse(remote.data))
+      const doc = remote.exists ? JSON.parse(remote.data) : null
+      if (doc && (Number(doc.schema_version) || 1) > DATA_VERSION) {
+        status.value = 'outdated'
+        return false
+      }
+
+      if (doc && Number(remote.mutatedAt) > lm) {
+        await backup.importAll(doc)
         setLocalMut(Number(remote.mutatedAt))
         markSynced()
         dataVersion.value++
@@ -86,6 +94,10 @@ export function useSync() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data, mutatedAt: stamp }),
       })
+      if (put.status === 409) {
+        status.value = 'outdated'
+        return false
+      }
       if (!put.ok) throw new Error(`PUT ${put.status}`)
       setLocalMut(stamp)
       markSynced()

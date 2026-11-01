@@ -27,7 +27,7 @@ useHead({
   <div class="pp">
     <div class="pp-wrap">
       <div class="pp-top">
-        <NuxtLink :to="lang === 'en' ? '/en' : '/'" class="pp-brand">
+        <NuxtLink :to="lang === 'en' ? '/' : '/tr'" class="pp-brand">
           <svg width="24" height="24" viewBox="0 0 60 60" fill="none">
             <path d="M47 22 A19 19 0 1 0 49 34" stroke="#6d6fae" stroke-width="6.5" stroke-linecap="round" />
             <circle cx="47" cy="14" r="4.6" fill="#6d6fae" />
@@ -54,7 +54,7 @@ useHead({
       <h2>{{ P.contactTitle }}</h2>
       <p>{{ P.contact }} <a href="mailto:erenbekman@gmail.com">erenbekman@gmail.com</a></p>
 
-      <NuxtLink :to="lang === 'en' ? '/en' : '/'" class="pp-back">{{ P.back }}</NuxtLink>
+      <NuxtLink :to="lang === 'en' ? '/' : '/tr'" class="pp-back">{{ P.back }}</NuxtLink>
     </div>
   </div>
 </template>

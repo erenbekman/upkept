@@ -82,6 +82,10 @@ scripts/release-desktop.sh 0.1.2 "notlar"   # imzalı desktop sürümü + auto-u
 
 </details>
 
+## Lisans
+
+© 2026 Eren Bekman — tüm hakları saklıdır. Kaynak kod okunabilsin diye açık; kopyalama, değiştirme ve yeniden dağıtım izne tabidir. Ayrıntı: [LICENSE](LICENSE).
+
 <div align="center">
 <br/>
 <i>Kaçırmak da yolculuğun bir parçası.</i>

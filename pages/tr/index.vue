@@ -3,5 +3,5 @@ definePageMeta({ layout: false })
 </script>
 
 <template>
-  <Landing lang="en" />
+  <Landing lang="tr" />
 </template>

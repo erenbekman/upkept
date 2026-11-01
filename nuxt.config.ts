@@ -3,14 +3,15 @@ export default defineNuxtConfig({
   // (/app/**) stays a client-only SPA because it needs SQLite/localStorage.
   routeRules: {
     '/': { prerender: true },
-    '/en': { prerender: true },
+    '/tr': { prerender: true },
+    '/en': { redirect: { to: '/', statusCode: 301 } },
     '/privacy': { prerender: true },
     '/gizlilik': { prerender: true },
     '/app/**': { ssr: false },
   },
   devtools: { enabled: false },
   modules: ['@vite-pwa/nuxt'],
-  css: ['~/assets/fonts.css', '~/assets/main.css'],
+  css: ['~/assets/fonts.css', '~/assets/main.css', '~/assets/app.css'],
   app: {
     head: {
       title: 'Upkept',
@@ -44,7 +45,7 @@ export default defineNuxtConfig({
       short_name: 'Upkept',
       description: 'Aylık alışkanlık takibi — yargısız, sürdürülebilir',
       theme_color: '#6d6fae',
-      background_color: '#f6f5f2',
+      background_color: '#f1f1f8',
       display: 'standalone',
       start_url: '/app',
       lang: 'tr',

@@ -18,7 +18,7 @@ const dark = { ...vars('[data-theme="dark"] {'), ...vars(':root {\n  --accent') 
 // Only --accent and the filled dots are theme-agnostic; the soft --*-bg fills
 // are per-theme and must NOT be pulled in here or one theme overwrites the other.
 const shared = Object.fromEntries(
-  [...css.matchAll(/(--(?:accent|on-accent|danger-solid|done-dot|partial-dot|miss-dot)):\s*(#[0-9a-fA-F]{6})/g)]
+  [...css.matchAll(/(--(?:accent|on-accent|danger-solid|done-dot|partial-dot|miss-dot|rest-dot|rest-solid)):\s*(#[0-9a-fA-F]{6})/g)]
     .map(m => [m[1], m[2]]))
 Object.assign(light, shared)
 Object.assign(dark, shared)
@@ -40,20 +40,9 @@ function check(theme, P, fg, bg, min) {
 }
 
 const TEXT = ['--ink', '--ink2', '--muted', '--muted2', '--serif-soft', '--accent-text',
-  '--done-text', '--partial-text', '--miss-text']
+  '--done-text', '--partial-text', '--miss-text', '--rest-text']
 
-// Colour themes override a subset of tokens on top of the base light/dark set.
-const PALETTES = [...css.matchAll(/\[data-palette="(\w+)"\] \{/g)].map(m => m[1])
 const THEMES = [['açık', light], ['koyu', dark]]
-for (const name of PALETTES) {
-  THEMES.push([`${name} açık`, { ...light, ...vars(`[data-palette="${name}"] {`) }])
-  THEMES.push([`${name} koyu`, { ...dark, ...vars(`[data-palette="${name}"][data-theme="dark"] {`) }])
-}
-
-test('beş renk teması tanımlı ve her birinin iki modu var', () => {
-  assert.deepEqual(PALETTES, ['pastel', 'bordo', 'night', 'garden', 'forest'])
-  for (const name of PALETTES) assert.ok(css.includes(`[data-palette="${name}"][data-theme="dark"] {`), name)
-})
 
 for (const [theme, P] of THEMES) {
   test(`${theme} tema: metin renkleri --bg ve --card üstünde AA (4.5:1)`, () => {
@@ -85,10 +74,14 @@ for (const [theme, P] of THEMES) {
     check(theme, P, '--on-accent', '--danger-solid', 4.5)
   })
 
+  test(`${theme} tema: --on-accent, dinlenme dolgusu üstünde AA`, () => {
+    check(theme, P, '--on-accent', '--rest-solid', 4.5)
+  })
+
   // ✓ ~ ✕ inside the filled dots are glyphs, not prose — 3:1. --partial-dot sat
   // at 2.57:1 and missed even that.
   test(`${theme} tema: dolgu üstündeki işaret glifleri grafik eşiğini geçiyor`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, '--on-accent', `--${k}-dot`, 3.0)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, '--on-accent', `--${k}-dot`, 3.0)
   })
 
   test(`${theme} tema: toast metni kendi zemininde AA`, () => {
@@ -104,7 +97,7 @@ for (const [theme, P] of THEMES) {
 
   // .saved-flag draws --done-text on --sheet, which is its own surface in dark.
   test(`${theme} tema: durum metni --sheet üstünde AA`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, `--${k}-text`, '--sheet', 4.5)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, `--${k}-text`, '--sheet', 4.5)
   })
 
   test(`${theme} tema: --muted ile --muted2 arasında görülür kademe var`, () => {
@@ -116,11 +109,11 @@ for (const [theme, P] of THEMES) {
   // The pill draws --*-text on --*-bg. Both are theme-scoped, so both themes
   // must be checked — a light fill left under dark text was the original bug.
   test(`${theme} tema: durum metni kendi pill dolgusunun üstünde AA`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, `--${k}-text`, `--${k}-bg`, 4.5)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, `--${k}-text`, `--${k}-bg`, 4.5)
   })
 
   test(`${theme} tema: pill dolgusu karttan ayrışıyor`, () => {
-    for (const k of ['done', 'partial', 'miss']) {
+    for (const k of ['done', 'partial', 'miss', 'rest']) {
       const r = ratio(P[`--${k}-bg`], P['--card'])
       assert.ok(r >= 1.15, `--${k}-bg (${P[`--${k}-bg`]}) kartla ${r.toFixed(2)}:1 — pill kayboluyor`)
     }

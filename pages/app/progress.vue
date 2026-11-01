@@ -218,7 +218,7 @@ const journey = computed(() => (startDate.value ? challengeDay(startDate.value, 
 </script>
 
 <template>
-  <div class="k-page">
+  <div class="k-page k-progress">
     <div class="k-head">
       <h1 class="k-large">{{ t('tabs.progress') }}</h1>
       <span v-if="journey" class="k-head-note">{{ t('progress.journey', { n: journey }) }}</span>

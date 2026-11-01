@@ -342,6 +342,40 @@ html.k-app body { background: var(--k-bg); color: var(--k-ink); font-family: var
 .k-reorder.dragging { transition: none; z-index: 2; background: var(--k-card); box-shadow: 0 10px 30px rgba(17,17,20,0.14); }
 .k-settling .k-reorder { transition: none; }
 
+@media (min-width: 700px) {
+  .k-shell { max-width: 1160px; }
+  .k-page { max-width: 680px; margin: 0 auto; }
+  .k-page.k-today, .k-page.k-progress { max-width: 780px; }
+  .k-page.k-today { min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px); display: flex; flex-direction: column; }
+  .k-today > .k-today-head { margin-bottom: auto; }
+  .k-today > .k-today-rest { margin-bottom: auto; padding-bottom: 24px; }
+  .k-today-head { padding-top: 22px; }
+  .k-tubes { height: 44px; }
+  .k-tube { width: 10px; height: 44px; border-radius: 5px; }
+  .k-rows { margin-top: 26px; }
+  .k-hrow { height: 64px; }
+  .k-cal-cell { height: 84px; }
+  .k-cal-btn { width: 80px; height: 80px; border-radius: 20px; }
+  .k-cal-num { font-size: 52px; }
+  .k-cal-wd { font-size: 14px; }
+  .k-grid-names { width: 120px; }
+  .k-sheet { bottom: calc(24px + env(safe-area-inset-bottom)); padding-bottom: 18px; }
+}
+@media (min-width: 1000px) and (orientation: landscape) {
+  .k-page.k-today {
+    max-width: 1120px; padding: 0 40px;
+    display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto auto auto auto 1fr; column-gap: 56px;
+  }
+  .k-today > .k-today-head { grid-column: 1 / -1; grid-row: 1; margin-bottom: 0; }
+  .k-today > .k-number { grid-row: 3; }
+  .k-today > .k-caption { grid-row: 4; }
+  .k-today > .k-tubes { grid-row: 5; }
+  .k-today > .k-tube-legend { grid-row: 6; }
+  .k-today > .k-number, .k-today > .k-caption, .k-today > .k-tubes, .k-today > .k-tube-legend { grid-column: 1; }
+  .k-today > .k-rows { grid-column: 2; grid-row: 3 / 6; align-self: center; margin-top: 0; }
+  .k-today > .k-today-rest { grid-column: 2; grid-row: 6; margin-bottom: 0; padding-bottom: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .k-page, .k-push, .k-sheet, .k-welcome-body, .k-detail { animation: none; }
 }

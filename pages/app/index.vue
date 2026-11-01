@@ -272,7 +272,7 @@ async function toggleRestDay() {
 </script>
 
 <template>
-  <div v-if="loaded && habits.length" class="k-page">
+  <div v-if="loaded && habits.length" class="k-page k-today">
     <div class="k-today-head">
       <span class="k-today-date">{{ headDate }}</span>
       <span style="display:flex; align-items:center; gap:10px;">
@@ -339,7 +339,7 @@ async function toggleRestDay() {
       </template>
     </div>
 
-    <div style="display:flex; justify-content:center; padding-top:8px;">
+    <div class="k-today-rest" style="display:flex; justify-content:center; padding-top:8px;">
       <button v-if="unlogged.length || canUndoRest" class="k-link" style="font-size:15px;" @click="toggleRestDay">
         {{ unlogged.length ? t('today.restDay') : t('today.restUndo') }}
       </button>

@@ -11,7 +11,7 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: false },
   modules: ['@vite-pwa/nuxt'],
-  css: ['~/assets/fonts.css', '~/assets/main.css', '~/assets/app.css'],
+  css: ['~/assets/main.css', '~/assets/app.css'],
   app: {
     head: {
       title: 'Upkept',
@@ -23,15 +23,11 @@ export default defineNuxtConfig({
         { property: 'og:site_name', content: 'upkept' },
         { property: 'og:image', content: 'https://up-kept.app/og.png' },
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'theme-color', content: '#6d6fae' },
+        { name: 'theme-color', content: '#f3f4f6' },
       ],
       link: [
         { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
-        // Fonts are self-hosted (assets/fonts.css) — the app must render its own
-        // typography offline. Preload the two faces above the fold.
-        { rel: 'preload', href: '/fonts/karla-400-normal-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' },
-        { rel: 'preload', href: '/fonts/spectral-600-normal-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' },
       ],
     },
   },
@@ -44,8 +40,8 @@ export default defineNuxtConfig({
       name: 'Upkept',
       short_name: 'Upkept',
       description: 'Aylık alışkanlık takibi — yargısız, sürdürülebilir',
-      theme_color: '#6d6fae',
-      background_color: '#f1f1f8',
+      theme_color: '#f3f4f6',
+      background_color: '#f3f4f6',
       display: 'standalone',
       start_url: '/app',
       lang: 'tr',
@@ -55,6 +51,6 @@ export default defineNuxtConfig({
         { src: 'icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
     },
-    workbox: { globPatterns: ['**/*.{js,css,html,wasm,woff2}'] },
+    workbox: { globPatterns: ['**/*.{js,css,html,wasm}'] },
   },
 })

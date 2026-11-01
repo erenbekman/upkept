@@ -40,6 +40,10 @@ export function fmtShort(dateStr: string): string {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long' })
 }
 
+export function fmtDate(dateStr: string): string {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export function fmtMonth(year: number, month: number): string {
   return new Date(year, month - 1, 1).toLocaleDateString(dateLocale(), {
     month: 'long', year: 'numeric',

@@ -1,39 +1,40 @@
 <div class="splash">
-  <svg class="splash-mark" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-    <path class="splash-ring" d="M47 22 A19 19 0 1 0 49 34" stroke-width="6.5" stroke-linecap="round" pathLength="100" />
-    <circle class="splash-dot" cx="47" cy="14" r="4.6" />
+  <svg class="splash-mark" viewBox="200 180 624 664" aria-hidden="true">
+    <defs>
+      <mask id="splash-u" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+        <path d="M337 297 V552 A175 175 0 0 0 687 552 V297" fill="none" stroke="#fff" stroke-width="160" stroke-linecap="round" />
+      </mask>
+    </defs>
+    <g mask="url(#splash-u)">
+      <rect class="splash-empty" width="1024" height="1024" />
+      <g class="splash-fill">
+        <path fill="#ffb020" d="M-20 512 L12 523 L76 528 L140 520 L204 505 L268 496 L332 500 L396 514 L460 526 L524 527 L588 516 L652 502 L716 496 L780 503 L844 518 L908 527 L972 525 L1044 512 L1044 1044 L-20 1044 Z" />
+        <path fill="#ff8a70" d="M-20 632 L44 619 L108 606 L172 604 L236 614 L300 628 L364 635 L428 629 L492 615 L556 604 L620 605 L684 618 L748 631 L812 635 L876 625 L940 611 L1004 603 L1044 604 L1044 1044 L-20 1044 Z" />
+        <path fill="#ff5a36" d="M-20 706 L44 704 L108 714 L172 728 L236 735 L300 729 L364 714 L428 704 L492 706 L556 718 L620 731 L684 734 L748 725 L812 711 L876 703 L940 709 L1004 723 L1044 729 L1044 1044 L-20 1044 Z" />
+      </g>
+    </g>
   </svg>
-  <div class="splash-word">upkept</div>
 </div>
 <script>
   try {
-    var t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    var t = localStorage.getItem('theme')
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     document.documentElement.setAttribute('data-theme', t)
-    var pal = localStorage.getItem('palette')
-    if (pal && pal !== 'upkept') document.documentElement.setAttribute('data-palette', pal)
   } catch (e) {}
 </script>
 <style>
   .splash {
     position: fixed; inset: 0; z-index: 100;
     display: flex; align-items: center; justify-content: center;
-    background: var(--bg, #f6f5f2); color: var(--ink, #1c1b19);
+    background: #f3f4f6;
   }
-  [data-theme="dark"] .splash { background: var(--bg, #16161a); color: var(--ink, #f2f2f4); }
-  /* Sized like the native launch image (logo ≈ 18% of the aspect-filled square) so the handoff does not jump. */
-  .splash-mark { width: min(18vmax, 160px); height: auto; }
-  .splash-ring { stroke: var(--accent, #6d6fae); stroke-dasharray: 100; animation: splash-draw 1.1s cubic-bezier(.6,0,.2,1) infinite alternate; }
-  .splash-dot { fill: var(--accent, #6d6fae); transform-origin: 47px 14px; animation: splash-pop 1.1s ease-in-out infinite alternate; }
-  .splash-word {
-    position: absolute; top: calc(50% + min(9vmax, 80px) + 18px); left: 0; right: 0; text-align: center;
-    font-family: 'Spectral', Georgia, serif; font-weight: 500; font-size: 26px; letter-spacing: -0.02em;
-    opacity: 0; animation: splash-fade 0.5s 0.15s ease-out forwards;
-  }
-  @keyframes splash-draw { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 18; } }
-  @keyframes splash-pop { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes splash-fade { to { opacity: 1; } }
+  .splash-empty { fill: #e3e5ea; }
+  [data-theme="dark"] .splash { background: #0e0f12; }
+  [data-theme="dark"] .splash-empty { fill: #2a2d34; }
+  .splash-mark { width: min(15.9vmax, 140px); height: auto; }
+  .splash-fill { animation: splash-rise 1.4s cubic-bezier(.4,0,.2,1) infinite alternate; }
+  @keyframes splash-rise { from { transform: translateY(0); } to { transform: translateY(-150px); } }
   @media (prefers-reduced-motion: reduce) {
-    .splash-ring, .splash-dot { animation: none; }
-    .splash-word { animation: none; opacity: 1; }
+    .splash-fill { animation: none; }
   }
 </style>

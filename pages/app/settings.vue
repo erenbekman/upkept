@@ -239,7 +239,10 @@ const privacyPath = computed(() => (locale.value === 'en' ? '/privacy' : '/gizli
           </div>
           <div class="k-row">
             <span :style="{ opacity: counterOn ? 1 : 0.4 }">{{ t('settings.startDate') }}</span>
-            <input v-model="startDate" type="date" class="k-pill-input" :max="today" :disabled="!counterOn" :style="{ opacity: counterOn ? 1 : 0.4 }" :aria-label="t('settings.startDateLabel')" @change="saveStart" />
+            <label class="k-pill-input k-date-pill" :style="{ opacity: counterOn ? 1 : 0.4 }">
+              <span aria-hidden="true">{{ fmtDate(startDate || today) }}</span>
+              <input v-model="startDate" type="date" :max="today" :disabled="!counterOn" :aria-label="t('settings.startDateLabel')" @change="saveStart" />
+            </label>
           </div>
         </div>
         <p class="k-foot">{{ counterOn ? t('settings.counterFoot') : t('settings.counterOffFoot') }}</p>

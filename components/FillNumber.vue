@@ -35,15 +35,15 @@ function build(animated: boolean) {
   const list = props.layers.map((l) => {
     const cur = amounts.get(l.id) ?? (animated ? 0 : l.value)
     cum += cur
-    return { l, cum }
+    return { l, cur, cum }
   })
   const total = cum
   const slope = Math.tan((tilt * Math.PI) / 180)
   const bottom = H.value + 10
   const out: typeof paths.value = []
   for (let i = list.length - 1; i >= 0; i--) {
-    const { l, cum: c } = list[i]
-    if (c <= 0.001) continue
+    const { l, cur, cum: c } = list[i]
+    if (c <= 0.001 || cur <= 0.001) continue
     const isTop = out.length === 0
     const amp = !animated ? 0 : isTop ? (total > 0.02 && total < 0.985 ? 3.4 : 0.6) : 1.1
     const yb = base.value + 3 - c * fullH.value

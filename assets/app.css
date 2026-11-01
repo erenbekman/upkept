@@ -96,6 +96,8 @@ html.k-app body { background: var(--k-bg); color: var(--k-ink); font-family: var
   height: 34px; padding: 0 10px; border-radius: 10px; border: 0; background: var(--k-fill); color: var(--k-ink);
   font: inherit; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
 }
+.k-date-pill { position: relative; display: inline-flex; align-items: center; }
+.k-date-pill input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; }
 .k-input {
   width: 100%; height: 52px; padding: 0 16px; border-radius: 16px; border: 0; background: var(--k-card); color: var(--k-ink);
   font: inherit; font-size: 17px; font-weight: 600;

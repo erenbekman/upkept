@@ -12,7 +12,6 @@ watch(pending, async (p) => {
   box.value?.querySelector<HTMLElement>('input, button.btn-primary, button.btn-danger')?.focus()
 })
 
-// Same trap as AppSheet: without it Tab leaves the alert dialog for the page behind.
 function onTab(e: KeyboardEvent) {
   if (!box.value) return
   const items = [...box.value.querySelectorAll<HTMLElement>('input, button')]

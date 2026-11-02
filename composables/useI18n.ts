@@ -25,6 +25,7 @@ export function tList<T = string>(key: string): T[] {
 }
 
 export const dateLocale = () => (locale.value === 'en' ? 'en-US' : 'tr-TR')
+export const percentFirst = () => locale.value === 'tr'
 
 export function useLocale() {
   function setLocale(l: Locale) {

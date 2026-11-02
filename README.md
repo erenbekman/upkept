@@ -6,20 +6,20 @@
 
 ### Kusursuz değil, *sürekli* ol.
 
-Sakin ve yargısız bir aylık alışkanlık takipçisi. Bir günü kaçırmak bir alarm değil — sadece sessizce, istersen bir sebeple kaydedilir. Çünkü önemli olan kusursuz bir seri değil, **geri dönmen.**
+Sakin ve yargısız bir alışkanlık takipçisi. Her alışkanlık günün rakamına bir katman ekler; gün doldukça sen de görürsün. Bir günü kaçırmak bir alarm değil — sadece sessizce, istersen bir sebeple kaydedilir. Çünkü önemli olan kusursuz bir seri değil, **geri dönmen.**
 
 <br/>
 
 **[🌐 Web'de aç](https://up-kept.app/app)**  ·  **[⬇︎ macOS için indir](https://github.com/erenbekman/upkept/releases/latest/download/Upkept.dmg)**  ·  **[📱 App Store'dan indir](https://apps.apple.com/us/app/upkept/id6794236887)**
 
-![platform](https://img.shields.io/badge/web·macOS·iOS-6d6fae?style=flat-square)
-![hesap](https://img.shields.io/badge/hesap-gerekmez-5f8a58?style=flat-square)
-![offline](https://img.shields.io/badge/offline-çalışır-c79433?style=flat-square)
-![fiyat](https://img.shields.io/badge/fiyat-ücretsiz-3a352d?style=flat-square)
+![platform](https://img.shields.io/badge/web·macOS·iOS-ff5a36?style=flat-square)
+![hesap](https://img.shields.io/badge/hesap-gerekmez-14a37f?style=flat-square)
+![offline](https://img.shields.io/badge/offline-çalışır-2f80ed?style=flat-square)
+![fiyat](https://img.shields.io/badge/fiyat-ücretsiz-111114?style=flat-square)
 
 <br/>
 
-<img src="docs/preview-app.png" width="300" alt="upkept — Bugün ekranı" />
+<img src="docs/preview-app.png" width="300" alt="upkept — Bugün ekranı, katmanlarla dolan gün rakamı" />
 
 </div>
 
@@ -35,16 +35,17 @@ Bir günü kaçırdığında sebebini bir dokunuşla bırakırsın (*yorgundum, 
 
 ## Öne çıkanlar
 
-- ✍️ **Üç sakin durum** — Yaptım · Kısmen · Yapamadım. "Kaçırdım + sebep" kaydetmek "yaptım" kadar hızlı.
-- ▦ **Aylık grid** — bütün ayı tek bakışta gör; bugün vurgulu, gelecek günler sessiz.
-- ◔ **Nazik istatistikler** — süreklilik yüzdesi, en sık kaçırma sebebin, alışkanlık başına güncel seri.
-- 🌙 **Açık / koyu tema** — sıcak dijital kağıt estetiği.
+- 🌊 **Dolan rakam** — günün rakamı her alışkanlıkla bir katman dolar. Basılı tut: yaptım; dokun: kısmen, dinlen ya da olmadı.
+- ✍️ **Yargısız kayıt** — "olmadı + sebep" kaydetmek "yaptım" kadar hızlı. Miktarlı hedefler (8 bardak su gibi) adım adım dolar.
+- ▦ **İlerleme** — dolan rakamlardan bir ay takvimi, aylık grid ve sayılar: süreklilik, seriler, en sık sebep, en zor gün.
+- 📱 **Widget** — ana ekranda ve kilit ekranında dolan rakam; satıra dokunarak işaretle.
+- 🎨 **Açık / koyu, beş vurgu rengi** — istersen rakam tek renkle dolar.
 - 🔒 **Gizlilik önce** — hesap yok, reklam yok, izleme yok. Verilerin cihazında kalır.
 - ☁️ **Opsiyonel senkron** — istersen login'siz, anonim bir kodla cihazların arasında senkronla.
 - 📴 **Offline** — uçakta, dağda, internetsiz her yerde çalışır.
 
 <div align="center">
-<img src="docs/preview-grid.png" width="760" alt="upkept — Aylık grid" />
+<img src="docs/preview-grid.png" width="760" alt="upkept — İlerleme: ay, grid ve sayılar" />
 </div>
 
 ## İndir / kullan
@@ -81,6 +82,10 @@ scripts/release-desktop.sh 0.1.2 "notlar"   # imzalı desktop sürümü + auto-u
 ```
 
 </details>
+
+## Lisans
+
+© 2026 Eren Bekman — tüm hakları saklıdır. Kaynak kod okunabilsin diye açık; kopyalama, değiştirme ve yeniden dağıtım izne tabidir. Ayrıntı: [LICENSE](LICENSE).
 
 <div align="center">
 <br/>

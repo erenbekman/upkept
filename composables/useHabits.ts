@@ -1,3 +1,17 @@
+export type HabitKind = 'build' | 'quit'
+
+export interface HabitFields {
+  name?: string
+  target_desc?: string | null
+  color?: string | null
+  icon?: string | null
+  days?: number | null
+  goal?: number | null
+  unit?: string | null
+  kind?: HabitKind
+  group_name?: string | null
+}
+
 export interface Habit {
   id: number
   user_id: number
@@ -5,32 +19,74 @@ export interface Habit {
   target_desc: string | null
   color: string | null
   icon: string | null
+  days: number | null
+  goal: number | null
+  unit: string | null
+  kind: HabitKind
+  group_name: string | null
   sort_order: number
   active: number
   created_at: string
 }
 
-// Full hue wheel at one OKLCH lightness (L 0.62) so no swatch outshouts another
-// and the 5px habit bar stays visible on both the light and the dark card.
+export interface HabitDraft {
+  name: string
+  kind: HabitKind
+  color: string
+  days: number | null
+  goalOn: boolean
+  goal: number
+  unit: string
+  group: string | null
+  remind: string | null
+}
+
+export function habitDraft(h: Habit | null, color: string, remind: string | null = null): HabitDraft {
+  return {
+    name: h?.name ?? '',
+    kind: h?.kind ?? 'build',
+    color: h?.color ?? color,
+    days: h?.days ?? null,
+    goalOn: !!h?.goal,
+    goal: h?.goal ?? 8,
+    unit: h?.unit ?? '',
+    group: h?.group_name ?? null,
+    remind,
+  }
+}
+
+export function draftFields(d: HabitDraft): HabitFields & { name: string } {
+  const goal = d.goalOn && d.kind !== 'quit' && d.goal > 0 ? d.goal : null
+  return {
+    name: d.name.trim(),
+    color: d.color,
+    days: d.days,
+    goal,
+    unit: goal ? d.unit.trim().slice(0, 16) || null : null,
+    kind: d.kind,
+    group_name: d.group?.trim().slice(0, 40) || null,
+  }
+}
+
 export const HABIT_COLORS = [
-  { hex: '#c8626d', name: 'raspberry' },
-  { hex: '#c8664e', name: 'coral' },
-  { hex: '#c16e2d', name: 'orange' },
-  { hex: '#b37903', name: 'mustard' },
-  { hex: '#9e840a', name: 'olive' },
-  { hex: '#848f1e', name: 'pistachio' },
-  { hex: '#629742', name: 'leaf' },
-  { hex: '#349d62', name: 'emerald' },
-  { hex: '#0c9c82', name: 'seaGreen' },
-  { hex: '#06999a', name: 'turquoise' },
-  { hex: '#1896ad', name: 'petrol' },
-  { hex: '#0891c9', name: 'skyBlue' },
-  { hex: '#4c88d3', name: 'blue' },
-  { hex: '#707ed4', name: 'indigo' },
-  { hex: '#8c74cc', name: 'lavender' },
-  { hex: '#a36cbc', name: 'lilac' },
-  { hex: '#b566a5', name: 'redbud' },
-  { hex: '#c1628a', name: 'rose' },
+  { hex: '#e8456f', name: 'raspberry' },
+  { hex: '#eb4a38', name: 'coral' },
+  { hex: '#d76506', name: 'orange' },
+  { hex: '#be7907', name: 'mustard' },
+  { hex: '#a98608', name: 'olive' },
+  { hex: '#909103', name: 'pistachio' },
+  { hex: '#679d03', name: 'leaf' },
+  { hex: '#04a64c', name: 'emerald' },
+  { hex: '#0ba27f', name: 'seaGreen' },
+  { hex: '#0c9f99', name: 'turquoise' },
+  { hex: '#0d9caf', name: 'petrol' },
+  { hex: '#0397c8', name: 'skyBlue' },
+  { hex: '#078df1', name: 'blue' },
+  { hex: '#5f7dfe', name: 'indigo' },
+  { hex: '#8d6df9', name: 'lavender' },
+  { hex: '#af5fe3', name: 'lilac' },
+  { hex: '#ca53c3', name: 'redbud' },
+  { hex: '#dd499b', name: 'rose' },
   { hex: '#80878f', name: 'slate' },
   { hex: '#928377', name: 'taupe' },
 ]
@@ -42,7 +98,10 @@ export function nextHabitColor(used: (string | null)[]): string {
   return taken.has(pick) ? HABIT_COLORS.find(c => !taken.has(c.hex))?.hex ?? pick : pick
 }
 
-export const isEmojiIcon = (s: string) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(s)
+export const ALL_DAYS = 127
+
+export const normalizeDays = (days: number | null | undefined) =>
+  !days || days >= ALL_DAYS ? null : days
 
 export function useHabits() {
   const db = useDb()
@@ -53,29 +112,41 @@ export function useHabits() {
     )
   }
 
-  async function create(input: {
-    name: string; target_desc?: string; color?: string; icon?: string
-  }): Promise<number> {
+  function listArchived() {
+    return db.query<Habit>(
+      'SELECT * FROM habits WHERE active = 0 ORDER BY name COLLATE NOCASE, id',
+    )
+  }
+
+  async function nextOrder() {
     const order = await db.query<{ n: number }>(
       'SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM habits',
     )
+    return order[0].n
+  }
+
+  async function create(input: HabitFields & { name: string }): Promise<number> {
     await db.run(
-      `INSERT INTO habits (name, target_desc, color, icon, sort_order)
-       VALUES (?, ?, ?, ?, ?)`,
-      [input.name, input.target_desc ?? null, input.color ?? null, input.icon ?? null, order[0].n],
+      `INSERT INTO habits (name, target_desc, color, icon, days, goal, unit, kind, group_name, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        input.name, input.target_desc ?? null, input.color ?? null, input.icon ?? null,
+        normalizeDays(input.days), input.goal ?? null, input.unit ?? null, input.kind ?? 'build',
+        input.group_name ?? null, await nextOrder(),
+      ],
     )
     return db.lastInsertId()
   }
 
-  function update(id: number, fields: {
-    name?: string; target_desc?: string | null; color?: string | null; icon?: string | null
-  }) {
+  function update(id: number, fields: HabitFields) {
     const sets: string[] = []
     const params: any[] = []
-    if (fields.name !== undefined) { sets.push('name = ?'); params.push(fields.name) }
-    if (fields.target_desc !== undefined) { sets.push('target_desc = ?'); params.push(fields.target_desc) }
-    if (fields.color !== undefined) { sets.push('color = ?'); params.push(fields.color) }
-    if (fields.icon !== undefined) { sets.push('icon = ?'); params.push(fields.icon) }
+    for (const key of ['name', 'target_desc', 'color', 'icon', 'goal', 'unit', 'kind', 'group_name'] as const) {
+      if (fields[key] === undefined) continue
+      sets.push(`${key} = ?`)
+      params.push(fields[key])
+    }
+    if (fields.days !== undefined) { sets.push('days = ?'); params.push(normalizeDays(fields.days)) }
     if (!sets.length) return Promise.resolve()
     params.push(id)
     return db.run(`UPDATE habits SET ${sets.join(', ')} WHERE id = ?`, params)
@@ -89,5 +160,9 @@ export function useHabits() {
     return db.run('UPDATE habits SET active = 0 WHERE id = ?', [id])
   }
 
-  return { listActive, create, update, reorder, deactivate }
+  async function restore(id: number) {
+    await db.run('UPDATE habits SET active = 1, sort_order = ? WHERE id = ?', [await nextOrder(), id])
+  }
+
+  return { listActive, listArchived, create, update, reorder, deactivate, restore }
 }

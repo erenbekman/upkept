@@ -18,7 +18,7 @@ const dark = { ...vars('[data-theme="dark"] {'), ...vars(':root {\n  --accent') 
 // Only --accent and the filled dots are theme-agnostic; the soft --*-bg fills
 // are per-theme and must NOT be pulled in here or one theme overwrites the other.
 const shared = Object.fromEntries(
-  [...css.matchAll(/(--(?:accent|on-accent|danger-solid|done-dot|partial-dot|miss-dot)):\s*(#[0-9a-fA-F]{6})/g)]
+  [...css.matchAll(/(--(?:accent|on-accent|danger-solid|done-dot|partial-dot|miss-dot|rest-dot|rest-solid)):\s*(#[0-9a-fA-F]{6})/g)]
     .map(m => [m[1], m[2]]))
 Object.assign(light, shared)
 Object.assign(dark, shared)
@@ -40,9 +40,11 @@ function check(theme, P, fg, bg, min) {
 }
 
 const TEXT = ['--ink', '--ink2', '--muted', '--muted2', '--serif-soft', '--accent-text',
-  '--done-text', '--partial-text', '--miss-text']
+  '--done-text', '--partial-text', '--miss-text', '--rest-text']
 
-for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
+const THEMES = [['açık', light], ['koyu', dark]]
+
+for (const [theme, P] of THEMES) {
   test(`${theme} tema: metin renkleri --bg ve --card üstünde AA (4.5:1)`, () => {
     for (const fg of TEXT) for (const bg of ['--bg', '--card']) check(theme, P, fg, bg, 4.5)
   })
@@ -72,10 +74,14 @@ for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
     check(theme, P, '--on-accent', '--danger-solid', 4.5)
   })
 
+  test(`${theme} tema: --on-accent, dinlenme dolgusu üstünde AA`, () => {
+    check(theme, P, '--on-accent', '--rest-solid', 4.5)
+  })
+
   // ✓ ~ ✕ inside the filled dots are glyphs, not prose — 3:1. --partial-dot sat
   // at 2.57:1 and missed even that.
   test(`${theme} tema: dolgu üstündeki işaret glifleri grafik eşiğini geçiyor`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, '--on-accent', `--${k}-dot`, 3.0)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, '--on-accent', `--${k}-dot`, 3.0)
   })
 
   test(`${theme} tema: toast metni kendi zemininde AA`, () => {
@@ -91,7 +97,7 @@ for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
 
   // .saved-flag draws --done-text on --sheet, which is its own surface in dark.
   test(`${theme} tema: durum metni --sheet üstünde AA`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, `--${k}-text`, '--sheet', 4.5)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, `--${k}-text`, '--sheet', 4.5)
   })
 
   test(`${theme} tema: --muted ile --muted2 arasında görülür kademe var`, () => {
@@ -103,11 +109,11 @@ for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
   // The pill draws --*-text on --*-bg. Both are theme-scoped, so both themes
   // must be checked — a light fill left under dark text was the original bug.
   test(`${theme} tema: durum metni kendi pill dolgusunun üstünde AA`, () => {
-    for (const k of ['done', 'partial', 'miss']) check(theme, P, `--${k}-text`, `--${k}-bg`, 4.5)
+    for (const k of ['done', 'partial', 'miss', 'rest']) check(theme, P, `--${k}-text`, `--${k}-bg`, 4.5)
   })
 
   test(`${theme} tema: pill dolgusu karttan ayrışıyor`, () => {
-    for (const k of ['done', 'partial', 'miss']) {
+    for (const k of ['done', 'partial', 'miss', 'rest']) {
       const r = ratio(P[`--${k}-bg`], P['--card'])
       assert.ok(r >= 1.15, `--${k}-bg (${P[`--${k}-bg`]}) kartla ${r.toFixed(2)}:1 — pill kayboluyor`)
     }
@@ -118,14 +124,14 @@ for (const [theme, P] of [['açık', light], ['koyu', dark]]) {
 // Marketing pages. They carry their own hardcoded palette rather than the app
 // tokens, and nothing checked it: 27 of 55 pairs missed AA, some as low as
 // 1.68:1. Scanned from source so a stray light tone fails here, not in the wild.
-const lp = readFileSync(new URL('../pages/index.vue', import.meta.url), 'utf8')
-const pp = readFileSync(new URL('../pages/privacy.vue', import.meta.url), 'utf8')
+const lp = readFileSync(new URL('../components/Landing.vue', import.meta.url), 'utf8')
+const pp = readFileSync(new URL('../components/PrivacyPolicy.vue', import.meta.url), 'utf8')
 
 // every surface the marketing pages paint text on
-const LP_SURFACES = ['#f7f4ed', '#fbf8f0', '#f2ede2', '#fdfbf5', '#f4efe3']
-const LP_TEXT = ['#726a5e', '#7d6758', '#6465a5', '#6b6459', '#4a463f', '#4a453c',
-  '#3a352d', '#33302b', '#262420', '#201e1a', '#3f6b3a', '#886214', '#9a5236']
-const LP_GRAPHIC = ['#8e8778']
+const LP_SURFACES = ['#f3f4f6', '#ffffff', '#e9ebee']
+const LP_TEXT = ['#111114', '#62656e', '#3a3d45', '#bb381a']
+const LP_DARK_TEXT = ['#ffffff', '#a3a7b0']
+const LP_LARGE = ['#e8441e']
 
 test('tanıtım sayfası: metin tonları her zeminde AA', () => {
   for (const fg of LP_TEXT) for (const bg of LP_SURFACES) {
@@ -134,18 +140,23 @@ test('tanıtım sayfası: metin tonları her zeminde AA', () => {
   }
 })
 
-test('tanıtım sayfası: grafik tonları her zeminde 3:1', () => {
-  for (const fg of LP_GRAPHIC) for (const bg of LP_SURFACES) {
+test('tanıtım sayfası: koyu karttaki metin AA', () => {
+  for (const fg of LP_DARK_TEXT) {
+    const v = ratio(fg, '#111114')
+    assert.ok(v >= 4.5, `${fg} / #111114 = ${v.toFixed(2)}:1, min 4.5`)
+  }
+})
+
+test('tanıtım sayfası: başlık vurgusu büyük metin için 3:1', () => {
+  for (const fg of LP_LARGE) for (const bg of LP_SURFACES) {
     const v = ratio(fg, bg)
     assert.ok(v >= 3.0, `${fg} / ${bg} = ${v.toFixed(2)}:1, min 3.0`)
   }
 })
 
-test('tanıtım sayfası: dolgu üstündeki glifler beyaz ve 3:1 geçiyor', () => {
-  for (const fill of ['#6d6fae', '#5f8a58', '#ba8a2f', '#bd7659']) {
-    const v = ratio('#ffffff', fill)
-    assert.ok(v >= 3.0, `#ffffff / ${fill} = ${v.toFixed(2)}:1, min 3.0`)
-  }
+test('tanıtım sayfası: mercan dolgu üstünde koyu metin', () => {
+  const v = ratio('#111114', '#ff5a36')
+  assert.ok(v >= 4.5, `#111114 / #ff5a36 = ${v.toFixed(2)}:1, min 4.5`)
 })
 
 // The tones that used to fail. Any reappearance is a regression, including via
@@ -153,11 +164,10 @@ test('tanıtım sayfası: dolgu üstündeki glifler beyaz ve 3:1 geçiyor', () =
 test('tanıtım sayfasında AA geçmeyen eski tonlar geri gelmemiş', () => {
   const banned = ['#8a8172', '#9a917f', '#a89f8c', '#b0a894', '#b0917d', '#cbc1ac', '#c3b79b']
   for (const c of banned) {
-    assert.ok(!lp.includes(c), `pages/index.vue hâlâ ${c} kullanıyor`)
-    assert.ok(!pp.includes(c), `pages/privacy.vue hâlâ ${c} kullanıyor`)
+    assert.ok(!lp.includes(c), `Landing.vue hâlâ ${c} kullanıyor`)
+    assert.ok(!pp.includes(c), `PrivacyPolicy.vue hâlâ ${c} kullanıyor`)
   }
-  // #6d6fae is the fill; as small text it only reaches 4.22:1
-  assert.ok(!/color: #6d6fae/.test(pp), 'privacy.vue accent dolgusunu metin rengi olarak kullanıyor')
+  assert.ok(!/color: #ff5a36/.test(pp), 'gizlilik sayfası mercan dolguyu metin rengi olarak kullanıyor')
 })
 
 // ---------------------------------------------------------------------------

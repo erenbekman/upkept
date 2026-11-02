@@ -23,4 +23,8 @@ end
 
 post_install do |installer|
   assertDeploymentTarget(installer)
+  # Capacitor's podspecs still declare iOS 13, which Xcode 27 refuses to build.
+  installer.pods_project.targets.each do |t|
+    t.build_configurations.each { |c| c.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0' }
+  end
 end

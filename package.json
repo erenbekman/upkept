@@ -1,6 +1,7 @@
 {
   "name": "lifestyle-bootstrap",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",

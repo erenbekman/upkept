@@ -1,4 +1,4 @@
-import { t, dateLocale } from './useI18n.ts'
+import { t, tList, dateLocale } from './useI18n.ts'
 
 const MS_DAY = 86400000
 
@@ -16,21 +16,20 @@ export function challengeDay(startDate: string, today = todayStr()): number | nu
   return diff < 0 ? null : diff + 1
 }
 
-export function fmtLong(dateStr: string): string {
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
-}
-
-// Single letter under the grid's day number — scanning a horizontally scrolling
-// month with nothing but 1..31 is what made picking a day disorienting.
 export function fmtWeekdayNarrow(dateStr: string): string {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), { weekday: 'narrow' })
 }
 
-export function isWeekend(dateStr: string): boolean {
-  const d = new Date(dateStr + 'T00:00:00').getDay()
-  return d === 0 || d === 6
+export function fmtWeekdayMin(dateStr: string): string {
+  return tList('common.weekdayMin')[weekdayOf(dateStr)] ?? fmtWeekdayNarrow(dateStr)
+}
+
+export function weekdayOf(dateStr: string): number {
+  return new Date(dateStr + 'T00:00:00').getDay()
+}
+
+export function scheduledOn(days: number | null | undefined, dateStr: string): boolean {
+  return !days || ((days >> weekdayOf(dateStr)) & 1) === 1
 }
 
 export function fmtWeekdayLong(dateStr: string): string {
@@ -39,6 +38,10 @@ export function fmtWeekdayLong(dateStr: string): string {
 
 export function fmtShort(dateStr: string): string {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long' })
+}
+
+export function fmtDate(dateStr: string): string {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export function fmtMonth(year: number, month: number): string {

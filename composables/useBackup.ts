@@ -1,3 +1,5 @@
+import { DATA_VERSION } from '~/db/schema'
+
 const TABLES = ['app_meta', 'habits', 'reason_tags', 'entries'] as const
 
 // Column names get interpolated into INSERT SQL, and import data can come from
@@ -5,9 +7,9 @@ const TABLES = ['app_meta', 'habits', 'reason_tags', 'entries'] as const
 // inject SQL; unknown keys are dropped. Values are always parameterized.
 const COLUMNS: Record<string, Set<string>> = {
   app_meta: new Set(['key', 'value']),
-  habits: new Set(['id', 'user_id', 'name', 'target_desc', 'color', 'icon', 'sort_order', 'active', 'created_at']),
+  habits: new Set(['id', 'user_id', 'name', 'target_desc', 'color', 'icon', 'days', 'goal', 'unit', 'kind', 'group_name', 'sort_order', 'active', 'created_at']),
   reason_tags: new Set(['id', 'user_id', 'name', 'sort_order']),
-  entries: new Set(['id', 'user_id', 'habit_id', 'date', 'status', 'reason_tag_id', 'note', 'created_at']),
+  entries: new Set(['id', 'user_id', 'habit_id', 'date', 'status', 'reason_tag_id', 'amount', 'note', 'created_at']),
 }
 
 export interface Backup {
@@ -22,12 +24,13 @@ export function useBackup() {
   async function exportAll(): Promise<Backup> {
     const tables: Record<string, Record<string, any>[]> = {}
     for (const t of TABLES) tables[t] = await db.query(`SELECT * FROM ${t}`)
-    return { schema_version: 1, exported_at: new Date().toISOString(), tables }
+    return { schema_version: DATA_VERSION, exported_at: new Date().toISOString(), tables }
   }
 
   // Overwrites everything. Preserves ids so FK links stay intact.
   async function importAll(data: Backup) {
     if (!data?.tables) throw new Error(t('settings.invalidBackup'))
+    if ((Number(data.schema_version) || 1) > DATA_VERSION) throw new Error(t('settings.newerBackup'))
     // Suppress the local-mutation stamp/event so a pull doesn't echo back as a push.
     if (import.meta.client) (window as any).__upkeptImporting = true
     try {

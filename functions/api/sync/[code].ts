@@ -15,6 +15,14 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
+function dataVersion(doc: string): number {
+  try {
+    return Number(JSON.parse(doc).schema_version) || 1
+  } catch {
+    return 1
+  }
+}
+
 export function onRequestOptions(): Response {
   return new Response(null, { headers: CORS })
 }
@@ -38,6 +46,11 @@ export async function onRequestPut(ctx: any): Promise<Response> {
     return json({ error: 'bad data' }, 400)
   }
   const mutatedAt = Number(body.mutatedAt) || Date.now()
+
+  const current = await ctx.env.DB.prepare('SELECT data FROM sync_docs WHERE code = ?').bind(code).first()
+  if (current && dataVersion(body.data) < dataVersion(current.data)) {
+    return json({ error: 'outdated' }, 409)
+  }
 
   await ctx.env.DB.prepare(
     `INSERT INTO sync_docs (code, data, mutated_at, rev) VALUES (?1, ?2, ?3, 1)

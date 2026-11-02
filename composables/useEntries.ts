@@ -1,4 +1,4 @@
-export type EntryStatus = 'done' | 'partial' | 'missed'
+export type EntryStatus = 'done' | 'partial' | 'missed' | 'rest'
 
 export interface Entry {
   id: number
@@ -6,6 +6,7 @@ export interface Entry {
   date: string
   status: EntryStatus
   reason_tag_id: number | null
+  amount: number | null
   note: string | null
 }
 
@@ -23,18 +24,21 @@ export function useEntries() {
     date: string
     status: EntryStatus
     reason_tag_id?: number | null
+    amount?: number | null
     note?: string | null
   }) {
-    const reason = input.status === 'done' ? null : (input.reason_tag_id ?? null)
-    const note = input.status === 'done' ? null : (input.note ?? null)
+    const plain = input.status === 'done' || input.status === 'rest'
+    const reason = plain ? null : (input.reason_tag_id ?? null)
+    const note = plain ? null : (input.note ?? null)
     return db.run(
-      `INSERT INTO entries (habit_id, date, status, reason_tag_id, note)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO entries (habit_id, date, status, reason_tag_id, amount, note)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(habit_id, date) DO UPDATE SET
          status        = excluded.status,
          reason_tag_id = excluded.reason_tag_id,
+         amount        = excluded.amount,
          note          = excluded.note`,
-      [input.habit_id, input.date, input.status, reason, note],
+      [input.habit_id, input.date, input.status, reason, input.amount ?? null, note],
     )
   }
 

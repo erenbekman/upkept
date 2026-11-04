@@ -9,6 +9,8 @@ const syncApi = useSync()
 const { mono, accentHex } = useTheme()
 
 const today = todayStr()
+const day = ref(today)
+const isToday = computed(() => day.value === today)
 const habits = ref<Habit[]>([])
 const byHabit = ref<Record<number, Entry>>({})
 const history = ref<Entry[]>([])
@@ -18,10 +20,12 @@ const counterOn = ref(true)
 const loaded = ref(false)
 
 async function load() {
+  const target = day.value
   habits.value = await habitsRepo.listActive()
-  const list = await entriesRepo.getForDate(today)
+  const list = await entriesRepo.getForDate(target)
+  if (target !== day.value) return
   byHabit.value = Object.fromEntries(list.map(e => [e.habit_id, e]))
-  history.value = await entriesRepo.getRange(shiftDate(today, -29), shiftDate(today, -1))
+  history.value = await entriesRepo.getRange(shiftDate(today, -29), today)
   reasons.value = await entriesRepo.listReasons()
   startDate.value = await db.getMeta('challenge_start_date')
   counterOn.value = (await db.getMeta('day_counter')) !== '0'
@@ -29,22 +33,45 @@ async function load() {
 }
 onMounted(load)
 watch(syncApi.dataVersion, load)
+watch(day, () => {
+  openId.value = null
+  load()
+})
+
+const firstDay = computed(() => startDate.value && startDate.value <= today ? startDate.value : shiftDate(today, -29))
+const canGoBack = computed(() => day.value > firstDay.value)
+
+let steppedAt = 0
+function stepDay(n: number) {
+  if (n < 0 ? !canGoBack.value : isToday.value) return
+  day.value = shiftDate(day.value, n)
+}
+function onStepUp(n: number) {
+  steppedAt = performance.now()
+  stepDay(n)
+}
+function onStepClick(n: number) {
+  if (performance.now() - steppedAt > 500) stepDay(n)
+}
 
 const chromeHidden = useState('chrome_hidden', () => false)
 const welcoming = computed(() => loaded.value && !habits.value.length)
 watch(welcoming, (v) => { chromeHidden.value = v }, { immediate: true })
 onUnmounted(() => { chromeHidden.value = false })
 
-const dayNo = computed(() => (counterOn.value && startDate.value ? challengeDay(startDate.value, today) : null))
-const numberText = computed(() => String(dayNo.value ?? Number(today.slice(8))))
-const caption = computed(() => dayNo.value != null ? t('today.sinceStart', { n: dayNo.value }) : t('today.monthDay', { date: fmtShort(today) }))
-const headDate = computed(() => `${fmtWeekdayLong(today)}, ${fmtShort(today)}`)
+const dayNo = computed(() => (counterOn.value && startDate.value ? challengeDay(startDate.value, day.value) : null))
+const numberText = computed(() => String(dayNo.value ?? Number(day.value.slice(8))))
+const caption = computed(() => {
+  if (dayNo.value != null) return t('today.sinceStart', { n: dayNo.value })
+  return isToday.value ? t('today.monthDay', { date: fmtShort(today) }) : fmtShort(day.value)
+})
+const headDate = computed(() => `${fmtWeekdayLong(day.value)}, ${fmtShort(day.value)}`)
 
 const statusOf = (h: Habit) => byHabit.value[h.id]?.status ?? null
 const counting = (h: Habit) => !!h.goal && h.kind !== 'quit'
 const colorOf = (h: Habit) => (mono.value ? accentHex.value : h.color || accentHex.value)
-const planned = computed(() => habits.value.filter(h => plannedOn(h, today, byHabit.value[h.id])))
-const offToday = computed(() => habits.value.filter(h => !plannedOn(h, today, byHabit.value[h.id])))
+const planned = computed(() => habits.value.filter(h => plannedOn(h, day.value, byHabit.value[h.id])))
+const offToday = computed(() => habits.value.filter(h => !plannedOn(h, day.value, byHabit.value[h.id])))
 
 const sections = computed(() => {
   const groups = new Map<string, Habit[]>()
@@ -57,7 +84,7 @@ const sections = computed(() => {
   const named = ordered.some(([k]) => k)
   return [
     ...ordered.map(([name, list]) => ({ key: `g:${name}`, title: named ? name || t('today.otherGroup') : '', list, off: false })),
-    { key: 'off', title: t('today.notToday'), list: offToday.value, off: true },
+    { key: 'off', title: isToday.value ? t('today.notToday') : t('day.unplanned'), list: offToday.value, off: true },
   ].filter(s => s.list.length)
 })
 
@@ -85,9 +112,9 @@ const dayComplete = computed(() => planned.value.length > 0
   && planned.value.some(h => statusOf(h) === 'done'))
 
 const tubes = computed(() => {
-  const dates = Array.from({ length: 29 }, (_, i) => shiftDate(today, i - 29))
+  const dates = Array.from({ length: 30 }, (_, i) => shiftDate(today, i - 29))
   const f = fractionsByDate(habits.value, history.value, dates)
-  return [...dates.map(d => f[d] ?? 0), fraction.value].map(v => ({ h: `${Math.round(v * 34)}px`, op: v >= 1 ? 1 : 0.5 }))
+  return dates.map(d => d === day.value ? fraction.value : f[d] ?? 0).map(v => ({ h: `${Math.round(v * 34)}px`, op: v >= 1 ? 1 : 0.5 }))
 })
 const firstTube = computed(() => fmtShort(shiftDate(today, -29)))
 
@@ -152,12 +179,12 @@ async function write(h: Habit, status: EntryStatus | null, extra: Partial<Entry>
     const { [h.id]: _, ...rest } = byHabit.value
     byHabit.value = rest
   } else {
-    byHabit.value = { ...byHabit.value, [h.id]: { ...(cur ?? {}), habit_id: h.id, date: today, status, reason_tag_id: null, note: null, amount: null, ...extra } as Entry }
+    byHabit.value = { ...byHabit.value, [h.id]: { ...(cur ?? {}), habit_id: h.id, date: day.value, status, reason_tag_id: null, note: null, amount: null, ...extra } as Entry }
   }
   pop(h.id)
   celebrate(was)
-  if (!status) await entriesRepo.remove(h.id, today)
-  else await entriesRepo.upsert({ habit_id: h.id, date: today, status, amount: extra.amount ?? null, reason_tag_id: extra.reason_tag_id ?? null, note: extra.note ?? null })
+  if (!status) await entriesRepo.remove(h.id, day.value)
+  else await entriesRepo.upsert({ habit_id: h.id, date: day.value, status, amount: extra.amount ?? null, reason_tag_id: extra.reason_tag_id ?? null, note: extra.note ?? null })
 }
 
 async function complete(h: Habit) {
@@ -258,14 +285,18 @@ function options(h: Habit) {
 }
 
 const unlogged = computed(() => planned.value.filter(h => !statusOf(h)))
+const restLabel = computed(() => {
+  const scope = isToday.value ? 'today' : 'day'
+  return unlogged.value.length ? t(`${scope}.restDay`) : t(`${scope}.restUndo`)
+})
 const canUndoRest = computed(() => planned.value.length > 0 && !unlogged.value.length && planned.value.some(h => statusOf(h) === 'rest'))
 
 async function toggleRestDay() {
   haptic()
   if (unlogged.value.length) {
-    for (const h of unlogged.value) await entriesRepo.upsert({ habit_id: h.id, date: today, status: 'rest' })
+    for (const h of unlogged.value) await entriesRepo.upsert({ habit_id: h.id, date: day.value, status: 'rest' })
   } else {
-    for (const h of planned.value) if (statusOf(h) === 'rest') await entriesRepo.remove(h.id, today)
+    for (const h of planned.value) if (statusOf(h) === 'rest') await entriesRepo.remove(h.id, day.value)
   }
   await load()
 }
@@ -289,7 +320,14 @@ async function toggleRestDay() {
 
     <div class="k-caption">
       <b>{{ caption }}</b>
-      <span aria-hidden="true">{{ t('today.tiltHint') }}</span>
+      <div class="k-day-nav">
+        <button :aria-label="t('today.prevDay')" :disabled="!canGoBack" @pointerup="onStepUp(-1)" @click="onStepClick(-1)">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 9H3M8 4 3 9l5 5" /></svg>
+        </button>
+        <button :aria-label="t('today.nextDay')" :disabled="isToday" @pointerup="onStepUp(1)" @click="onStepClick(1)">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h12M10 4l5 5-5 5" /></svg>
+        </button>
+      </div>
     </div>
 
     <div class="k-tubes" aria-hidden="true">
@@ -341,7 +379,7 @@ async function toggleRestDay() {
 
     <div class="k-today-rest" style="display:flex; justify-content:center; padding-top:8px;">
       <button v-if="unlogged.length || canUndoRest" class="k-link" style="font-size:15px;" @click="toggleRestDay">
-        {{ unlogged.length ? t('today.restDay') : t('today.restUndo') }}
+        {{ restLabel }}
       </button>
     </div>
   </div>

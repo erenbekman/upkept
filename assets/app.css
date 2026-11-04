@@ -183,11 +183,14 @@ html.k-app body { background: var(--k-bg); color: var(--k-ink); font-family: var
 .k-today-date { font-size: 15px; font-weight: 600; color: var(--k-sub); }
 .k-today-pct { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .k-number { position: relative; margin: 6px 4px 0; touch-action: pan-y; cursor: grab; }
-.k-number svg { display: block; width: 100%; height: auto; overflow: visible; }
+.k-number svg { display: block; width: 100%; height: auto; overflow: visible; pointer-events: none; }
 .k-number-flash { position: absolute; left: 0; right: 0; bottom: 20%; text-align: center; font-size: 15px; font-weight: 700; color: var(--k-accent-ink); animation: kPop 1.6s ease both; pointer-events: none; }
-.k-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 4px 6px 0; }
+.k-caption { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 6px 0; }
 .k-caption b { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.k-caption span { font-size: 12.5px; font-weight: 600; color: var(--k-faint); white-space: nowrap; }
+.k-day-nav { display: flex; gap: 2px; margin: -6px -8px -6px 0; flex-shrink: 0; }
+.k-day-nav button { width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: var(--k-sub); display: grid; place-items: center; cursor: pointer; }
+.k-day-nav button:disabled { opacity: .3; cursor: default; }
+.k-day-nav svg { width: 18px; height: 18px; }
 .k-tubes { display: flex; justify-content: space-between; align-items: flex-end; height: 34px; padding: 12px 6px 0; box-sizing: content-box; }
 .k-tube { position: relative; width: 7px; height: 34px; border-radius: 3.5px; background: var(--k-empty); overflow: hidden; }
 .k-tube i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--k-accent); transition: height .4s ease; }

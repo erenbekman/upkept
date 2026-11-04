@@ -11,6 +11,7 @@
 		06FE38162DE28757FA224D8D /* UpkeptWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E2E426570BC4393086811E /* UpkeptWidget.swift */; };
 		251CEFE2852DDB568149EA49 /* UpkeptWidgetPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* UpkeptTabBarPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */; };
+		C3D4E5F6A7B8C9D0E1F2A3B4 /* UpkeptMotionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* UpkeptMotionPlugin.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		3F8ABAE28559F75316FE8C4A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FFEE3E5A15302B9913C610D /* Foundation.framework */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -53,6 +54,7 @@
 /* Begin PBXFileReference section */
 		17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpkeptWidgetPlugin.swift; sourceTree = "<group>"; };
 		B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpkeptTabBarPlugin.swift; sourceTree = "<group>"; };
+		D4E5F6A7B8C9D0E1F2A3B4C5 /* UpkeptMotionPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpkeptMotionPlugin.swift; sourceTree = "<group>"; };
 		1D0C52B0E3C5C03341041381 /* MainViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		382C9B380DE9F9F0D8157093 /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				17BA9772591720BB7FB78135 /* UpkeptWidgetPlugin.swift */,
 				B2C3D4E5F6A7B8C9D0E1F2A3 /* UpkeptTabBarPlugin.swift */,
+				D4E5F6A7B8C9D0E1F2A3B4C5 /* UpkeptMotionPlugin.swift */,
 				1D0C52B0E3C5C03341041381 /* MainViewController.swift */,
 				382C9B380DE9F9F0D8157093 /* App.entitlements */,
 				B4667E8586E6F3857ACCB69E /* SceneDelegate.swift */,
@@ -321,6 +324,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				251CEFE2852DDB568149EA49 /* UpkeptWidgetPlugin.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* UpkeptTabBarPlugin.swift in Sources */,
+				C3D4E5F6A7B8C9D0E1F2A3B4 /* UpkeptMotionPlugin.swift in Sources */,
 				026822DF6CA85EBD68EA9EC1 /* MainViewController.swift in Sources */,
 				941BB54AA2E5586976BEEC71 /* SceneDelegate.swift in Sources */,
 			);

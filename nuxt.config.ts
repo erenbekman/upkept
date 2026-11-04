@@ -51,6 +51,11 @@ export default defineNuxtConfig({
         { src: 'icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
     },
-    workbox: { globPatterns: ['**/*.{js,css,html,wasm}'] },
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,wasm}'],
+      globIgnores: ['index.html', 'tr/index.html', 'privacy/index.html', 'gizlilik/index.html', '**/_payload.json'],
+      navigateFallback: '/200',
+      navigateFallbackAllowlist: [/^\/app(\/|$)/],
+    },
   },
 })

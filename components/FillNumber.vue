@@ -28,6 +28,7 @@ let tilt = 0
 let tiltTarget = 0
 let dragX: number | null = null
 let raf = 0
+let stopTilt: (() => void) | undefined
 const reduced = import.meta.client && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function build(animated: boolean) {
@@ -82,8 +83,8 @@ function start() {
 watch(() => props.layers, () => { if (!props.live || reduced) start() }, { deep: true })
 watch(() => [props.live, props.text], start)
 
-function onOrient(e: DeviceOrientationEvent) {
-  if (dragX === null && typeof e.gamma === 'number') tiltTarget = Math.max(-22, Math.min(22, e.gamma))
+function onTilt(gamma: number) {
+  if (dragX === null) tiltTarget = Math.max(-22, Math.min(22, -gamma))
 }
 function onVisibility() { start() }
 
@@ -104,12 +105,12 @@ onMounted(() => {
   if (!props.live) for (const l of props.layers) amounts.set(l.id, l.value)
   start()
   document.addEventListener('visibilitychange', onVisibility)
-  if (props.live) window.addEventListener('deviceorientation', onOrient)
+  if (props.live && !reduced) stopTilt = watchDeviceTilt(onTilt)
 })
 onUnmounted(() => {
   cancelAnimationFrame(raf)
   document.removeEventListener('visibilitychange', onVisibility)
-  window.removeEventListener('deviceorientation', onOrient)
+  stopTilt?.()
 })
 </script>
 
